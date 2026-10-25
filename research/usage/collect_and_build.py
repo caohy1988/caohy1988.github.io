@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
+import sqlite3
 import subprocess
 import urllib.request
 import urllib.error
@@ -32,6 +34,7 @@ MUSE_AUTH = Path.home() / ".config/muse/auth.json"
 DSH_BIN = Path.home() / ".local/bin/dsh"
 DSH_DIR = Path.home() / ".dsh"
 QWEN_BIN = Path("/usr/local/bin/qwen")
+OPENCODE_BIN = Path("/usr/local/bin/opencode")
 GROK_CACHE = HERE / "grok_box_activity.json"
 
 # Box collection + freshness logic is shared with the box-side collector script.
@@ -1459,6 +1462,12 @@ def _dsh_overlay_model(path: Path) -> tuple:
     return tuple(v if v and _DSH_ID.fullmatch(v) else None for v in vals)
 
 
+# Default small model seats (Haiyuan 2026-10-24): OpenCode GLM-5.3 first, DSH DeepSeek v4.1 Flash the
+# alternate + fallback; advisory jobs only. Both cards carry this label.
+SMALL_SEAT = "default small"
+SMALL_TRIAL = "two-week trial from 10/28"
+
+
 def collect_dsh() -> dict:
     """DSH (DeepSeek Harness) — version + OpenRouter auth health; credits PAYG (no Coding Plan bars)."""
     import shutil
@@ -1469,6 +1478,8 @@ def collect_dsh() -> dict:
         "source": "dsh --version + ~/.dsh/collect-model.patch.yml + credential presence",
         "bars": [],
         "product": "DeepSeek Harness",
+        "seat": SMALL_SEAT,
+        "seat_role": "alternate + fallback",
         "model": None,
         "provider": None,
         "model_source": None,
@@ -1775,6 +1786,380 @@ def collect_qwen() -> dict:
         out["ok"] = bool(out["cli_version"]) and out["auth_ok"]
     except Exception as e:
         errors.append(safe_error(e))
+    if errors:
+        out["error"] = "; ".join(errors)
+    return out
+
+
+_OPENCODE_COUNTERS = ("input_tokens", "cached_tokens", "cache_write_tokens", "output_tokens", "reasoning_tokens", "cost_usd")
+
+
+def opencode_config(path: Path) -> dict:
+    """provider, model and reasoning effort from opencode.json ("model": "<provider>/<model id>", effort under
+    provider.<provider>.models.<model id>.options.reasoning). None for anything missing or unpublishable."""
+    out = {"provider": None, "model": None, "effort": None}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return out
+    ref = data.get("model") if isinstance(data, dict) else None
+    provider, _, model = ref.partition("/") if isinstance(ref, str) else ("", "", "")
+    if not (_qwen_model_id(provider) and _qwen_model_id(model)):
+        return out
+    out["provider"], out["model"] = provider, model
+    try:
+        effort = data["provider"][provider]["models"][model]["options"]["reasoning"]["effort"]
+    except (KeyError, TypeError):
+        effort = None
+    out["effort"] = effort if isinstance(effort, str) and _KIMI_EFFORT.fullmatch(effort) else None
+    return out
+
+
+def _opencode_connect(db: Path) -> sqlite3.Connection:
+    """Open mode=ro; decode TEXT per row so malformed UTF-8 cannot enter an exception message.
+    SQLite may still update WAL sidecars; mode=ro prevents writes to the database itself."""
+    con = sqlite3.connect(db.as_uri() + "?mode=ro", uri=True, timeout=5)
+    con.text_factory = bytes
+    return con
+
+
+def _opencode_text(value) -> str:
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="strict")
+    if isinstance(value, str):
+        return value
+    raise ValueError("invalid text field")
+
+
+def _opencode_request(o: dict):
+    """Counters of one assistant message (one model request in OpenCode 1.19.4), or None if unusable.
+    input_tokens = all prompt tokens (OpenCode's uncached input + cache read + cache write), as on the Qwen
+    card; reasoning is its own count (OpenCode's total = input + output + reasoning + cache)."""
+    tok, cost = o.get("tokens"), o.get("cost")
+    cache = tok.get("cache") if isinstance(tok, dict) else None
+    if not isinstance(cache, dict):
+        return None
+    counts = [tok.get(k) for k in ("input", "output", "reasoning")] + [cache.get(k) for k in ("read", "write")]
+    if not all(isinstance(v, int) and not isinstance(v, bool) and v >= 0 for v in counts):
+        return None
+    if isinstance(cost, bool) or not isinstance(cost, (int, float)):
+        return None
+    try:
+        cost = float(cost)
+    except (OverflowError, ValueError, TypeError):
+        return None
+    if not math.isfinite(cost) or cost < 0:
+        return None
+    inp, out, reasoning, read, write = counts
+    return {"model": _qwen_model_id(o.get("modelID")) or "unrecognized model id",
+            "input_tokens": inp + read + write, "cached_tokens": read, "cache_write_tokens": write,
+            "output_tokens": out, "reasoning_tokens": reasoning, "cost_usd": cost}
+
+
+def _opencode_root(sid, parents: dict):
+    """A subagent's child session counts toward its top-level session; a parent cycle maps to its lowest id."""
+    seen = []
+    while sid not in seen:
+        seen.append(sid)
+        if parents.get(sid) is None:
+            return sid
+        sid = parents[sid]
+    return min(seen[seen.index(sid):])
+
+
+def _opencode_execution(o: dict):
+    """Private fork-stable identity from immutable execution metadata, never settlement fields.
+    Completion time, finish status, errors, tokens and cost may change after history is copied.
+    Without a valid execution clock, keep rows separate rather than guess from equal counters."""
+    clock = o.get("time")
+    if not isinstance(clock, dict):
+        return None
+    created = clock.get("created")
+    if not isinstance(created, int) or isinstance(created, bool) or created <= 0:
+        return None
+    try:
+        identity = {k: o.get(k) for k in ("providerID", "modelID", "mode", "agent", "variant", "path")}
+        identity["created"] = created
+        return json.dumps(identity,
+                          sort_keys=True, separators=(",", ":"), allow_nan=False)
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def _opencode_compaction_history(parent_id: str, sid: str, messages: dict, input_parts: dict, compactions: dict):
+    """Immutable compaction flags plus corroborating preceding history, with references normalized.
+    tail_start_id is assigned after model processing and rewritten by forks: validate its target but
+    do not make this mutable selection field part of execution identity."""
+    positions, history, corroborated = {}, [], False
+    for mid, (session, data) in messages.items():
+        if session != sid:
+            continue
+        position = len(history)
+        positions[mid] = position
+        role, clock = data.get("role"), data.get("time")
+        created = clock.get("created") if isinstance(clock, dict) else None
+        if not isinstance(created, int) or isinstance(created, bool) or created <= 0:
+            return None
+        if role == "user":
+            entry = {k: data.get(k) for k in ("agent", "model", "format", "system", "tools")}
+            parts = input_parts.get((sid, mid)) or []
+            corroborated = corroborated or bool(parts)
+            entry.update(role=role, created=created, parts=parts, compactions=[])
+            for part in compactions.get((sid, mid), []):
+                if not isinstance(part.get("auto"), bool) or ("overflow" in part and not isinstance(part["overflow"], bool)):
+                    return None
+                tail_id = part.get("tail_start_id")
+                if tail_id is not None:
+                    tail = positions.get(tail_id) if isinstance(tail_id, str) else None
+                    if tail is None:
+                        return None
+                entry["compactions"].append({"auto": part["auto"], "overflow": part.get("overflow")})
+        elif role == "assistant":
+            execution = _opencode_execution(data)
+            reference = data.get("parentID")
+            parent = positions.get(reference) if isinstance(reference, str) else None
+            if execution is None or parent is None or parent >= position:
+                return None
+            entry = {"role": role, "execution": execution, "parent": parent}
+        else:
+            return None
+        history.append(entry)
+        if mid == parent_id:
+            return history if corroborated else None
+    return None
+
+
+def _opencode_history(o: dict, messages: dict, input_parts: dict, compactions: dict):
+    """Corroborate copied history using the referenced user message and its ordered input parts.
+    Forks remap ids but retain this preceding history. Matching execution clocks alone is not proof."""
+    parent_id = o.get("parentID")
+    parent = messages.get(parent_id) if isinstance(parent_id, str) else None
+    if parent is None:
+        return None
+    sid, user = parent
+    clock = user.get("time")
+    created = clock.get("created") if isinstance(clock, dict) else None
+    parts = input_parts.get((sid, parent_id))
+    if not parts and compactions.get((sid, parent_id)):
+        parts = _opencode_compaction_history(parent_id, sid, messages, input_parts, compactions)
+    if user.get("role") != "user" or not parts or not isinstance(created, int) or isinstance(created, bool) or created <= 0:
+        return None
+    try:
+        history = {k: user.get(k) for k in ("agent", "model", "format", "system", "tools")}
+        history.update(created=created, parts=parts)
+        return json.dumps(history, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def _opencode_window(reqs: list) -> dict:
+    w = {"sessions": len({r["session"] for r in reqs}), "requests": len(reqs)}
+    for k in _OPENCODE_COUNTERS:
+        w[k] = sum(r[k] for r in reqs)
+    if math.isfinite(w["cost_usd"]):
+        w["cost_usd"] = round(w["cost_usd"], 6)
+    else:
+        w["cost_usd"] = None
+        w["cost_overflow"] = True
+    return w
+
+
+def _opencode_excluded(bad: int, future: int) -> str:
+    """'1 unreadable row, 2 future-dated rows' — what summarize_opencode_usage left out ('' if nothing)."""
+    parts = [f"{n} {label}{'' if n == 1 else 's'}" for n, label in
+             ((bad, "unreadable row"), (future, "future-dated row")) if n]
+    return ", ".join(parts)
+
+
+def summarize_opencode_usage(db: Path, now: datetime) -> dict:
+    """Aggregate model requests from OpenCode's opencode.db, opened read-only.
+
+    Only assistant messages with persisted step-start/step-finish evidence represent model requests.
+    Merge matching immutable execution metadata only with corroborating copied parent/input history.
+    Reconcile counters separately from the canonical origin session, using the earliest session creation.
+    Repeated executions within a session retain their multiplicity.
+    state: "ok", "no_requests" (readable, no model executions), "missing" (no
+    opencode.db, so no lookup ran: never shown as zero) or "unreadable" (a database error, or rows but none
+    usable). Rows that do not parse are counted in bad_rows, rows dated after `now` (the collection time)
+    in future_records; neither counts. Session ids are grouping keys only; paths, titles and prompts (the
+    part table) are never published. Parts are read only to identify model-execution evidence.
+    """
+    if not db.is_file():
+        return {"state": "missing"}
+    parents, session_created, input_parts, compactions, evidence, bad = {}, {}, {}, {}, set(), 0
+    try:
+        con = _opencode_connect(db)
+        try:
+            con.execute("BEGIN")  # one consistent read of messages and their execution evidence
+            for sid, parent, created in con.execute("SELECT id, parent_id, time_created FROM session"):
+                try:
+                    sid = _opencode_text(sid)
+                    parents[sid] = _opencode_text(parent) if parent is not None else None
+                    session_created[sid] = created if isinstance(created, int) and not isinstance(created, bool) and created > 0 else None
+                except (UnicodeError, ValueError, TypeError):
+                    bad += 1
+            for sid, mid, data in con.execute("SELECT session_id, message_id, data FROM part ORDER BY id"):
+                try:
+                    sid, mid = _opencode_text(sid), _opencode_text(mid)
+                    part = json.loads(_opencode_text(data))
+                    if not isinstance(part, dict):
+                        raise ValueError("invalid part")
+                    if part.get("type") in ("step-start", "step-finish"):
+                        evidence.add((sid, mid))
+                    elif part.get("type") == "compaction":
+                        compactions.setdefault((sid, mid), []).append(
+                            {k: part[k] for k in ("auto", "overflow", "tail_start_id") if k in part})
+                    elif (part.get("type") == "text" and isinstance(part.get("text"), str) and part["text"].strip()
+                          or part.get("type") == "file" and isinstance(part.get("url"), str) and part["url"]):
+                        payload = {k: v for k, v in part.items() if k not in ("id", "messageID", "sessionID")}
+                        input_parts.setdefault((sid, mid), []).append(
+                            json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False))
+                except (UnicodeError, ValueError, TypeError):
+                    bad += 1
+            rows = con.execute("SELECT id, session_id, time_created, time_updated, data FROM message"
+                               " ORDER BY time_created, id").fetchall()
+        finally:
+            con.close()
+    except Exception:  # fixed category only: database exceptions can contain private row text
+        return {"state": "unreadable", "error": "opencode.db unreadable: database read failed"}
+    now_ms = int(now.timestamp() * 1000)
+    messages, decoded = {}, []
+    for mid, sid, ts, updated, data in rows:
+        try:
+            mid, sid = _opencode_text(mid), _opencode_text(sid)
+            o = json.loads(_opencode_text(data))
+            if not isinstance(o, dict):
+                raise ValueError("invalid message")
+            messages[mid] = (sid, o)
+            decoded.append((mid, sid, ts, updated, o))
+        except Exception:
+            bad += 1
+    future, deduplicated, ignored = 0, 0, 0
+    executions, occurrences = {}, {}
+    for mid, sid, ts, updated, o in decoded:
+        role = o.get("role") if isinstance(o, dict) else None
+        if role == "user":
+            continue  # the prompt side of a turn, not a model request
+        req = _opencode_request(o) if role == "assistant" else None
+        if req is None or not (isinstance(ts, int) and not isinstance(ts, bool) and ts > 0):
+            bad += 1
+            continue
+        if (sid, mid) not in evidence:
+            ignored += 1  # native shell/subtask wrappers do not execute a model
+            continue
+        execution = _opencode_execution(o)
+        if execution is not None:
+            ts = o["time"]["created"]  # fork insertion time is not a new model execution
+        if ts > now_ms:
+            future += 1
+            continue
+        history = _opencode_history(o, messages, input_parts, compactions) if execution is not None else None
+        if history is not None:
+            slot = (sid, execution, history)
+            occurrences[slot] = occurrences.get(slot, 0) + 1
+            identity = (execution, history, occurrences[slot])
+        else:
+            identity = (sid, mid)
+        req["ts"], req["session"] = ts, _opencode_root(sid, parents)
+        completed = (o.get("time") or {}).get("completed") if isinstance(o.get("time"), dict) else None
+        completed = completed if isinstance(completed, int) and not isinstance(completed, bool) and completed >= ts else 0
+        updated = updated if isinstance(updated, int) and not isinstance(updated, bool) else 0
+        rank = (completed, sum(req[k] for k in _OPENCODE_COUNTERS if k != "cost_usd"), req["cost_usd"], updated)
+        created = session_created.get(sid)
+        origin = (created is None, created or 0, mid, sid)
+        previous = executions.get(identity)
+        if previous is None:
+            executions[identity] = (rank, req, origin)
+        else:
+            deduplicated += 1
+            canonical_session = req["session"] if origin < previous[2] else previous[1]["session"]
+            counters = req if rank > previous[0] else previous[1]
+            counters["session"] = canonical_session
+            executions[identity] = (max(rank, previous[0]), counters, min(origin, previous[2]))
+    reqs = [req for _, req, _ in executions.values()]
+    excluded = _opencode_excluded(bad, future)
+    windows = {
+        "last_24h": _opencode_window([r for r in reqs if r["ts"] >= now_ms - 86_400_000]),
+        "last_7d": _opencode_window([r for r in reqs if r["ts"] >= now_ms - 7 * 86_400_000]),
+        "all_time": _opencode_window(reqs),
+    }
+    models = []
+    for name in sorted({r["model"] for r in reqs}):
+        w = _opencode_window([r for r in reqs if r["model"] == name])
+        w["model"] = name
+        models.append(w)
+    return {
+        "state": "ok" if reqs else "unreadable" if excluded else "no_requests",
+        "requests": len(reqs),
+        "sessions": windows["all_time"]["sessions"],
+        "bad_rows": bad,
+        "future_records": future,
+        "deduplicated_requests": deduplicated,
+        "ignored_assistant_rows": ignored,
+        "last_run_pt": ts_to_pt(max(r["ts"] for r in reqs) / 1000) if reqs else None,
+        "windows": windows,
+        "models": models,
+    }
+
+
+def collect_opencode() -> dict:
+    """OpenCode · GLM-5.3, the first-choice default small model seat — CLI version, configured model,
+    OpenRouter key presence, and usage + recorded cost from opencode.db (read-only). OpenRouter PAYG: no
+    plan bars. Publishes no paths, session ids or prompts."""
+    out: dict = {
+        "ok": False,
+        "source": "opencode --version + opencode.json + opencode.db (read-only) + key presence",
+        "bars": [],
+        "product": "OpenCode",
+        "seat": SMALL_SEAT,
+        "seat_role": "first choice",
+        "provider": None,
+        "model": None,
+        "effort": None,
+        "cli_version": None,
+        "auth_ok": False,
+        "auth_mechanism": None,
+        "cost_note": "cost as OpenCode recorded it per request; not an OpenRouter invoice",
+    }
+    errors = []
+    try:
+        home = Path.home()  # resolved per call, like collect_qwen (tests run with a temp HOME)
+        if not OPENCODE_BIN.exists():
+            errors.append("opencode binary not found")
+        else:
+            try:
+                proc = subprocess.run(
+                    [str(OPENCODE_BIN), "--version"],
+                    capture_output=True,
+                    text=True,
+                    timeout=20,
+                    stdin=subprocess.DEVNULL,
+                    env={**os.environ, "OPENCODE_DISABLE_AUTOUPDATE": "1"},  # a refresh never updates the CLI
+                )
+                lines = (proc.stdout or "").strip().splitlines()
+                m = _QWEN_VERSION.fullmatch(lines[0].strip()) if lines else None  # same x.y.z shape
+                if m:
+                    out["cli_version"] = m.group(1)
+                else:  # never echo unexpected output into the public page
+                    errors.append(f"opencode --version printed no version (exit {proc.returncode})")
+            except subprocess.TimeoutExpired:
+                errors.append("opencode version check timed out")
+            except Exception:
+                errors.append("opencode version check failed")
+        out.update(opencode_config(home / ".config" / "opencode" / "opencode.json"))
+        # ~/.local/bin/opencode-or sources ~/.dsh/.env at launch; presence check only, the value is never read out.
+        out["auth_ok"] = openrouter_key_present(home / ".dsh" / ".env")
+        if out["auth_ok"]:
+            out["auth_mechanism"] = "DSH .env via opencode-or"
+        else:
+            errors.append("OpenRouter key missing — opencode-or sources OPENROUTER_API_KEY from the DSH .env")
+        usage = summarize_opencode_usage(home / ".local" / "share" / "opencode" / "opencode.db", now_pt())
+        if usage.get("error"):
+            errors.append(usage.pop("error"))
+        out["usage"] = usage
+        out["ok"] = bool(out["cli_version"]) and out["auth_ok"]
+    except Exception:
+        errors.append("opencode collection failed")
     if errors:
         out["error"] = "; ".join(errors)
     return out
@@ -2327,6 +2712,95 @@ def render_qwen_body(qwen: dict) -> str:
     """
 
 
+def _small_seat_html(card: dict) -> str:
+    """The "default small" seat label on the OpenCode and DSH cards ('' for any other card)."""
+    if card.get("seat") != SMALL_SEAT:
+        return ""
+    return f"""
+      <div class="metric">
+        <div class="metric-label">Default small seat · {esc(card.get('seat_role') or '—')}</div>
+        <div class="status-chip unk">DEFAULT SMALL</div>
+        <div class="metric-reset">{esc(SMALL_TRIAL)} · advisory only</div>
+      </div>"""
+
+
+def render_opencode_body(oc: dict) -> str:
+    """OpenCode · GLM-5.3 card — install/auth chip, default-small seat label, data-quality banner and the
+    usage table (24h / 7d / all time), "no requests yet" or "usage unavailable"."""
+    usage = oc.get("usage") if isinstance(oc.get("usage"), dict) else {}
+    state = usage.get("state")
+    tone = "ok" if oc.get("ok") else "bad"
+    chip = "AUTH OK" if oc.get("ok") else "AUTH / INSTALL"
+    err = f'<p class="err">{esc(oc.get("error"))}</p>' if oc.get("error") else ""
+
+    quality = ""
+    excluded = _opencode_excluded(usage.get("bad_rows") or 0, usage.get("future_records") or 0)
+    if excluded:  # shown in every state: skipped rows may hide usage
+        quality = (
+            '<p class="stale-banner" role="status"><span class="status-chip warn">DATA</span> '
+            f"Not counted from opencode.db: {esc(excluded)} (future-dated = time after this refresh). "
+            "Totals may be incomplete.</p>"
+        )
+
+    totals = list((usage.get("windows") or {}).values()) + (usage.get("models") or [])
+    if any(w.get("cost_overflow") for w in totals):
+        quality += ('<p class="stale-banner" role="status"><span class="status-chip warn">DATA</span> '
+                    'Cost unavailable: aggregate overflow; request and token counts remain available.</p>')
+
+    def usage_pill(text: str) -> str:
+        return f'<div class="metric"><div class="metric-label">Usage</div><p class="pill">{esc(text)}</p></div>'
+
+    if state == "missing":
+        usage_html = usage_pill("usage unavailable: opencode.db not found")
+    elif state == "no_requests":
+        usage_html = usage_pill("no requests yet")
+    elif state != "ok":
+        usage_html = usage_pill("usage unavailable: no readable rows" if excluded else "usage unavailable (see error above)")
+    else:
+        wins = usage.get("windows") or {}
+        cols = [wins.get(k) or {} for k in ("last_24h", "last_7d", "all_time")]
+        rows = []
+        for label, key in (("Sessions", "sessions"), ("Requests", "requests"), ("Input tokens", "input_tokens"),
+                           ("Cached input", "cached_tokens"), ("Output tokens", "output_tokens"),
+                           ("Reasoning tokens", "reasoning_tokens")):
+            tds = "".join(f'<td class="num">{esc(_fmt_int(w.get(key)))}</td>' for w in cols)
+            rows.append(f"<tr><td>{esc(label)}</td>{tds}</tr>")
+        tds = "".join(f'<td class="num">{esc(_fmt_usd(w.get("cost_usd")))}</td>' for w in cols)
+        rows.append(f"<tr><td>Cost*</td>{tds}</tr>")
+        models = usage.get("models") or []
+        per_model = ""
+        if len(models) > 1:
+            items = " · ".join(
+                f"{esc(m.get('model'))} {esc(_fmt_int(m.get('input_tokens')))} in / "
+                f"{esc(_fmt_int(m.get('output_tokens')))} out, {esc(_fmt_usd(m.get('cost_usd')))}"
+                for m in models
+            )
+            per_model = f'<p class="muted">All time by model: {items}</p>'
+        usage_html = f"""
+      <div class="table-wrap">
+        <table class="bots">
+          <thead><tr><th>Usage</th><th>24h</th><th>7d</th><th>All time</th></tr></thead>
+          <tbody>{''.join(rows)}</tbody>
+        </table>
+      </div>
+      <div class="metric-reset">Last run {esc(usage.get('last_run_pt') or '—')}</div>
+      {per_model}"""
+
+    return f"""
+      <p class="pill">CLI <strong>{esc(oc.get('cli_version') or '—')}</strong> · provider <strong>{esc(oc.get('provider') or '—')}</strong> · model <strong>{esc(oc.get('model') or '—')}</strong> · effort <strong>{esc(oc.get('effort') or '—')}</strong></p>
+      <div class="metric">
+        <div class="metric-label">OpenCode status</div>
+        <div class="status-chip {tone}">{esc(chip)}</div>
+        <div class="metric-reset">auth {esc(oc.get('auth_mechanism') or '—')} · OpenRouter PAYG (no plan bars)</div>
+      </div>
+      {err}
+      {_small_seat_html(oc)}
+      {quality}
+      {usage_html}
+      <p class="muted">* Cost is what OpenCode recorded for each request; it is not an OpenRouter invoice. OpenRouter list price for z-ai/glm-5.3 on 10/24: $0.079/M input, $1.40/M output. Input tokens include cached input; reasoning tokens are counted apart from output. Source: opencode.db, read-only; inherited fork history is counted once using original execution metadata.</p>
+    """
+
+
 def render_html(snap: dict) -> str:
     refreshed = snap["refreshed_at"]
     claude = snap["claude"]
@@ -2336,6 +2810,7 @@ def render_html(snap: dict) -> str:
     muse = snap.get("muse") or {}
     dsh = snap.get("dsh") or {}
     qwen = snap.get("qwen") or {}
+    opencode = snap.get("opencode") or {}
     routine_proxy = snap.get("routine_proxy") or {}
     grok = snap["grok"]
 
@@ -2456,10 +2931,13 @@ def render_html(snap: dict) -> str:
         <div class="status-chip {dsh_tone}">{esc(dsh_chip)}</div>
         <div class="metric-reset">auth {esc(dsh.get('auth_mechanism') or '—')} · OpenRouter credits (no plan bars)</div>
       </div>
+      {_small_seat_html(dsh)}
       {dsh_err}
       {dsh_bars}
       <p class="muted">{esc(dsh.get('detail') or 'DeepSeek Harness via OpenRouter.')}</p>
     """
+
+    opencode_body = render_opencode_body(opencode)
 
     qwen_body = render_qwen_body(qwen)
 
@@ -2827,7 +3305,7 @@ def render_html(snap: dict) -> str:
     <header class="hero">
       <p class="kicker">Mac CLIs · Grok activity</p>
       <h1>Agent model usage</h1>
-      <p class="lede">At-a-glance quotas for Claude/Fable, Codex/Astra, Kimi, Agy, Muse Spark, DSH, Qwen Code (trial), Grok activity share, plus a routine fires/week proxy (not dollars).</p>
+      <p class="lede">At-a-glance quotas for the Opus 5.5 seat, Codex/Astra, Kimi, Agy, Muse Spark, DSH (default small), OpenCode · GLM-5.3 (default small), Qwen Code (trial), Grok activity share, plus a routine fires/week proxy (not dollars).</p>
       <div class="meta">
         <span>Last refreshed <strong>{esc(refreshed)}</strong></span>
         <span>Timezone <strong>America/Los_Angeles</strong></span>
@@ -2876,6 +3354,12 @@ def render_html(snap: dict) -> str:
         {dsh_body}
       </section>
 
+      <section class="card" id="opencode">
+        <h2>OpenCode · GLM-5.3</h2>
+        <p class="sub">opencode --version · OpenRouter GLM-5.3</p>
+        {opencode_body}
+      </section>
+
       <section class="card" id="qwen">
         <h2>Qwen Code</h2>
         <p class="sub">qwen --version · OpenRouter Qwen3.8-Max</p>
@@ -2920,13 +3404,14 @@ def main() -> None:
         "agy": collect_agy(),
         "muse": collect_muse(),
         "dsh": collect_dsh(),
+        "opencode": collect_opencode(),
         "qwen": collect_qwen(),
         "routine_proxy": collect_routine_proxy(),
         "grok": collect_grok(),
     }
     snap = scrub_tree(snap)  # last line of defense; collectors already use safe_error()
 
-    publish = json.loads(json.dumps(snap))
+    publish = json.loads(json.dumps(snap, allow_nan=False))
     if "evidence" in publish.get("kimi", {}):
         publish["kimi"]["evidence"] = [
             {"path": Path(e["path"]).name, "mtime": e.get("mtime"), "excerpt": (e.get("excerpt") or "")[:180]}
@@ -2939,9 +3424,15 @@ def main() -> None:
     if publish.get("agy", {}).get("usage_raw_excerpt"):
         publish["agy"]["usage_raw_excerpt"] = publish["agy"]["usage_raw_excerpt"][:800]
 
+    # Publish structured metrics only; raw CLI diagnostic excerpts can include private text.
+    for card in publish.values():
+        if isinstance(card, dict):
+            for key in ("raw_excerpt", "usage_raw_excerpt"):
+                card.pop(key, None)
+
     HERE.mkdir(parents=True, exist_ok=True)
-    (HERE / "snapshot.json").write_text(json.dumps(publish, indent=2) + "\n")
-    html = render_html(snap)
+    (HERE / "snapshot.json").write_text(json.dumps(publish, indent=2, allow_nan=False) + "\n")
+    html = "\n".join(line.rstrip() for line in render_html(snap).splitlines()) + "\n"
     (HERE / "index.html").write_text(html)
     print(f"Wrote {HERE / 'snapshot.json'}")
     print(f"Wrote {HERE / 'index.html'}")
@@ -2954,6 +3445,13 @@ def main() -> None:
     print(f"Muse: ok={m.get('ok')} ver={m.get('cli_version')} model={m.get('model')}")
     d = snap.get("dsh") or {}
     print(f"DSH: ok={d.get('ok')} ver={d.get('cli_version')} model={d.get('model')} provider={d.get('provider')}")
+    o = snap.get("opencode") or {}
+    ou = o.get("usage") or {}
+    print(
+        f"OpenCode: ok={o.get('ok')} ver={o.get('cli_version')} model={o.get('model')} effort={o.get('effort')} "
+        f"state={ou.get('state')} requests={ou.get('requests')} "
+        f"cost_all={((ou.get('windows') or {}).get('all_time') or {}).get('cost_usd')}"
+    )
     q = snap.get("qwen") or {}
     qu = q.get("usage") or {}
     print(
