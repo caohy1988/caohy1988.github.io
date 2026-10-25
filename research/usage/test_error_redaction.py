@@ -96,7 +96,7 @@ assert_clean("kimi", kimi)
 # 4. end to end: main() → snapshot.json + index.html, other collectors stubbed out
 cab.HERE = TMP / "out"
 cab.collect_claude = lambda: {"ok": False, "error": f"boom Authorization: Bearer {JWT}"}  # any future path
-for name in ("collect_agy", "collect_muse", "collect_dsh", "collect_routine_proxy"):
+for name in ("collect_agy", "collect_muse", "collect_dsh", "collect_openrouter", "collect_routine_proxy"):
     setattr(cab, name, lambda: {})
 cab.collect_grok = lambda: {"ok": False, "bots": [], "stale": True, "stale_reason": "test"}
 cab.main()

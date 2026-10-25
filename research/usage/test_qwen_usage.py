@@ -410,7 +410,8 @@ cred.write_text(json.dumps({"access_token": KIMI_TOKEN}))
 # 12. main(): snapshot.json + index.html carry the Qwen card and the Kimi model; nothing private leaks
 (TMP / ".qwen" / "usage_record.jsonl").write_text(rec(datetime(2026, 10, 24, 10, 30, 52, tzinfo=PT)) + "\n")
 cab.HERE = TMP / "out"
-for name in ("collect_claude", "collect_codex", "collect_agy", "collect_muse", "collect_dsh", "collect_routine_proxy"):
+for name in ("collect_claude", "collect_codex", "collect_agy", "collect_muse", "collect_dsh", "collect_openrouter",
+             "collect_routine_proxy"):
     setattr(cab, name, lambda: {})
 cab.collect_grok = lambda: {"ok": False, "bots": [], "stale": True, "stale_reason": "test"}
 cab.main()

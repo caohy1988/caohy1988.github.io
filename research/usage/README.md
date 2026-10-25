@@ -39,6 +39,21 @@ bots get no stale mark (an idle side bot is not a broken source), so only roster
 the collector exit 1. The fixed collector has to be copied to the box (and to the Mac folder,
 because `collect_and_build.py` imports `normalize_bots` from it) before extra bots appear.
 
+## OpenRouter spend (DSH + Qwen Code, one key)
+
+`collect_openrouter()` reads `OPENROUTER_API_KEY` from `~/.dsh/.env` on every build and calls
+`GET https://openrouter.ai/api/v1/key` with it. The request uses urllib, with the key only in an
+unredirected `Authorization` header and redirects refused. The key never goes into argv, the
+snapshot, the page, logs or any file. The card shows that key's own usage counters in USD
+(OpenRouter credits are US dollars): today, this week (from Monday) and this month, all in UTC,
+plus all time.
+
+DSH and Qwen Code both send requests with this key, and DSH keeps no per-request generation ids,
+so the figures are their **combined** spend, not split per seat. (Qwen's chat logs do record
+`gen-…` ids; a per-seat split would need one `/api/v1/generation` call per request.) Any failure
+(no key, an HTTP error, a network or TLS error, an unreadable reply) shows "unavailable" on
+every row, never $0. `/api/v1/credits` needs a management key, so it is not used.
+
 ## 36h STALE rule
 
 `collect_grok()` sets `stale` / `stale_reason` on `snapshot.json → grok` when:

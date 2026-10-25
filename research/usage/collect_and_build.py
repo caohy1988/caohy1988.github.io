@@ -9,6 +9,7 @@ import os
 import re
 import shutil
 import sqlite3
+import ssl
 import subprocess
 import tempfile
 import time
@@ -2967,6 +2968,121 @@ def collect_opencode() -> dict:
     return out
 
 
+# ── OpenRouter spend (one key, shared by DSH and Qwen Code) ────────────────
+
+OPENROUTER_KEY_URL = "https://openrouter.ai/api/v1/key"
+OPENROUTER_SEATS = ["DSH", "Qwen Code"]
+# (published name, /api/v1/key field): OpenRouter counts UTC days and UTC weeks starting Monday
+_OPENROUTER_WINDOWS = (("today_utc", "usage_daily"), ("week_utc", "usage_weekly"), ("month_utc", "usage_monthly"),
+                       ("all_time", "usage"))
+_OPENROUTER_KEY_ASSIGN = re.compile(r"""\s*(?:export\s+)?OPENROUTER_API_KEY\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s#]*))""")
+_OPENROUTER_KEY_SHAPE = re.compile(r"[A-Za-z0-9._-]{8,256}")
+
+
+def read_openrouter_key(path: Path) -> str | None:
+    """OPENROUTER_API_KEY from a dotenv file (the last assignment wins, as when a shell sources it), or None
+    when it is missing, empty or not a plain value. The key stays in memory: never published, logged or
+    written anywhere."""
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeDecodeError):
+        return None
+    key = None
+    for line in lines:
+        m = _OPENROUTER_KEY_ASSIGN.match(line)
+        if m:
+            key = next(g for g in m.groups() if g is not None)
+    return key if key and _OPENROUTER_KEY_SHAPE.fullmatch(key) else None
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Refuse redirects, so the key is only ever sent to the URL asked for."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def _https_context() -> ssl.SSLContext:
+    """Default verifying TLS context. A python.org build that ships no CA certificates gets the macOS
+    system bundle /etc/ssl/cert.pem instead; verification is never turned off."""
+    ctx = ssl.create_default_context()
+    if not ctx.cert_store_stats().get("x509_ca") and Path("/etc/ssl/cert.pem").is_file():
+        ctx.load_verify_locations(cafile="/etc/ssl/cert.pem")
+    return ctx
+
+
+def _openrouter_get(url: str, api_key: str, timeout: float = 15):
+    """GET one OpenRouter API URL -> parsed JSON body; raises on HTTP, network and JSON errors. The key goes
+    only in an unredirected Authorization header: never in argv (no curl), never to a redirect target."""
+    req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "usage-dashboard"})
+    req.add_unredirected_header("Authorization", "Bearer " + api_key)
+    opener = urllib.request.build_opener(_NoRedirect, urllib.request.HTTPSHandler(context=_https_context()))
+    with opener.open(req, timeout=timeout) as resp:
+        return json.loads(resp.read(1_000_000).decode("utf-8"))
+
+
+def _usd_amount(v, allow_negative=False):
+    """A finite number (not a bool), non-negative unless allowed, else None."""
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return None
+    try:
+        f = float(v)
+    except OverflowError:
+        return None
+    return v if math.isfinite(f) and (allow_negative or f >= 0) else None
+
+
+def collect_openrouter() -> dict:
+    """OpenRouter spend of the one key DSH and Qwen Code both use (GET /api/v1/key), in USD. The key's own
+    counters cover both seats, so the figures are combined, not split per seat. On any failure every figure
+    stays None, which the card shows as "unavailable" (never $0); errors are fixed phrases, never exception
+    text."""
+    out: dict = {
+        "ok": False,
+        "source": "GET https://openrouter.ai/api/v1/key with OPENROUTER_API_KEY from ~/.dsh/.env (read per build, never stored)",
+        "scope": "one shared key: DSH + Qwen Code combined, not split per seat",
+        "seats": list(OPENROUTER_SEATS),
+        "unit": "USD (OpenRouter credits are US dollars)",
+        "windows": {"today_utc": "current UTC day", "week_utc": "current UTC week, from Monday",
+                    "month_utc": "current UTC month", "all_time": "all time"},
+        "spend_usd": dict.fromkeys(name for name, _ in _OPENROUTER_WINDOWS),
+        "limit_usd": None,
+        "limit_remaining_usd": None,
+        "limit_reset": None,
+        "fetched_at": None,
+    }
+    key = read_openrouter_key(Path.home() / ".dsh" / ".env")  # ~ resolved per call (tests use a temp HOME)
+    if not key:
+        out["error"] = "OPENROUTER_API_KEY not found in ~/.dsh/.env"
+        return out
+    try:
+        body = _openrouter_get(OPENROUTER_KEY_URL, key)
+    except urllib.error.HTTPError as e:
+        out["error"] = f"OpenRouter /api/v1/key returned HTTP {int(e.code)}"
+        return out
+    except (urllib.error.URLError, OSError):
+        out["error"] = "OpenRouter /api/v1/key request failed (network or timeout)"
+        return out
+    except ValueError:
+        out["error"] = "OpenRouter /api/v1/key response unreadable (not JSON)"
+        return out
+    except Exception:
+        out["error"] = "OpenRouter /api/v1/key request failed"
+        return out
+    data = body.get("data") if isinstance(body, dict) else None
+    spend = {name: _usd_amount(data.get(field)) for name, field in _OPENROUTER_WINDOWS} if isinstance(data, dict) else {}
+    if len(spend) != len(_OPENROUTER_WINDOWS) or any(v is None for v in spend.values()):
+        out["error"] = "OpenRouter /api/v1/key response unreadable (usage counters missing or invalid)"
+        return out
+    out["spend_usd"] = spend
+    out["limit_usd"] = _usd_amount(data.get("limit"))
+    out["limit_remaining_usd"] = _usd_amount(data.get("limit_remaining"), allow_negative=True)
+    reset = data.get("limit_reset")
+    out["limit_reset"] = reset if isinstance(reset, str) and re.fullmatch(r"[a-z]{1,16}", reset) else None
+    out["fetched_at"] = iso_pt()
+    out["ok"] = True
+    return out
+
 
 
 
@@ -3659,6 +3775,44 @@ def render_opencode_body(oc: dict) -> str:
     """
 
 
+OPENROUTER_POINTER = (
+    '<p class="muted">OpenRouter spend: DSH and Qwen Code use one key, so their spend is shown combined on the '
+    "OpenRouter spend card.</p>"
+)
+
+
+def render_openrouter_body(orr: dict) -> str:
+    """Shared-key OpenRouter spend card: one row per window, "unavailable" unless the fetch succeeded."""
+    ok = bool(orr.get("ok"))
+    spend = orr.get("spend_usd") or {}
+    labels = (("today_utc", "Today (UTC)"), ("week_utc", "This week (UTC, from Mon)"),
+              ("month_utc", "This month (UTC)"), ("all_time", "All time"))
+    rows = "".join(
+        f'<tr><td>{label}</td><td class="num">'
+        f'{esc(_fmt_usd(spend.get(name)) if ok and spend.get(name) is not None else "unavailable")}</td></tr>'
+        for name, label in labels
+    )
+    err = "" if ok else f'<p class="err">Spend unavailable: {esc(orr.get("error") or "not collected")}</p>'
+    limit = ""
+    if ok and orr.get("limit_usd") is not None:
+        reset = f" · resets {esc(orr['limit_reset'])}" if orr.get("limit_reset") else ""
+        limit = (f'<div class="metric-reset">Key limit {esc(_fmt_usd(orr["limit_usd"]))} · remaining '
+                 f'{esc(_fmt_usd(orr.get("limit_remaining_usd")))}{reset}</div>')
+    fetched = f" Fetched {esc(orr['fetched_at'])}." if ok and orr.get("fetched_at") else ""
+    return f"""
+      <p class="pill"><strong>DSH + Qwen Code combined</strong> · one shared key · not split per seat</p>
+      {err}
+      <div class="table-wrap">
+        <table class="bots">
+          <thead><tr><th>Window</th><th>Spend (USD)</th></tr></thead>
+          <tbody>{rows}</tbody>
+        </table>
+      </div>
+      {limit}
+      <p class="muted">From OpenRouter's own usage counters for the key in <code>~/.dsh/.env</code> (USD: OpenRouter credits are US dollars).{fetched} Both seats send requests with this key and DSH keeps no per-request ids, so its share cannot be split out: this is their combined spend. The Qwen card's est. cost is a separate list-price estimate from its local usage log.</p>
+    """
+
+
 def render_html(snap: dict) -> str:
     refreshed = snap["refreshed_at"]
     claude = snap["claude"]
@@ -3669,6 +3823,7 @@ def render_html(snap: dict) -> str:
     dsh = snap.get("dsh") or {}
     qwen = snap.get("qwen") or {}
     opencode = snap.get("opencode") or {}
+    openrouter = snap.get("openrouter") or {}
     routine_proxy = snap.get("routine_proxy") or {}
     grok = snap["grok"]
 
@@ -3860,6 +4015,7 @@ def render_html(snap: dict) -> str:
       {dsh_err}
       {dsh_bars}
       <p class="muted">{esc(dsh.get('detail') or 'DeepSeek Harness via OpenRouter.')}</p>
+      {OPENROUTER_POINTER}
     """
 
     opencode_body = render_opencode_body(opencode)
@@ -3874,7 +4030,8 @@ def render_html(snap: dict) -> str:
     }
     card_cls = {k: "card pace-marked" if v else "card" for k, v in flags.items()}
 
-    qwen_body = render_qwen_body(qwen)
+    qwen_body = render_qwen_body(qwen) + OPENROUTER_POINTER
+    openrouter_body = render_openrouter_body(openrouter)
 
     grok_body = render_grok_body(grok)
 
@@ -4258,7 +4415,7 @@ def render_html(snap: dict) -> str:
     <header class="hero">
       <p class="kicker">Mac CLIs · Grok activity</p>
       <h1>Agent model usage</h1>
-      <p class="lede">At-a-glance quotas for the Opus 5.5 seat, Codex/Astra, Kimi, Agy, Muse Spark, DSH (default small), OpenCode · GLM-5.3 (default small), Qwen Code (trial), Grok activity share, plus a routine fires/week proxy (not dollars).</p>
+      <p class="lede">At-a-glance quotas for the Opus 5.5 seat, Codex/Astra, Kimi, Agy, Muse Spark, DSH (default small), OpenCode · GLM-5.3 (default small), Qwen Code (trial), OpenRouter spend (DSH + Qwen combined), Grok activity share, plus a routine fires/week proxy (not dollars).</p>
       <div class="meta">
         <span>Last refreshed <strong>{esc(refreshed)}</strong></span>
         <span>Timezone <strong>America/Los_Angeles</strong></span>
@@ -4327,6 +4484,12 @@ def render_html(snap: dict) -> str:
         {qwen_body}
       </section>
 
+      <section class="card" id="openrouter">
+        <h2>OpenRouter spend</h2>
+        <p class="sub">GET /api/v1/key · one key shared by DSH + Qwen Code</p>
+        {openrouter_body}
+      </section>
+
       <section class="card wide" id="grok">
         <h2>Overall Grok Bots</h2>
         <p class="sub">activity from local transcripts · not plan dollars</p>
@@ -4368,6 +4531,7 @@ def main() -> None:
         "dsh": add_pacing(collect_dsh()),
         "opencode": collect_opencode(),
         "qwen": collect_qwen(),
+        "openrouter": collect_openrouter(),
         "routine_proxy": collect_routine_proxy(),
         "grok": collect_grok(),
     }
@@ -4425,6 +4589,12 @@ def main() -> None:
     print(
         f"Qwen: ok={q.get('ok')} ver={q.get('cli_version')} model={q.get('model')} state={qu.get('state')} sessions={qu.get('sessions')} "
         f"cost_all={((qu.get('windows') or {}).get('all_time') or {}).get('est_cost_usd')} trial={(q.get('trial') or {}).get('status')}"
+    )
+    o = snap.get("openrouter") or {}
+    osp = o.get("spend_usd") or {}
+    print(
+        f"OpenRouter: ok={o.get('ok')} (DSH + Qwen combined) today={osp.get('today_utc')} week={osp.get('week_utc')} "
+        f"month={osp.get('month_utc')} all_time={osp.get('all_time')} error={o.get('error')}"
     )
     g = snap["grok"]
     print(f"Grok: bots={len(g.get('bots') or [])} fleet={g.get('fleet_messages_total')} source={g.get('source')} stale={g.get('stale')}")

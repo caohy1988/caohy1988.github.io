@@ -496,6 +496,8 @@ class RenderTests(unittest.TestCase):
             "collect_agy": lambda: {},
             "collect_muse": lambda: {"ok": True, "bars": []},
             "collect_dsh": lambda: {"ok": True, "bars": []},
+            "collect_qwen": lambda: {},
+            "collect_openrouter": lambda: {"ok": False, "error": "offline"},  # never the network from a test
             "collect_routine_proxy": lambda: {},
             "collect_grok": lambda: {"ok": False, "bots": [], "stale": True, "stale_reason": "test"},
         }
