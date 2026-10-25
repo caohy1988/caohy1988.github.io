@@ -7,12 +7,15 @@ import json
 import math
 import os
 import re
+import shutil
 import sqlite3
 import subprocess
+import tempfile
+import time
 import urllib.request
 import urllib.error
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -31,11 +34,26 @@ CODEX_AUTH = Path.home() / ".codex/auth.json"
 CLAUDE_BIN = Path.home() / ".local/bin/claude"
 MUSE_BIN = Path.home() / ".local/bin/muse"
 MUSE_AUTH = Path.home() / ".config/muse/auth.json"
+MUSE_SHARE = Path.home() / ".local/share/muse"
+MUSE_SETTINGS = Path.home() / ".config/muse/settings.json"
+MUSE_PLAN = "Max"  # user-stated 2026-10-12; Muse exposes no plan API
+MUSE_USAGE_DAYS = 7
+MUSE_USAGE_MAX_FILE_BYTES = 200 * 1024 * 1024  # skip + flag session logs larger than this
+MUSE_USAGE_TIME_BUDGET_S = 20.0  # on exceed, the usage scan stops and marks partial (deadline checked on every scanned line/parse and between files)
 DSH_BIN = Path.home() / ".local/bin/dsh"
 DSH_DIR = Path.home() / ".dsh"
 QWEN_BIN = Path("/usr/local/bin/qwen")
 OPENCODE_BIN = Path("/usr/local/bin/opencode")
 GROK_CACHE = HERE / "grok_box_activity.json"
+
+# Pacing (report-only): each quota window's published used % next to the share of the window
+# elapsed at the reading. Nothing reads these to hold or throttle a launch. The two marks are
+# the token-weather Lab card's author defaults, not measured.
+PACE_AHEAD_POINTS = 15.0  # marked when used % runs more than this many points ahead of elapsed %
+PACE_USED_MARK_PCT = 90.0  # marked when used % is past this
+PACE_SKEW_S = 300  # a reset up to this far past one full window still reads as "window just started"
+FIVE_HOURS_S = 5 * 3600
+SEVEN_DAYS_S = 7 * 86400
 
 # Box collection + freshness logic is shared with the box-side collector script.
 from collect_grok_box_activity import (  # noqa: E402
@@ -180,6 +198,165 @@ def first_clause(text: str | None, limit: int = 120) -> str:
     return t[: limit - 1] + "…"
 
 
+# ── pacing (report-only) ────────────────────────────────────────────────────
+
+
+def _iso_utc(dt: datetime | None) -> str | None:
+    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if dt else None
+
+
+def _parse_iso(s) -> datetime | None:
+    """Aware datetime from an ISO-8601 string; None when naive or unparseable."""
+    if not s:
+        return None
+    # Seconds are enough here, and Python 3.9 only parses 3- or 6-digit fractions.
+    t = re.sub(r"(\d{2}:\d{2}:\d{2})\.\d+", r"\1", str(s).strip()).replace("Z", "+00:00")
+    try:
+        dt = datetime.fromisoformat(t)
+    except ValueError:
+        return None
+    return dt if dt.tzinfo else None
+
+
+def _epoch_utc(ts) -> datetime | None:
+    try:
+        return datetime.fromtimestamp(float(ts), tz=timezone.utc)
+    except (TypeError, ValueError, OverflowError, OSError):
+        return None
+
+
+def window_seconds_from_name(name) -> int | None:
+    """Window length implied by a quota label ('Current session', 'Weekly Limit Remaining', …)."""
+    n = str(name or "").lower()
+    if re.search(r"\bsession\b|\bfive[ -]?hours?\b|\b5[ -]?h(?:ours?|r)?\b", n):
+        return FIVE_HOURS_S
+    if re.search(r"\bweek(?:ly)?\b|\b7[ -]?days?\b", n):
+        return SEVEN_DAYS_S
+    return None
+
+
+_UNIT_S = {"SECOND": 1, "MINUTE": 60, "HOUR": 3600, "DAY": 86400}
+
+
+def window_seconds_from_unit(duration, time_unit) -> int | None:
+    """Window length from an API {duration, timeUnit} pair, e.g. (300, 'TIME_UNIT_MINUTE')."""
+    unit = _UNIT_S.get(str(time_unit or "").upper().rsplit("_", 1)[-1].rstrip("S"))
+    try:
+        secs = int(float(duration) * unit) if unit else 0
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return secs if secs > 0 else None
+
+
+_RESET_TEXT = re.compile(
+    r"^(?:(?P<mon>[A-Za-z]{3})[a-z]*\.?\s+(?P<day>\d{1,2})(?:\s*,\s*|\s+at\s+|\s+))?"
+    r"(?P<h>\d{1,2})(?::(?P<m>\d{2}))?\s*(?P<ap>[ap]m)\s*(?:\((?P<tz>[^()]+)\))?$",
+    re.I,
+)
+_MONTHS = "jan feb mar apr may jun jul aug sep oct nov dec".split()
+
+
+def parse_reset_text(text, now: datetime) -> datetime | None:
+    """Reset time from `/usage` text such as 'Oct 13 at 2:59pm (America/Los_Angeles)'.
+
+    The text carries no year: take the one that puts the reset nearest `now`. Time-only
+    text means the next such time. No zone in parentheses means PT.
+    """
+    m = _RESET_TEXT.match(str(text or "").strip())
+    if not m:
+        return None
+    hour, minute = int(m["h"]), int(m["m"] or 0)
+    if not (1 <= hour <= 12 and minute < 60):
+        return None
+    hour = hour % 12 + (12 if m["ap"].lower() == "pm" else 0)
+    try:
+        tz = ZoneInfo(m["tz"].strip()) if m["tz"] else PT
+    except Exception:
+        return None
+    local_now = now.astimezone(tz)
+    if not m["mon"]:
+        at = local_now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        return at if at > local_now else at + timedelta(days=1)
+    mon = m["mon"].lower()
+    if mon not in _MONTHS:
+        return None
+    candidates = []
+    for year in (local_now.year - 1, local_now.year, local_now.year + 1):
+        try:
+            candidates.append(datetime(year, _MONTHS.index(mon) + 1, int(m["day"]), hour, minute, tzinfo=tz))
+        except ValueError:
+            pass
+    return min(candidates, key=lambda c: abs(c - now), default=None)
+
+
+def _pace_na(reason: str) -> dict:
+    return {"status": "n/a", "reason": reason, "marked": False}
+
+
+def pacing(used_percent, reset_at: datetime | None, window_seconds, now: datetime) -> dict:
+    """Share of a rolling window used vs share of it elapsed at `now` (report-only).
+
+    Marked when used % runs more than PACE_AHEAD_POINTS ahead of elapsed %, or is past
+    PACE_USED_MARK_PCT. Values stay unrounded, so the comparisons and the ratio see the exact
+    figures; pacing_html rounds for display only. A window without a reset time, a length or
+    a reading is 'n/a'.
+    """
+    if reset_at is None or reset_at.tzinfo is None:
+        return _pace_na("no window time")
+    try:
+        window = float(window_seconds)
+    except (TypeError, ValueError, OverflowError):
+        window = math.nan
+    if not (math.isfinite(window) and window > 0):
+        return _pace_na("unknown window length")
+    try:
+        used = float(used_percent)
+    except (TypeError, ValueError, OverflowError):
+        used = math.nan
+    if not math.isfinite(used):  # NaN/inf would also leak into snapshot.json as non-JSON tokens
+        return _pace_na("no usage reading")
+    left = (reset_at - now).total_seconds()
+    if left <= 0:
+        return _pace_na("window already reset")
+    if left > window + PACE_SKEW_S:
+        return _pace_na("reset time outside window")
+    elapsed = 100.0 * max(0.0, window - left) / window
+    ahead = used - elapsed
+    reasons = []
+    if ahead > PACE_AHEAD_POINTS:
+        reasons.append(f"more than {PACE_AHEAD_POINTS:g} pts ahead of the clock")
+    if used > PACE_USED_MARK_PCT:
+        reasons.append(f"past {PACE_USED_MARK_PCT:g}% used")
+    return {
+        "status": "ok",
+        "used_pct": used,
+        "elapsed_pct": elapsed,
+        "ahead_points": ahead,
+        "ratio": used / elapsed if elapsed > 0 else None,
+        "marked": bool(reasons),
+        "mark_reasons": reasons,
+    }
+
+
+def add_pacing(seat: dict, now: datetime | None = None) -> dict:
+    """Attach a report-only `pacing` dict to each quota bar of one Mac CLI seat, as of `now`.
+
+    A bar whose shown `used_percent` was rounded by its collector also carries
+    `used_percent_unrounded`; pacing compares that one."""
+    if not isinstance(seat, dict):
+        return seat
+    now = now or datetime.now(timezone.utc)
+    for key in ("bars", "additional_rate_limits"):
+        for b in seat.get(key) or []:
+            if isinstance(b, dict):
+                used = b.get("used_percent_unrounded")
+                b["pacing"] = pacing(
+                    b.get("used_percent") if used is None else used,
+                    _parse_iso(b.get("reset_at")), b.get("window_seconds"), now,
+                )
+    return seat
+
+
 # ── collectors ──────────────────────────────────────────────────────────────
 
 
@@ -210,6 +387,7 @@ def collect_claude() -> dict:
             r"(\d+(?:\.\d+)?)%\s*used\s*·\s*resets\s*(.+)$",
             re.I,
         )
+        now = now_pt()
         for ln in lines:
             m = pat.match(ln.strip())
             if not m:
@@ -221,6 +399,8 @@ def collect_claude() -> dict:
                     "used_percent": pct_s,
                     "reset": reset,
                     "tone": bar_class(pct_s),
+                    "reset_at": _iso_utc(parse_reset_text(reset, now)),
+                    "window_seconds": window_seconds_from_name(label),
                 }
             )
         out["ok"] = bool(out["bars"])
@@ -231,6 +411,60 @@ def collect_claude() -> dict:
     except Exception as e:
         out["error"] = safe_error(e)
     return out
+
+
+def _codex_window(win: dict) -> dict:
+    """reset_at (ISO UTC) + window_seconds from one wham/usage window object."""
+    reset = _epoch_utc(win.get("reset_at"))
+    if reset is None:
+        try:
+            reset = datetime.now(timezone.utc) + timedelta(seconds=float(win["reset_after_seconds"]))
+        except (KeyError, TypeError, ValueError, OverflowError):
+            reset = None
+    try:
+        length = int(win.get("limit_window_seconds") or 0)
+    except (TypeError, ValueError, OverflowError):
+        length = 0
+    return {"reset_at": _iso_utc(reset), "window_seconds": length if length > 0 else None}
+
+
+def _codex_bar(label: str, win, blocked: bool = False, **extra) -> dict:
+    """One quota bar from a wham/usage window object (primary or secondary)."""
+    win = win if isinstance(win, dict) else {}
+    fields = _codex_window(win)
+    reset = _parse_iso(fields["reset_at"])
+    pct = win.get("used_percent")
+    return {
+        "label": label,
+        "used_percent": pct,
+        "reset": reset.astimezone(PT).strftime("%Y-%m-%d %H:%M %Z") if reset else None,
+        "tone": bar_class(pct, blocked=blocked),
+        **extra,
+        **fields,
+    }
+
+
+def codex_windows(data: dict) -> tuple:
+    """(bars, additional) for every window in a wham/usage payload: the main limit's primary
+    and secondary window, then each additional limit's. A secondary window only when sent."""
+    rl = data.get("rate_limit") or {}
+    bars = [
+        _codex_bar(
+            "Primary window", rl.get("primary_window"), blocked=bool(rl.get("limit_reached")),
+            allowed=rl.get("allowed"), limit_reached=rl.get("limit_reached"),
+        )
+    ]
+    if isinstance(rl.get("secondary_window"), dict) and rl["secondary_window"]:
+        bars.append(_codex_bar("Secondary window", rl["secondary_window"]))
+    addl = []
+    for item in data.get("additional_rate_limits") or []:
+        if not isinstance(item, dict):
+            continue
+        arl, name = item.get("rate_limit") or {}, item.get("limit_name")
+        addl.append(_codex_bar(f"{name} · primary window", arl.get("primary_window"), limit_name=name))
+        if isinstance(arl.get("secondary_window"), dict) and arl["secondary_window"]:
+            addl.append(_codex_bar(f"{name} · secondary window", arl["secondary_window"], limit_name=name))
+    return bars, addl
 
 
 def collect_codex() -> dict:
@@ -298,22 +532,7 @@ def collect_codex() -> dict:
                     return out
         data = redact(raw)
         out["plan_type"] = data.get("plan_type")
-        rl = data.get("rate_limit") or {}
-        pw = rl.get("primary_window") or {}
-        pct = pw.get("used_percent")
-        reset = ts_to_pt(pw.get("reset_at"))
-        if reset is None and pw.get("reset_after_seconds") is not None:
-            reset = ts_to_pt(datetime.now(timezone.utc).timestamp() + float(pw["reset_after_seconds"]))
-        out["bars"].append(
-            {
-                "label": "Primary window",
-                "used_percent": pct,
-                "reset": reset,
-                "tone": bar_class(pct, blocked=bool(rl.get("limit_reached"))),
-                "allowed": rl.get("allowed"),
-                "limit_reached": rl.get("limit_reached"),
-            }
-        )
+        out["bars"], addl = codex_windows(data)
         model_usage = data.get("model_usage") or {}
         astra = model_usage.get("gpt-6-astra") or {}
         out["gpt6_astra"] = {
@@ -328,18 +547,6 @@ def collect_codex() -> dict:
             "unlimited": credits.get("unlimited"),
             "overage_limit_reached": credits.get("overage_limit_reached"),
         }
-        addl = []
-        for item in data.get("additional_rate_limits") or []:
-            arl = (item.get("rate_limit") or {}).get("primary_window") or {}
-            apct = arl.get("used_percent")
-            addl.append(
-                {
-                    "limit_name": item.get("limit_name"),
-                    "used_percent": apct,
-                    "reset": ts_to_pt(arl.get("reset_at")),
-                    "tone": bar_class(apct),
-                }
-            )
         out["additional_rate_limits"] = addl
         out["snapshot_redacted"] = {
             "plan_type": out["plan_type"],
@@ -709,13 +916,14 @@ def collect_kimi() -> dict:
                 usage = payload.get("usage") or {}
                 limits = payload.get("limits") or []
                 # API reports remaining; dashboard bars are used %
-                def pct_used(limit_s, remaining_s):
+                def pct_used(limit_s, remaining_s, ndigits=1):
                     try:
                         lim = float(limit_s)
                         rem = float(remaining_s)
                         if lim <= 0:
                             return None
-                        return round(max(0.0, min(100.0, 100.0 * (lim - rem) / lim)), 1)
+                        pct = max(0.0, min(100.0, 100.0 * (lim - rem) / lim))
+                        return pct if ndigits is None else round(pct, ndigits)
                     except (TypeError, ValueError):
                         return None
 
@@ -739,6 +947,8 @@ def collect_kimi() -> dict:
                         return iso_s
 
                 weekly_used = pct_used(usage.get("limit"), usage.get("remaining"))
+                # display, tone and status keep the 1-decimal share; pacing reads the unrounded one
+                weekly_exact = pct_used(usage.get("limit"), usage.get("remaining"), None)
                 weekly_reset = fmt_reset(usage.get("resetTime"))
                 bars = []
                 if weekly_used is not None:
@@ -748,6 +958,9 @@ def collect_kimi() -> dict:
                             "used_percent": weekly_used,
                             "reset": weekly_reset,
                             "tone": tone_for(weekly_used),
+                            "reset_at": _iso_utc(_parse_iso(usage.get("resetTime"))),
+                            "window_seconds": SEVEN_DAYS_S,
+                            "used_percent_unrounded": weekly_exact,
                         }
                     )
                 for lim in limits:
@@ -767,6 +980,9 @@ def collect_kimi() -> dict:
                             "used_percent": used,
                             "reset": fmt_reset(detail.get("resetTime")),
                             "tone": tone_for(used),
+                            "reset_at": _iso_utc(_parse_iso(detail.get("resetTime"))),
+                            "window_seconds": window_seconds_from_unit(dur, unit),
+                            "used_percent_unrounded": pct_used(detail.get("limit"), detail.get("remaining"), None),
                         }
                     )
 
@@ -1016,6 +1232,8 @@ def parse_agy_usage_tsv(text: str) -> list[dict]:
                 "tone": bar_class(used),
                 "raw_window": window,
                 "reports_remaining": remaining_word,
+                "reset_at": _iso_utc(_parse_iso(reset_raw)),
+                "window_seconds": window_seconds_from_name(window),
             }
         )
     return bars
@@ -1347,20 +1565,540 @@ def _collect_grok_from_box() -> dict | None:
 
 
 
-def collect_muse() -> dict:
-    """Muse Code / Muse Spark — version + auth; Meta does not expose CLI quota bars yet."""
+def _muse_find_model_completed(obj, hits, ctx=None, depth=0, malformed=None,
+                                 deadline=None, expired=None):
+    """Collect (ctx, event) for every dict with kind=="model_completed".
+
+    Events sit under payload→…→event; retained frames embed whole records as
+    JSON strings in record_json fields. Only those known record_json strings
+    are ever decoded — model_completed JSON quoted inside tool output or any
+    other string is never parsed, so quoted text cannot be counted as usage.
+    ctx = (record_id, recorded_at_us) of the nearest enclosing record — the
+    dedupe key. goal_usage_attribution records re-report the same usage and
+    are ignored. Unparseable record_json values are recorded in `malformed`
+    (a set of string ids, shared with the prompt finder so one broken frame
+    counts once) for the caller to flag partial. When `deadline` is given,
+    traversal stops as soon as it passes and sets expired[0].
+    """
+    if depth > 8:
+        return
+    if expired is not None and expired[0]:
+        return
+    if deadline is not None and time.monotonic() > deadline:
+        if expired is not None:
+            expired[0] = True
+        return
+    if isinstance(obj, dict):
+        if obj.get("record_type") and obj.get("id"):
+            ctx = (obj.get("id"), obj.get("recorded_at"))
+        if obj.get("kind") == "model_completed":
+            hits.append((ctx, obj))
+            return
+        for k, v in obj.items():
+            if k == "record_json" and isinstance(v, str) and "model_completed" in v:
+                if deadline is not None and time.monotonic() > deadline:
+                    if expired is not None:
+                        expired[0] = True
+                    return
+                try:
+                    parsed = json.loads(v)
+                except ValueError:
+                    if malformed is not None:
+                        malformed.add(id(v))
+                else:
+                    _muse_find_model_completed(
+                        parsed, hits, ctx, depth + 1, malformed, deadline, expired)
+            else:
+                _muse_find_model_completed(
+                    v, hits, ctx, depth + 1, malformed, deadline, expired)
+            if expired is not None and expired[0]:
+                return
+    elif isinstance(obj, list):
+        for v in obj:
+            _muse_find_model_completed(
+                v, hits, ctx, depth + 1, malformed, deadline, expired)
+            if expired is not None and expired[0]:
+                return
+
+
+def _muse_find_user_prompts(obj, hits, depth=0, malformed=None, deadline=None,
+                             expired=None):
+    """Collect (record_id, recorded_at_us, intent_id) for user-prompt records.
+
+    One runtime.user_intent.accepted record per user prompt in real session
+    logs (counts match the index prompt_count on this Mac). Retained frames
+    embed whole records as JSON strings in record_json fields; only those
+    known record_json strings are ever decoded — prompt JSON quoted inside
+    tool output or any other string is never parsed or counted. Callers
+    dedupe by record id. Unparseable record_json values are recorded in
+    `malformed` (shared with the model finder) for the caller to flag
+    partial. When `deadline` is given, traversal stops as soon as it passes
+    and sets expired[0].
+    """
+    if depth > 8:
+        return
+    if expired is not None and expired[0]:
+        return
+    if deadline is not None and time.monotonic() > deadline:
+        if expired is not None:
+            expired[0] = True
+        return
+    if isinstance(obj, dict):
+        if obj.get("payload_type") == "runtime.user_intent.accepted":
+            payload = obj.get("payload") if isinstance(obj.get("payload"), dict) else {}
+            hits.append((obj.get("id"), obj.get("recorded_at"), payload.get("intent_id")))
+            return
+        for k, v in obj.items():
+            if k == "record_json" and isinstance(v, str) and "user_intent.accepted" in v:
+                if deadline is not None and time.monotonic() > deadline:
+                    if expired is not None:
+                        expired[0] = True
+                    return
+                try:
+                    parsed = json.loads(v)
+                except ValueError:
+                    if malformed is not None:
+                        malformed.add(id(v))
+                else:
+                    _muse_find_user_prompts(
+                        parsed, hits, depth + 1, malformed, deadline, expired)
+            else:
+                _muse_find_user_prompts(
+                    v, hits, depth + 1, malformed, deadline, expired)
+            if expired is not None and expired[0]:
+                return
+    elif isinstance(obj, list):
+        for v in obj:
+            _muse_find_user_prompts(v, hits, depth + 1, malformed, deadline, expired)
+            if expired is not None and expired[0]:
+                return
+
+
+def _muse_event_day(recorded_us, days, fallback_day, start_key):
+    """Map an event timestamp to its PT window day: (day_key|None, valid_ts, pre_window).
+
+    A valid timestamp outside the window yields day None (exclude the event —
+    never dump it on the session's updated day). Only events with no usable
+    timestamp fall back to fallback_day (the session's updated day).
+    """
+    if isinstance(recorded_us, (int, float)) and not isinstance(recorded_us, bool):
+        try:
+            day = datetime.fromtimestamp(recorded_us / 1_000_000, PT).date().isoformat()
+        except (OverflowError, OSError, ValueError):
+            return fallback_day, False, False
+        if day in days:
+            return day, True, False
+        return None, True, day < start_key
+    return fallback_day, False, False
+
+
+def _muse_int(x) -> int:
+    return int(x) if isinstance(x, (int, float)) and not isinstance(x, bool) else 0
+
+
+def _muse_query_sessions(target, start_us, uri):
+    """Session rows updated at/after start_us; tolerates an index without created_at_us."""
+    con = sqlite3.connect(target, uri=uri, timeout=1)
+    try:
+        try:
+            return con.execute(
+                "SELECT session_id, session_log_path, model_id, prompt_count, updated_at_us, created_at_us"
+                " FROM sessions WHERE updated_at_us >= ? ORDER BY updated_at_us DESC",
+                (start_us,),
+            ).fetchall()
+        except sqlite3.OperationalError as e:
+            if "no such column" not in str(e).lower():
+                raise
+            return [
+                (*r, None)
+                for r in con.execute(
+                    "SELECT session_id, session_log_path, model_id, prompt_count, updated_at_us"
+                    " FROM sessions WHERE updated_at_us >= ? ORDER BY updated_at_us DESC",
+                    (start_us,),
+                ).fetchall()
+            ]
+    finally:
+        con.close()
+
+
+def _muse_query_sessions_via_copy(db: Path, start_us):
+    """Query a temp copy of the index (db + -wal + -shm). Never writes to the original.
+
+    Fallback for runtimes whose read-only WAL open fails ("unable to open
+    database file") on the live index. The copy may be opened read-write
+    (WAL recovery writes only inside the temp dir); always cleaned up.
+    """
+    with tempfile.TemporaryDirectory(prefix="muse-index-") as tmp:
+        dst = Path(tmp) / db.name
+        shutil.copyfile(db, dst)
+        for suffix in ("-wal", "-shm"):
+            src = Path(f"{db}{suffix}")
+            if src.exists():
+                shutil.copyfile(src, Path(f"{dst}{suffix}"))
+        return _muse_query_sessions(str(dst), start_us, uri=False)
+
+
+def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
+    """Last-7-days (PT) Muse token usage from session-index.db + per-session JSONL logs.
+
+    Tokens count model_completed events only (goal_usage_attribution re-reports
+    the same numbers). Per-day attribution is by each event's own timestamp:
+    events with valid timestamps outside the window are excluded, never moved
+    to the session's updated day; only untimestamped events fall back to that
+    day. A session counts on each day it had counted model/prompt activity
+    (totals count distinct sessions). Prompts count timestamped
+    runtime.user_intent.accepted records; sessions whose logs have none fall
+    back to the index lifetime prompt_count only when the session provably
+    started inside the window (a valid created_at_us inside the window, no
+    pre-window events, log fully read), spread pro rata over its
+    model-activity days and flagged prompts_approximate — pre-window
+    lifetimes are never attributed, and a missing/invalid created_at_us
+    contributes zero fallback prompts flagged approximate. Missing or
+    oversized logs, malformed model_completed / user_intent /
+    retained-frame record lines, and time-budget overruns (deadline checked
+    on every line/parse and between files) set partial + usage_note. The
+    WAL index is opened read-only with a brief locked-retry; if that open
+    or first query fails, a temp copy is queried instead (see
+    _muse_query_sessions_via_copy). Any remaining DB failure degrades into
+    usage_error + partial + usage_note — this never raises.
+    """
+    zero = {
+        "sessions": 0,
+        "prompts": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cached_tokens": 0,
+        "reasoning_tokens": 0,
+    }
+    usage: dict = {
+        "window_days": MUSE_USAGE_DAYS,
+        "plan": MUSE_PLAN,
+        "limit": None,  # not exposed by Muse CLI
+        "reset": None,  # not exposed by Muse CLI
+        "limit_note": "not exposed by Muse CLI",
+        "days": [],
+        "totals": dict(zero),
+        "today": dict(zero),
+        "by_model": {},
+        "sessions_in_window": 0,
+        "logs_scanned": 0,
+        "logs_missing": 0,
+        "logs_skipped_large": 0,
+        "malformed_lines": 0,
+        "malformed_usage_lines": 0,
+        "malformed_prompt_lines": 0,
+        "malformed_frame_records": 0,
+        "events_out_of_window": 0,
+        "partial": False,
+        "usage_note": "",
+        "prompts_approximate": False,
+        "prompts_note": "",
+    }
+    try:
+        now = now or now_pt()
+        today = now.date()
+        start_day = today - timedelta(days=MUSE_USAGE_DAYS - 1)
+        start_us = int(datetime.combine(start_day, datetime.min.time(), PT).timestamp() * 1_000_000)
+        day_keys = [(start_day + timedelta(days=i)).isoformat() for i in range(MUSE_USAGE_DAYS)]
+        days = {k: {"date": k, **zero, "models": {}} for k in day_keys}
+        usage["days"] = [days[k] for k in day_keys]
+        db = share_dir / "session-index.db"
+        if not db.exists():
+            usage["usage_error"] = "session-index.db not found"
+            usage["partial"] = True
+            usage["usage_note"] = "session-index.db not found — totals may undercount"
+            return usage
+        rows = None
+        ro_err: Exception | None = None
+        locked_exhausted = False
+        for _attempt in range(4):  # WAL db is actively written; tolerate transient locks
+            try:
+                rows = _muse_query_sessions(f"file:{db}?mode=ro", start_us, uri=True)
+                break
+            except sqlite3.OperationalError as e:
+                ro_err = e
+                if "locked" not in str(e).lower():
+                    break  # read-only open/query failed: try the copy fallback
+                if _attempt == 3:
+                    locked_exhausted = True
+                else:
+                    time.sleep(0.25)
+            except sqlite3.Error as e:
+                ro_err = e
+                break  # try the copy fallback (a corrupt copy fails too)
+        if rows is None and not locked_exhausted:
+            try:
+                rows = _muse_query_sessions_via_copy(db, start_us)
+            except Exception:
+                rows = None  # degrade below with the read-only error
+        if rows is None:
+            err = safe_error(ro_err) if ro_err is not None else "database is locked"
+            usage["usage_error"] = err
+            usage["partial"] = True
+            usage["usage_note"] = (
+                f"session-index.db could not be read ({err}) — totals may undercount"
+            )
+            return usage
+        usage["sessions_in_window"] = len(rows)
+        deadline = time.monotonic() + MUSE_USAGE_TIME_BUDGET_S
+        budget_hit = False
+        start_key = day_keys[0]
+        day_sessions = {k: set() for k in day_keys}
+        for session_id, log_path, model_id, prompt_count, updated_us, created_us in rows:
+            if time.monotonic() > deadline:
+                budget_hit = True
+                break
+            try:
+                up_day = datetime.fromtimestamp((updated_us or 0) / 1_000_000, PT).date().isoformat()
+            except (OverflowError, OSError, ValueError):
+                up_day = None
+            fallback_day = up_day if up_day in days else None
+            try:
+                size = os.path.getsize(log_path or "")
+            except OSError:
+                usage["logs_missing"] += 1
+                continue
+            if size > MUSE_USAGE_MAX_FILE_BYTES:
+                usage["logs_skipped_large"] += 1
+                continue
+            sess_model_days: Counter = Counter()
+            sess_prompt_days: Counter = Counter()
+            saw_prompt_record = False
+            saw_pre_window = False
+            truncated = False
+            read_ok = True
+            try:
+                with open(log_path, "r", encoding="utf-8", errors="replace") as fh:
+                    seen_models = set()
+                    seen_prompts = set()
+                    for line in fh:
+                        if time.monotonic() > deadline:
+                            budget_hit = True
+                            truncated = True
+                            break
+                        if "model_completed" not in line and "user_intent.accepted" not in line:
+                            continue
+                        try:
+                            obj = json.loads(line)
+                        except ValueError:
+                            usage["malformed_lines"] += 1
+                            if "model_completed" in line:
+                                usage["malformed_usage_lines"] += 1
+                            if "user_intent.accepted" in line:
+                                usage["malformed_prompt_lines"] += 1
+                            continue
+                        if time.monotonic() > deadline:
+                            budget_hit = True
+                            truncated = True
+                            break
+                        frame_malformed: set = set()
+                        expired = [False]
+                        hits: list = []
+                        _muse_find_model_completed(
+                            obj, hits, malformed=frame_malformed,
+                            deadline=deadline, expired=expired,
+                        )
+                        for ctx, ev in hits:
+                            if expired[0] or time.monotonic() > deadline:
+                                budget_hit = True
+                                truncated = True
+                                break
+                            key = (ctx[0] if ctx and ctx[0] else None) or (
+                                ev.get("model"), json.dumps(ev.get("usage") or {}, sort_keys=True)
+                            )
+                            if key in seen_models:
+                                continue
+                            seen_models.add(key)
+                            ev_day, valid_ts, pre_window = _muse_event_day(
+                                ctx[1] if ctx else None, days, fallback_day, start_key
+                            )
+                            saw_pre_window = saw_pre_window or pre_window
+                            if ev_day is None:
+                                if valid_ts:
+                                    usage["events_out_of_window"] += 1
+                                continue
+                            u = ev.get("usage") or {}
+                            inp = _muse_int(u.get("input_tokens"))
+                            out_t = _muse_int(u.get("output_tokens"))
+                            cached = _muse_int(u.get("cached_tokens")) + _muse_int(u.get("cache_read_tokens"))
+                            reas = _muse_int(u.get("reasoning_tokens"))
+                            model = ev.get("model") or model_id or "unknown"
+                            drow = days[ev_day]
+                            drow["input_tokens"] += inp
+                            drow["output_tokens"] += out_t
+                            drow["cached_tokens"] += cached
+                            drow["reasoning_tokens"] += reas
+                            drow["models"][model] = drow["models"].get(model, 0) + inp + out_t
+                            sess_model_days[ev_day] += 1
+                            day_sessions[ev_day].add(session_id)
+                        if truncated:
+                            usage["malformed_frame_records"] += len(frame_malformed)
+                            break
+                        phits: list = []
+                        _muse_find_user_prompts(
+                            obj, phits, malformed=frame_malformed,
+                            deadline=deadline, expired=expired,
+                        )
+                        usage["malformed_frame_records"] += len(frame_malformed)
+                        for rec_id, rec_at, intent_id in phits:
+                            if expired[0] or time.monotonic() > deadline:
+                                budget_hit = True
+                                truncated = True
+                                break
+                            pkey = rec_id or intent_id
+                            if pkey is not None:
+                                if pkey in seen_prompts:
+                                    continue
+                                seen_prompts.add(pkey)
+                            saw_prompt_record = True
+                            p_day, valid_ts, pre_window = _muse_event_day(
+                                rec_at, days, fallback_day, start_key
+                            )
+                            saw_pre_window = saw_pre_window or pre_window
+                            if p_day is None:
+                                if valid_ts:
+                                    usage["events_out_of_window"] += 1
+                                continue
+                            sess_prompt_days[p_day] += 1
+                        if expired[0]:
+                            budget_hit = True
+                            truncated = True
+                        if truncated:
+                            break
+            except OSError:
+                read_ok = False
+                usage["logs_missing"] += 1
+            if saw_prompt_record:
+                for dkey, n in sess_prompt_days.items():
+                    days[dkey]["prompts"] += n
+                    day_sessions[dkey].add(session_id)
+            elif read_ok and not truncated and sess_model_days and not saw_pre_window:
+                # No timestamped prompt events in this log: the lifetime index
+                # prompt_count is an in-window total only if a valid
+                # created_at_us proves the session started inside the window;
+                # spread it over the session's model-activity days pro rata
+                # (largest-remainder rounding). A missing/invalid creation
+                # timestamp proves nothing: contribute zero and flag the
+                # prompt totals approximate instead of attributing a lifetime.
+                created_ok = False
+                created_unknown = True
+                if isinstance(created_us, (int, float)) and not isinstance(created_us, bool) and created_us > 0:
+                    try:
+                        created_day = datetime.fromtimestamp(
+                            created_us / 1_000_000, PT
+                        ).date().isoformat()
+                    except (OverflowError, OSError, ValueError):
+                        created_day = None
+                    if created_day in days:
+                        created_ok = True
+                        created_unknown = False
+                    elif created_day is not None and created_day < start_key:
+                        created_unknown = False  # provably pre-window
+                total_pc = _muse_int(prompt_count)
+                if created_unknown and total_pc > 0:
+                    usage["prompts_approximate"] = True
+                if created_ok and total_pc > 0:
+                    total_w = sum(sess_model_days.values())
+                    shares = {k: [total_pc * w // total_w, total_pc * w % total_w]
+                              for k, w in sess_model_days.items()}
+                    assigned = sum(v[0] for v in shares.values())
+                    for dkey in sorted(shares, key=lambda k: (-shares[k][1], k)):
+                        if assigned >= total_pc:
+                            break
+                        shares[dkey][0] += 1
+                        assigned += 1
+                    for dkey, (n, _rem) in shares.items():
+                        days[dkey]["prompts"] += n
+                    usage["prompts_approximate"] = True
+            if read_ok:
+                usage["logs_scanned"] += 1
+            if truncated:
+                break
+        else:
+            if time.monotonic() > deadline:
+                budget_hit = True
+        note_parts = []
+        if usage["logs_missing"]:
+            note_parts.append(f"{usage['logs_missing']} session log(s) missing/unreadable")
+        if usage["logs_skipped_large"]:
+            limit = MUSE_USAGE_MAX_FILE_BYTES
+            limit_s = f"{limit / (1024 * 1024):g} MB" if limit >= 1024 * 1024 else f"{limit} bytes"
+            note_parts.append(f"{usage['logs_skipped_large']} session log(s) over {limit_s} skipped")
+        if usage.get("malformed_usage_lines"):
+            note_parts.append(
+                f"{usage['malformed_usage_lines']} malformed model_completed line(s) skipped"
+            )
+        if usage.get("malformed_prompt_lines"):
+            note_parts.append(
+                f"{usage['malformed_prompt_lines']} malformed user_intent line(s) skipped"
+            )
+        if usage.get("malformed_frame_records"):
+            note_parts.append(
+                f"{usage['malformed_frame_records']} malformed retained-frame record(s) skipped"
+            )
+        if budget_hit:
+            note_parts.append("time budget exceeded")
+        if note_parts:
+            usage["partial"] = True
+            usage["usage_note"] = "; ".join(note_parts) + " — totals may undercount"
+        if usage["prompts_approximate"]:
+            usage["prompts_note"] = (
+                "Some sessions have no timestamped prompt events; their index prompt_count "
+                "is spread over their model-activity days only when a valid created_at_us "
+                "proves the session started inside the window. Sessions created before the "
+                "window, or with a missing/invalid created_at_us, contribute zero fallback "
+                "prompts."
+            )
+        for k in day_keys:
+            days[k]["sessions"] = len(day_sessions[k])
+        active_sessions: set = set()
+        for s in day_sessions.values():
+            active_sessions |= s
+        by_model: dict = {}
+        for d in usage["days"]:
+            for f in zero:
+                if f != "sessions":
+                    usage["totals"][f] += d[f]
+            for m, t in d["models"].items():
+                by_model[m] = by_model.get(m, 0) + t
+        usage["totals"]["sessions"] = len(active_sessions)
+        usage["today"] = {f: days[today.isoformat()][f] for f in zero}
+        usage["by_model"] = dict(sorted(by_model.items(), key=lambda kv: -kv[1]))
+    except Exception as e:
+        usage["usage_error"] = safe_error(e)
+        usage["partial"] = True
+        if not usage.get("usage_note"):
+            usage["usage_note"] = (
+                f"usage scan failed ({usage['usage_error']}) — totals may undercount"
+            )
+    return usage
+
+
+def collect_muse(share_dir=None, settings_path=None, muse_bin=None, auth_path=None) -> dict:
+    """Muse Code / Muse Spark — version + auth + local 7-day token usage.
+
+    Muse exposes no plan/quota API; plan is user-stated Max, limits render as null.
+    Paths are injectable for tests (defaults = the real ~/.local / ~/.config paths).
+    """
     import shutil
+
+    share_dir = Path(share_dir) if share_dir else MUSE_SHARE
+    settings_path = Path(settings_path) if settings_path else MUSE_SETTINGS
+    auth_path = Path(auth_path) if auth_path else MUSE_AUTH
 
     out: dict = {
         "ok": False,
-        "source": "muse --version + ~/.config/muse/auth.json",
+        "source": "muse --version + ~/.config/muse/auth.json + session-index.db (7d local usage)",
         "bars": [],
         "model": "muse-spark-1.3-contributor",
         "product": "Muse Code",
         "model_family": "Muse Spark",
     }
     try:
-        muse = MUSE_BIN if MUSE_BIN.exists() else Path(shutil.which("muse") or "")
+        if muse_bin is not None:
+            muse = Path(muse_bin)
+        else:
+            muse = MUSE_BIN if MUSE_BIN.exists() else Path(shutil.which("muse") or "")
         if not muse or not Path(muse).exists():
             out["error"] = "muse binary not found"
             return out
@@ -1376,17 +2114,39 @@ def collect_muse() -> dict:
         out["cli_version"] = ver[0] if ver else "unknown"
         auth_ok = False
         mechanism = None
-        if MUSE_AUTH.exists():
-            auth = json.loads(MUSE_AUTH.read_text())
+        if auth_path.exists():
+            auth = json.loads(auth_path.read_text())
             meta = (auth.get("providers") or {}).get("meta") or {}
             mechanism = meta.get("mechanism") or meta.get("obtained_via") or meta.get("storage")
             auth_ok = bool(meta)
         out["auth_ok"] = auth_ok
         out["auth_mechanism"] = mechanism
+        cfg_model = None
+        try:
+            if settings_path.exists():
+                cfg = json.loads(settings_path.read_text())
+                if isinstance(cfg, dict):
+                    m = cfg.get("model")
+                    cfg_model = m.strip() if isinstance(m, str) and m.strip() else None
+                    if cfg.get("reasoning_effort"):
+                        out["reasoning_effort"] = cfg.get("reasoning_effort")
+        except Exception:
+            cfg_model = None
+        usage = _collect_muse_usage(share_dir)
+        out["usage"] = usage
+        if usage.get("usage_error"):
+            out["usage_error"] = usage["usage_error"]
+        top_model = next(iter(usage.get("by_model") or {}), None)
+        out["model"] = cfg_model or top_model or out["model"]
+        out["model_source"] = (
+            "settings.json" if cfg_model else ("session logs (7d most-used)" if top_model else "fallback default")
+        )
         out["ok"] = bool(out.get("cli_version")) and auth_ok
         out["detail"] = (
-            "Per Muse itself (2026-09-15): no documented /usage, muse usage, or quota API. "
-            "Plan/limits live in Meta Accounts Center (web). Card shows install + auth health only."
+            "Usage = local session-index.db (read-only, temp-copy fallback) + session logs, last 7 days PT by event "
+            "timestamp: tokens from model_completed only (goal_usage_attribution "
+            "excluded), prompts from user_intent events. Plan Max is user-stated "
+            "(2026-10-12): the Muse CLI exposes no plan/limit/reset API, so quota stays null."
         )
         if not auth_ok:
             out["error"] = "muse auth missing — run muse login"
@@ -2496,6 +3256,62 @@ def progress_bar(pct: float | None, tone: str, label: str | None = None) -> str:
     </div>"""
 
 
+PACE_TITLE = (
+    "Share of the rolling window used (the published %) vs share of the window's time elapsed at this "
+    "reading; × = used ÷ elapsed. Not dollars or tokens. Report only: nothing is held or throttled."
+)
+
+
+def _num(x: float, nd: int) -> str:
+    return f"{x:.{nd}f}".rstrip("0").rstrip(".")
+
+
+def _pace_decimals(p: dict) -> int:
+    """Fewest decimals (1–4) at which the shown used % and pts ahead sit on the same side of
+    their lines as the unrounded values, so a line never reads '15 pts ahead' yet marked."""
+    for nd in (1, 2, 3, 4):
+        if all(
+            (float(_num(v, nd)) > line) == (v > line)
+            for v, line in ((p["used_pct"], PACE_USED_MARK_PCT), (p["ahead_points"], PACE_AHEAD_POINTS))
+        ):
+            return nd
+    return 4
+
+
+def pacing_html(p: dict | None) -> str:
+    """One report-only line under a quota bar: used % vs elapsed % of its window."""
+    if not p or p.get("status") != "ok":
+        return f'<div class="metric-pace na">pacing: n/a ({esc((p or {}).get("reason") or "no window time")})</div>'
+    nd = _pace_decimals(p)
+    used, elapsed, ahead = (_num(p[k], nd) for k in ("used_pct", "elapsed_pct", "ahead_points"))
+    delta = (
+        "on the clock" if float(ahead) == 0
+        else f"{ahead.lstrip('-')} pts behind" if ahead.startswith("-") else f"{ahead} pts ahead"
+    )
+    # the ratio only reads sensibly once some of the window has visibly elapsed
+    ratio = f" ({_num(p['ratio'], 2)}× the clock)" if p.get("ratio") is not None and float(elapsed) > 0 else ""
+    text = f"pacing: {used}% used vs {elapsed}% of window elapsed{ratio} · {delta}"
+    if p.get("marked"):
+        why = "; ".join(p.get("mark_reasons") or [])
+        return f'<div class="metric-pace marked" title="{esc(PACE_TITLE)}">⚑ {esc(text)} · marked: {esc(why)}</div>'
+    return f'<div class="metric-pace" title="{esc(PACE_TITLE)}">{esc(text)}</div>'
+
+
+def pacing_flag_html(*bar_lists) -> str:
+    """Card-level mark naming each window whose pacing is marked; '' when none is."""
+    marked = [
+        b for bars in bar_lists for b in bars or []
+        if isinstance(b, dict) and (b.get("pacing") or {}).get("marked")
+    ]
+    if not marked:
+        return ""
+    items = "; ".join(
+        f"{esc(b.get('label') or b.get('limit_name') or 'window')} — {esc(', '.join(b['pacing'].get('mark_reasons') or []))}"
+        for b in marked
+    )
+    return f'<p class="pace-flag" role="status">⚑ <strong>Pacing mark</strong> (report only): {items}</p>'
+
+
 
 def _fmt_last_activity(b: dict) -> str:
     """Render last-activity cell; show visible stale-source badge when flagged."""
@@ -2823,9 +3639,10 @@ def render_html(snap: dict) -> str:
           <div class="metric-label">{esc(b.get('label'))}</div>
           {progress_bar(b.get('used_percent'), b.get('tone') or bar_class(b.get('used_percent')))}
           <div class="metric-reset">Resets {esc(b.get('reset') or '—')}</div>
+          {pacing_html(b.get('pacing'))}
         </div>"""
             )
-        return "\n".join(parts) if parts else '<p class="muted">No bar data.</p>'
+        return "\n".join(parts) if parts else '<p class="muted">No bar data.</p>\n' + pacing_html(None)
 
     claude_body = bars_html(claude.get("bars") or [])
     if not claude.get("ok"):
@@ -2839,9 +3656,10 @@ def render_html(snap: dict) -> str:
         for a in codex.get("additional_rate_limits") or []:
             addl += f"""
         <div class="metric">
-          <div class="metric-label">{esc(a.get('limit_name'))}</div>
+          <div class="metric-label">{esc(a.get('label') or a.get('limit_name'))}</div>
           {progress_bar(a.get('used_percent'), a.get('tone') or 'ok')}
           <div class="metric-reset">Resets {esc(a.get('reset') or '—')}</div>
+          {pacing_html(a.get('pacing'))}
         </div>"""
         codex_body = f"""
         <p class="pill">plan: <strong>{esc(codex.get('plan_type'))}</strong> · gpt-6-astra: <strong>{esc(av)}</strong></p>
@@ -2900,19 +3718,84 @@ def render_html(snap: dict) -> str:
 
     # Muse / Muse Spark
     muse_tone = "ok" if muse.get("ok") else "bad"
-    muse_chip = "AUTH OK" if muse.get("ok") else "AUTH / INSTALL"
+    mu = muse.get("usage") or {}
+    mu_plan = mu.get("plan")
+    muse_chip = str(mu_plan).upper() if mu_plan else ("AUTH OK" if muse.get("ok") else "AUTH / INSTALL")
     muse_bars = bars_html(muse.get("bars") or [])
     muse_err = ""
     if muse.get("error"):
         muse_err = f'<p class="err">{esc(muse.get("error"))}</p>'
+    mu_usage_err = ""
+    if mu.get("usage_error") or muse.get("usage_error"):
+        mu_usage_err = f'<p class="err">Usage scan: {esc(mu.get("usage_error") or muse.get("usage_error"))}</p>'
+    mu_usage_note = ""
+    if mu.get("usage_note"):
+        mu_usage_note = f'<p class="err">Usage incomplete: {esc(mu.get("usage_note"))}</p>'
+    mu_prompts_note = ""
+    if mu.get("prompts_note"):
+        mu_prompts_note = f'<p class="muted">{esc(mu.get("prompts_note"))}</p>'
+    mu_rows = []
+    for d in mu.get("days") or []:
+        day_models = ", ".join(f"{m} {t:,}" for m, t in (d.get("models") or {}).items()) or "—"
+        mu_rows.append(
+            f"""
+        <tr>
+          <td class="mono">{esc(d.get('date') or '—')}</td>
+          <td class="num">{esc(d.get('sessions', 0))}</td>
+          <td class="num">{esc(d.get('prompts', 0))}</td>
+          <td class="num">{d.get('input_tokens', 0):,}</td>
+          <td class="num">{d.get('output_tokens', 0):,}</td>
+          <td class="num">{d.get('cached_tokens', 0):,}</td>
+          <td class="num">{d.get('reasoning_tokens', 0):,}</td>
+          <td class="mono">{esc(day_models)}</td>
+        </tr>"""
+        )
+    mu_table = ""
+    if mu_rows:
+        mu_table = f"""
+      <div class="table-wrap">
+        <table class="bots">
+          <thead>
+            <tr>
+              <th>Day (PT)</th>
+              <th>Sess</th>
+              <th>Prompts</th>
+              <th>In tok</th>
+              <th>Out tok</th>
+              <th>Cached tok</th>
+              <th>Reas tok</th>
+              <th>Models (in+out)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {''.join(mu_rows)}
+          </tbody>
+        </table>
+      </div>"""
+    mu_summary = ""
+    if mu:
+        mu_tot = mu.get("totals") or {}
+        mu_today = mu.get("today") or {}
+        mu_partial = ' <span class="status-chip warn">PARTIAL</span>' if mu.get("partial") or mu.get("usage_error") else ""
+        mu_bymodel = " · ".join(
+            f"{esc(m)} <strong>{t:,}</strong>" for m, t in (mu.get("by_model") or {}).items()
+        )
+        mu_summary = f"""
+      <p class="pill">7d tokens <strong>{mu_tot.get('input_tokens', 0):,}</strong> in / <strong>{mu_tot.get('output_tokens', 0):,}</strong> out · today <strong>{mu_today.get('input_tokens', 0):,}</strong> / <strong>{mu_today.get('output_tokens', 0):,}</strong>{mu_partial}</p>
+      <p class="muted">By model (7d, in+out): {mu_bymodel or '—'}</p>"""
     muse_body = f"""
-      <p class="pill">CLI <strong>{esc(muse.get('cli_version') or '—')}</strong> · model <strong>{esc(muse.get('model') or 'muse-spark-1.3-contributor')}</strong></p>
+      <p class="pill">CLI <strong>{esc(muse.get('cli_version') or '—')}</strong> · plan <strong>{esc(mu_plan or '—')}</strong> · model <strong>{esc(muse.get('model') or 'muse-spark-1.3-contributor')}</strong></p>
       <div class="metric">
         <div class="metric-label">Muse Spark status</div>
         <div class="status-chip {muse_tone}">{esc(muse_chip)}</div>
-        <div class="metric-reset">auth {esc(muse.get('auth_mechanism') or '—')} · no CLI quota bars yet</div>
+        <div class="metric-reset">auth {esc(muse.get('auth_mechanism') or '—')} · limit/reset {esc(mu.get('limit_note') or 'not exposed by Muse CLI')}</div>
       </div>
       {muse_err}
+      {mu_usage_err}
+      {mu_usage_note}
+      {mu_summary}
+      {mu_table}
+      {mu_prompts_note}
       {muse_bars}
       <p class="muted">{esc(muse.get('detail') or 'Muse Code powered by Muse Spark.')}</p>
     """
@@ -2938,6 +3821,16 @@ def render_html(snap: dict) -> str:
     """
 
     opencode_body = render_opencode_body(opencode)
+    # Report-only pacing mark per Mac CLI card (Codex only when its bars are shown)
+    flags = {
+        "claude": pacing_flag_html(claude.get("bars")),
+        "codex": pacing_flag_html(codex.get("bars"), codex.get("additional_rate_limits")) if codex.get("ok") else "",
+        "kimi": pacing_flag_html(kimi.get("bars")),
+        "agy": pacing_flag_html(agy.get("bars")),
+        "muse": pacing_flag_html(muse.get("bars")),
+        "dsh": pacing_flag_html(dsh.get("bars")),
+    }
+    card_cls = {k: "card pace-marked" if v else "card" for k, v in flags.items()}
 
     qwen_body = render_qwen_body(qwen)
 
@@ -3092,6 +3985,24 @@ def render_html(snap: dict) -> str:
       font-size: 0.82rem;
       color: var(--ink-soft);
       margin-top: 4px;
+    }}
+    .metric-pace {{
+      font-size: 0.8rem;
+      color: var(--ink-soft);
+      margin-top: 2px;
+    }}
+    .metric-pace.na {{ color: var(--ink-faint); }}
+    .metric-pace.marked {{ color: var(--bad); font-weight: 600; }}
+    .card.pace-marked {{ border-color: #fecaca; box-shadow: inset 4px 0 0 var(--bad); }}
+    .pace-flag {{
+      margin: 0 0 12px;
+      padding: 8px 10px;
+      border: 1px solid #fecaca;
+      border-left: 4px solid var(--bad);
+      border-radius: 8px;
+      background: #fef2f2;
+      color: #991b1b;
+      font-size: 0.86rem;
     }}
     .kimi-detail {{ margin: 0 0 10px; font-size: 0.95rem; }}
     .bar-row {{
@@ -3314,43 +4225,51 @@ def render_html(snap: dict) -> str:
         <span><i class="ok"></i>&lt;70% green</span>
         <span><i class="warn"></i>70–89% amber</span>
         <span><i class="bad"></i>≥90% / blocked red</span>
+        <span>pacing = published used % vs share of the window elapsed (not dollars or tokens)</span>
+        <span>⚑ pacing mark: usage &gt;{PACE_AHEAD_POINTS:g} pts ahead of the window clock or past {PACE_USED_MARK_PCT:g}% used · report only</span>
       </div>
     </header>
 
     <div class="grid">
-      <section class="card" id="claude">
+      <section class="{card_cls['claude']}" id="claude">
         <h2>Claude / Fable</h2>
         <p class="sub">claude -p /usage</p>
+        {flags['claude']}
         {claude_body}
       </section>
 
-      <section class="card" id="codex">
+      <section class="{card_cls['codex']}" id="codex">
         <h2>Codex / Astra</h2>
-        <p class="sub">wham/usage · plan + primary window</p>
+        <p class="sub">wham/usage · plan + primary / secondary windows</p>
+        {flags['codex']}
         {codex_body}
       </section>
 
-      <section class="card" id="kimi">
+      <section class="{card_cls['kimi']}" id="kimi">
         <h2>Kimi</h2>
         <p class="sub">weekly (7-day) quota · derived status</p>
+        {flags['kimi']}
         {kimi_body}
       </section>
 
-      <section class="card" id="agy">
+      <section class="{card_cls['agy']}" id="agy">
         <h2>Agy</h2>
         <p class="sub">agy -p /usage · pack · social-superpowers MCP</p>
+        {flags['agy']}
         {agy_body}
       </section>
 
-      <section class="card" id="muse">
+      <section class="{card_cls['muse']}" id="muse">
         <h2>Muse / Muse Spark</h2>
-        <p class="sub">muse --version · Meta Muse Code</p>
+        <p class="sub">muse --version · Meta Muse Code · 7d local usage (model_completed)</p>
+        {flags['muse']}
         {muse_body}
       </section>
 
-      <section class="card" id="dsh">
+      <section class="{card_cls['dsh']}" id="dsh">
         <h2>DSH / DeepSeek Harness</h2>
         <p class="sub">dsh --version · OpenRouter DeepSeek</p>
+        {flags['dsh']}
         {dsh_body}
       </section>
 
@@ -3398,12 +4317,13 @@ def main() -> None:
     snap = {
         "refreshed_at": iso_pt(),
         "refreshed_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "claude": collect_claude(),
-        "codex": collect_codex(),
-        "kimi": collect_kimi(),
-        "agy": collect_agy(),
-        "muse": collect_muse(),
-        "dsh": collect_dsh(),
+        # pacing is stamped as each seat's reading lands, so elapsed % matches that reading
+        "claude": add_pacing(collect_claude()),
+        "codex": add_pacing(collect_codex()),
+        "kimi": add_pacing(collect_kimi()),
+        "agy": add_pacing(collect_agy()),
+        "muse": add_pacing(collect_muse()),
+        "dsh": add_pacing(collect_dsh()),
         "opencode": collect_opencode(),
         "qwen": collect_qwen(),
         "routine_proxy": collect_routine_proxy(),
@@ -3442,7 +4362,12 @@ def main() -> None:
     a = snap["agy"]
     print(f"Agy: ssp={ (a.get('social_superpowers') or {}).get('state') } health={ (a.get('collect_health') or {}).get('chip') }")
     m = snap.get("muse") or {}
-    print(f"Muse: ok={m.get('ok')} ver={m.get('cli_version')} model={m.get('model')}")
+    mu = m.get("usage") or {}
+    mut = mu.get("totals") or {}
+    print(
+        f"Muse: ok={m.get('ok')} ver={m.get('cli_version')} model={m.get('model')} plan={mu.get('plan')}"
+        f" 7d_in={mut.get('input_tokens')} 7d_out={mut.get('output_tokens')} partial={mu.get('partial')}"
+    )
     d = snap.get("dsh") or {}
     print(f"DSH: ok={d.get('ok')} ver={d.get('cli_version')} model={d.get('model')} provider={d.get('provider')}")
     o = snap.get("opencode") or {}
