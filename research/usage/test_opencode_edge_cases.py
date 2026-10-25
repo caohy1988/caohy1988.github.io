@@ -380,17 +380,33 @@ class OpenCodeEdgeCases(unittest.TestCase):
         self.assertNotIn("cost_overflow", usage["windows"]["all_time"])
         json.dumps(usage, allow_nan=False)
 
-    def test_main_refuses_nonfinite_json_before_writing(self):
+    def test_main_writes_strict_json_with_nonfinite_values_as_null(self):
+        def reject_constant(token):
+            self.fail(f"Non-finite JSON token: {token}")
+
         with patch.object(cab, "HERE", Path(self.tmp.name) / "output"):
             with ExitStack() as stack:
                 for name in dir(cab):
                     if name.startswith("collect_"):
                         stack.enter_context(patch.object(cab, name, return_value={}))
-                stack.enter_context(patch.object(cab, "collect_opencode", return_value={"cost": float("inf")}))
-                with self.assertRaises(ValueError):
-                    cab.main()
-                self.assertFalse((cab.HERE / "snapshot.json").exists())
-                self.assertFalse((cab.HERE / "index.html").exists())
+                stack.enter_context(patch.object(cab, "collect_opencode", return_value={
+                    "cost": float("inf"),
+                    "nested": [float("nan"), {"cost": float("-inf")}, 0.25],
+                    "raw_excerpt": self.private,
+                    "usage_raw_excerpt": self.private,
+                }))
+                cab.main()
+                self.assertTrue((cab.HERE / "snapshot.json").is_file())
+                self.assertTrue((cab.HERE / "index.html").is_file())
+                text = (cab.HERE / "snapshot.json").read_text()
+                html = (cab.HERE / "index.html").read_text()
+                snap = json.loads(text, parse_constant=reject_constant)
+                self.assertEqual(snap["opencode"], {
+                    "cost": None, "nested": [None, {"cost": None}, 0.25],
+                })
+                self.assertNotIn(self.private, text + html)
+                for token in ("NaN", "Infinity", "$inf", "nan%", "inf%"):
+                    self.assertNotIn(token, text + html)
 
 
 if __name__ == "__main__":
