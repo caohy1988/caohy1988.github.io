@@ -2428,7 +2428,7 @@ def openrouter_key_present(path: Path) -> bool:
 
 
 def _qwen_record(line: str):
-    """One usage_record.jsonl line -> (sessionId, end-time ms, {model: counters}), or None if unusable."""
+    """One usage_record.jsonl line -> (sessionId, end-time ms, {model: counters}, is_audit), or None."""
     try:
         o = json.loads(line)
     except Exception:
@@ -2453,7 +2453,9 @@ def _qwen_record(line: str):
                    for v in counts.values()):
             return None
         per_model[name] = counts
-    return sid, ts, per_model
+    # Native usage records do not identify the job. Only an explicit audit annotation is evidence;
+    # neither a date in the planned window nor an ordinary usage session establishes an audit run.
+    return sid, ts, per_model, o.get("job_type") == "nightly-mac-harness-audit"
 
 
 def _qwen_cost(model: str, c: dict) -> float | None:
@@ -2508,7 +2510,9 @@ def summarize_qwen_usage(text: str, now: datetime) -> dict:
     non-blank lines are counted in bad_lines; records dated after `now` (the collection time) in
     future_records. Neither counts toward usage or trial runs. state: "ok" (readable sessions),
     "no_runs" (no records at all) or "unreadable" (records, none usable), which is never shown as zero
-    usage. sessionId is the de-dup key only; neither it nor the project path is returned.
+    usage. sessionId is the de-dup key only; neither it nor the project path is returned. Only records
+    annotated with job_type="nightly-mac-harness-audit" advance the trial, including makeup audits
+    after the planned window. Unannotated records still contribute to all usage totals.
     """
     sessions: dict = {}
     bad = dups = 0
@@ -2522,7 +2526,8 @@ def summarize_qwen_usage(text: str, now: datetime) -> dict:
         dups += rec[0] in sessions
         sessions[rec[0]] = rec[1:]
     now_ms = int(now.timestamp() * 1000)
-    picked = [s for s in sessions.values() if s[0] <= now_ms]
+    observed = [s for s in sessions.values() if s[0] <= now_ms]
+    picked = [(ts, models) for ts, models, _ in observed]
     future = len(sessions) - len(picked)
     excluded = _qwen_excluded(bad, future)
     state = "ok" if picked else "unreadable" if excluded else "no_runs"
@@ -2551,8 +2556,8 @@ def summarize_qwen_usage(text: str, now: datetime) -> dict:
                      status=f"trial status unavailable: no readable records ({excluded})")
     else:
         start_ms, end_ms = (int(t.timestamp() * 1000) for t in (QWEN_TRIAL_START, QWEN_TRIAL_END))
-        runs = sum(1 for ts, _ in picked if start_ms <= ts < end_ms)
-        later = sum(1 for ts, _ in picked if ts >= end_ms)
+        runs = sum(1 for ts, _, is_audit in observed if ts >= start_ms and is_audit)
+        later = sum(1 for ts, _, is_audit in observed if ts >= end_ms and not is_audit)
         shown = f"{min(runs, QWEN_TRIAL_RUNS)}/{QWEN_TRIAL_RUNS}"
         if phase == "not_started":
             status = f"starts {first} (nightly ~3 AM PT; planned window through {last}); {shown} runs"

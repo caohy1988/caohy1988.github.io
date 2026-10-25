@@ -39,6 +39,7 @@ Each failure stops the loop and leaves its diagnostic visible.
 | `test_grok_stale.py` | 36h STALE rule, box collector schema, every non-room bot listed |
 | `test_error_redaction.py` | no Bearer token or argv in error fields, snapshot.json, index.html |
 | `test_qwen_usage.py` | Qwen card (usage log parser, cost, dated trial status); Kimi `config.toml` parser, tomllib and the 3.9 fallback agreeing |
+| `test_qwen_audit_runs.py` | Identified nightly audits, outage makeup runs after the planned window, ordinary-session exclusion |
 | `test_muse_usage.py` | Muse 7-day usage from `session-index.db` + session logs |
 | `test_pacing.py` | report-only pacing marks on the quota bars |
 | `test_strict_json.py` | snapshot.json is strict JSON: NaN / Infinity become null |
@@ -64,6 +65,9 @@ real snapshot.json / index.html.
   "scheduled window elapsed; keep/drop pending the third recorded run" while fewer than
   three runs are recorded, or "keep/drop pending review" once three are recorded. The
   calendar alone never marks the trial ended or complete; Haiyuan makes the keep/drop decision.
+  Audit records must carry the explicit `job_type: "nightly-mac-harness-audit"` annotation;
+  native usage records have no job label and do not advance the trial. Identified makeup audits
+  after 2026-10-27 count toward the same three runs. Ordinary sessions still count toward usage.
 - Actual OpenRouter spend is on the shared-key card (below), combined with DSH.
 
 ## Why Grok activity needs a box step

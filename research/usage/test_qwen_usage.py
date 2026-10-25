@@ -163,26 +163,30 @@ u = cab.summarize_qwen_usage("\n".join(rec(AFTER - d, sid=str(i)) for i, d in en
 assert [u["windows"][k]["sessions"] for k in ("last_24h", "last_7d", "all_time")] == [1, 2, 3], u["windows"]
 assert u["windows"]["last_7d"]["input_tokens"] == 2 * 24755
 
-# 7. trial: sessions from 2026-10-25 00:00 PT count, capped display N/3; earlier ones are setup tests
+def audit_rec(*args, **kwargs):
+    return rec(*args, job_type="nightly-mac-harness-audit", **kwargs)
+
+
+# 7. trial: identified audits from 2026-10-25 00:00 PT count, capped display N/3; earlier ones are setup tests
 start = datetime(2026, 10, 25, tzinfo=PT)
-lines = [rec(start - timedelta(milliseconds=1), sid="setup"), rec(start, sid="run1"),
-         rec(start + timedelta(hours=27), sid="run2")]
+lines = [audit_rec(start - timedelta(milliseconds=1), sid="setup"), audit_rec(start, sid="run1"),
+         audit_rec(start + timedelta(hours=27), sid="run2")]
 u = cab.summarize_qwen_usage("\n".join(lines), AFTER)
 assert (u["trial"]["runs"], u["trial"]["runs_display"], u["trial"]["setup_test_sessions"]) == (2, "2/3", 1), u["trial"]
 assert u["trial"]["status"] == "2/3 runs since 2026-10-25; planned window through 2026-10-27", u["trial"]
-lines += [rec(start + timedelta(hours=h), sid=f"extra{h}") for h in (50, 51, 52)]
+lines += [audit_rec(start + timedelta(hours=h), sid=f"extra{h}") for h in (50, 51, 52)]
 u = cab.summarize_qwen_usage("\n".join(lines), LATE)
 assert (u["trial"]["runs"], u["trial"]["runs_display"]) == (5, "3/3") and u["trial"]["status"] == "scheduled window elapsed (2026-10-25 to 2026-10-27); 3/3 runs; keep/drop pending review; 5 sessions"
 assert u["future_records"] == 0 and u["sessions"] == 6
-u = cab.summarize_qwen_usage(rec(start - timedelta(hours=1)), start)  # midnight PT: started, 0 runs
+u = cab.summarize_qwen_usage(audit_rec(start - timedelta(hours=1)), start)  # midnight PT: started, 0 runs
 assert u["trial"]["status"] == "0/3 runs since 2026-10-25; planned window through 2026-10-27"
 assert (u["trial"]["phase"], u["trial"]["first_day"], u["trial"]["last_day"]) == ("running", "2026-10-25", "2026-10-27")
 
 # 7a. Dates describe the planned window; elapsed dates never finish the trial.
-# Sessions after the window are still excluded from the existing usage-based run count.
+# Ordinary sessions after the window remain excluded; identified makeup audits are tested separately.
 end = datetime(2026, 10, 28, tzinfo=PT)  # the window is the PT days 10/25, 10/26 and 10/27
-two = [rec(start + timedelta(hours=3), sid="r1"), rec(start + timedelta(hours=27), sid="r2")]
-u, t, h = card("\n".join(two + [rec(end - timedelta(milliseconds=1), sid="r3-late"), rec(end, sid="after1"),
+two = [audit_rec(start + timedelta(hours=3), sid="r1"), audit_rec(start + timedelta(hours=27), sid="r2")]
+u, t, h = card("\n".join(two + [audit_rec(end - timedelta(milliseconds=1), sid="r3-late"), rec(end, sid="after1"),
                                 rec(end + timedelta(days=2), sid="after2")]), end + timedelta(days=3))
 assert (t["phase"], t["runs"], t["runs_display"], t["later_sessions"]) == ("window_elapsed", 3, "3/3", 2), t
 assert t["status"] == "scheduled window elapsed (2026-10-25 to 2026-10-27); 3/3 runs; keep/drop pending review; 2 later sessions not counted", t
@@ -209,18 +213,18 @@ for when in (BEFORE, AFTER, LATE):  # never relative wording, whatever the date
         assert word not in t["status"].lower() and word not in h.lower(), (when, word)
 
 # 7b. records dated after the collection time are quarantined: no usage, no trial run, visible flag
-u, t, h = card(rec(start), BEFORE)  # Oct 25 00:00 record read on Oct 24 noon
+u, t, h = card(audit_rec(start), BEFORE)  # Oct 25 00:00 record read on Oct 24 noon
 assert u["future_records"] == 1 and u["sessions"] == 0 and u["state"] == "unreadable", u
 assert u["windows"]["last_24h"]["sessions"] == 0 and t["runs"] is None, (u, t)
 assert "usage unavailable: no readable records" in h and "1 future-dated record" in h and "1/3" not in h, h
-u, t, h = card("\n".join([rec(BEFORE - timedelta(hours=1), sid="past"), rec(start, sid="future"),
-                          rec(BEFORE, sid="1ms-late", timestamp=int(BEFORE.timestamp()) * 1000 + 1)]), BEFORE)
+u, t, h = card("\n".join([audit_rec(BEFORE - timedelta(hours=1), sid="past"), audit_rec(start, sid="future"),
+                          audit_rec(BEFORE, sid="1ms-late", timestamp=int(BEFORE.timestamp()) * 1000 + 1)]), BEFORE)
 assert (u["sessions"], u["future_records"], u["windows"]["last_24h"]["sessions"]) == (1, 2, 1), u
 assert t["runs"] == 0 and t["status"] == "starts 2026-10-25 (nightly ~3 AM PT; planned window through 2026-10-27); 0/3 runs (not counted: 2 future-dated records)", t
 assert ">DATA<" in h and "2 future-dated records" in h and "<table" in h
-u = cab.summarize_qwen_usage(rec(BEFORE), BEFORE)  # stamped exactly at collection time: counted
+u = cab.summarize_qwen_usage(audit_rec(BEFORE), BEFORE)  # stamped exactly at collection time: counted
 assert u["sessions"] == 1 and u["future_records"] == 0
-u = cab.summarize_qwen_usage(rec(start), start + timedelta(hours=3))  # once the clock passes it, it counts
+u = cab.summarize_qwen_usage(audit_rec(start), start + timedelta(hours=3))  # once the clock passes it, it counts
 assert u["sessions"] == 1 and u["trial"]["runs"] == 1 and u["trial"]["runs_display"] == "1/3"
 
 # 8. collect_qwen end to end: fake binary, temp HOME, fake key — the key never leaves openrouter_key_present
