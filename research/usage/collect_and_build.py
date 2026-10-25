@@ -2389,7 +2389,7 @@ def collect_dsh() -> dict:
 # OpenRouter list prices, USD per 1M tokens — estimates only; models not listed show tokens, no cost.
 QWEN_PRICES = {"qwen/qwen3.8-max-0902": {"input": 2.00, "cached_input": 0.25, "output": 6.00}}
 QWEN_TRIAL_START = datetime(2026, 10, 25, tzinfo=PT)  # first PT day of the nightly-audit trial; earlier = setup tests
-QWEN_TRIAL_END = datetime(2026, 10, 28, tzinfo=PT)  # exclusive: the trial is the PT days 10/25, 10/26 and 10/27
+QWEN_TRIAL_END = datetime(2026, 10, 28, tzinfo=PT)  # exclusive end of the planned window, not trial completion
 QWEN_TRIAL_RUNS = 3
 QWEN_NOTE = "Qwen Code system prompt adds ~25k input tokens per request"
 _QWEN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}(?:/[A-Za-z0-9][A-Za-z0-9._:-]{0,95})?")
@@ -2490,7 +2490,7 @@ def _qwen_window(sessions: list) -> dict:
 
 
 def _qwen_trial_days() -> tuple:
-    """('2026-10-25', '2026-10-27'): the first and last PT day of the trial window."""
+    """('2026-10-25', '2026-10-27'): the first and last PT day of the planned trial window."""
     return QWEN_TRIAL_START.strftime("%Y-%m-%d"), (QWEN_TRIAL_END - timedelta(days=1)).strftime("%Y-%m-%d")
 
 
@@ -2541,10 +2541,10 @@ def summarize_qwen_usage(text: str, now: datetime) -> dict:
         w["model"] = _qwen_model_id(name) or "unrecognized model id"
         w["priced"] = name in QWEN_PRICES
         by_model.append(w)
-    # Rendered from dates at each refresh, with absolute days only: "starts", then "until", then "ended".
+    # Dates describe the planned window only; three recorded runs and keep/drop review are still required.
     first, last = _qwen_trial_days()
-    phase = "not_started" if now < QWEN_TRIAL_START else "running" if now < QWEN_TRIAL_END else "ended"
-    trial = {"seat": "trial", "window": f"nightly audits {first} to {last}", "first_day": first, "last_day": last,
+    phase = "not_started" if now < QWEN_TRIAL_START else "running" if now < QWEN_TRIAL_END else "window_elapsed"
+    trial = {"seat": "trial", "window": f"planned nightly audits {first} to {last}", "first_day": first, "last_day": last,
              "starts_pt": iso_pt(QWEN_TRIAL_START), "ends_pt": iso_pt(QWEN_TRIAL_END), "phase": phase}
     if state == "unreadable":
         trial.update(runs=None, runs_display=None, setup_test_sessions=None, later_sessions=None,
@@ -2555,11 +2555,12 @@ def summarize_qwen_usage(text: str, now: datetime) -> dict:
         later = sum(1 for ts, _ in picked if ts >= end_ms)
         shown = f"{min(runs, QWEN_TRIAL_RUNS)}/{QWEN_TRIAL_RUNS}"
         if phase == "not_started":
-            status = f"starts {first} (nightly ~3 AM PT, until {last}); {shown} runs"
+            status = f"starts {first} (nightly ~3 AM PT; planned window through {last}); {shown} runs"
         elif phase == "running":
-            status = f"{shown} runs since {first}; trial until {last}"
+            status = f"{shown} runs since {first}; planned window through {last}"
         else:
-            status = f"ended {last}; {shown} runs"
+            pending = "the third recorded run" if runs < QWEN_TRIAL_RUNS else "review"
+            status = f"scheduled window elapsed ({first} to {last}); {shown} runs; keep/drop pending {pending}"
         if runs > QWEN_TRIAL_RUNS:
             status += f"; {runs} sessions"
         if later:
@@ -3699,12 +3700,12 @@ def render_qwen_body(qwen: dict) -> str:
             f'<div class="metric-reset">{esc(setup_n)} setup test session{"" if setup_n == 1 else "s"} '
             f"before {first} (not trial runs)</div>"
         )
-    ended = trial.get("phase") == "ended"
-    trial_tone = "ok" if (trial.get("runs") or 0) >= QWEN_TRIAL_RUNS else "warn" if ended else "unk"
+    window_elapsed = trial.get("phase") == "window_elapsed"
+    trial_tone = "ok" if (trial.get("runs") or 0) >= QWEN_TRIAL_RUNS else "warn" if window_elapsed else "unk"
     trial_html = f"""
       <div class="metric">
-        <div class="metric-label">Trial seat · nightly audits {first} to {last}</div>
-        <div class="status-chip {trial_tone}">TRIAL {'ENDED ' if ended else ''}{esc(trial.get('runs_display') or '—')}</div>
+        <div class="metric-label">Trial seat · planned window {first} to {last} · nightly audits</div>
+        <div class="status-chip {trial_tone}">TRIAL {'PENDING ' if window_elapsed else ''}{esc(trial.get('runs_display') or '—')}</div>
         <div class="metric-reset">{esc(trial.get('status') or 'trial status unavailable')}</div>
         {setup}
       </div>"""

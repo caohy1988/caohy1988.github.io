@@ -59,8 +59,11 @@ real snapshot.json / index.html.
   sessionId wins, as in qwen's own reader. The card shows sessions, requests and tokens for 24h,
   7d and all time, plus an estimated cost at list price ($2/M uncached input, $0.25/M cached
   input, $6/M output). Session ids and project paths are never published.
-- Trial: three nightly audits, 2026-10-25 to 2026-10-27 (PT). The status line is computed from
-  those dates at each refresh: "starts …", then "… until 2026-10-27", then "ended 2026-10-27".
+- Trial: three recorded nightly audit runs; 2026-10-25 to 2026-10-27 (PT) is the planned
+  window. An outage-skipped night does not count. After the window, the status says
+  "scheduled window elapsed; keep/drop pending the third recorded run" while fewer than
+  three runs are recorded, or "keep/drop pending review" once three are recorded. The
+  calendar alone never marks the trial ended or complete; Haiyuan makes the keep/drop decision.
 - Actual OpenRouter spend is on the shared-key card (below), combined with DSH.
 
 ## Why Grok activity needs a box step
