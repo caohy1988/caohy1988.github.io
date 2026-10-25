@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import math
 import re
 import sqlite3
 import sys
@@ -107,6 +108,18 @@ SKIP_BASENAMES = {
     "conversation-blobs.db-shm",
     "settings.json",
 }
+
+
+def finite_tree(obj):
+    """Copy of a JSON-ready tree with every NaN / ±inf float replaced by None, so json.dumps(...,
+    allow_nan=False) always succeeds and the output is strict JSON (null, never NaN or Infinity)."""
+    if isinstance(obj, dict):
+        return {k: finite_tree(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [finite_tree(v) for v in obj]
+    if isinstance(obj, float) and not math.isfinite(obj):
+        return None
+    return obj
 
 
 def _mtime_pt(ts: float) -> str:
@@ -783,7 +796,7 @@ def main(argv: list[str] | None = None) -> int:
         "box agents/<id>/ live mtimes + store.db (+ Mac client replicas when newer)",
         problems=problems,
     )
-    text = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+    text = json.dumps(finite_tree(payload), indent=2, ensure_ascii=False, allow_nan=False) + "\n"
     if args.output == "-":
         sys.stdout.write(text)
     else:

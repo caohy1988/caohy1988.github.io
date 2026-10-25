@@ -337,6 +337,15 @@ VALID = [  # (valid TOML, expected); both parsers must agree on every one
     ('default_model = "bad id; rm -rf /"\n[thinking]\neffort = "MAX!"\n', NONE),  # fail the id / effort regex
     ('default_model = """kimi-code/k3\nsecond line"""\n', NONE),
     ("telemetry = false\n", NONE),
+    # multi-line basic strings decode like tomllib: escapes, line-ending backslash, first newline trimmed
+    ('default_model = """kimi-code/k3\\u002e1-pro"""\n[thinking]\neffort = "max"\n', WANT),  # review r2 repro
+    ('default_model = """kimi-code/k3\\U0000002e1-pro"""\n[thinking]\neffort = """\\\n    max"""\n', WANT),
+    ('default_model = """\\\n    kimi-code/\\\n    k3.1-pro"""\n' + TAIL[TAIL.index("["):], WANT),
+    ('default_model = """kimi-code/\\   \n\n  k3.1-pro"""\n' + TAIL[TAIL.index("["):], WANT),  # spaces, blank line
+    ('default_model = """\\\r\n  kimi-code/k3.1-pro"""\r\n[thinking]\r\neffort = "max"\r\n', WANT),  # CRLF
+    ('note = """a \\"quoted\\" \\\\ path"""\n' + TAIL, WANT),
+    ('default_model = """kimi-code/k3\\n"""\n', NONE),  # decodes to a value with a newline: fails the id regex
+    ("default_model = '''kimi-code/k3\\u002e1-pro'''\n", NONE),  # literal: no escapes, so a backslash stays
 ]
 INVALID = [  # both parsers refuse the whole file, so nothing is read from it
     'default_model = "kimi-code/k3"\ndefault_model = "kimi-code/k3.1-pro"\n',
@@ -353,6 +362,12 @@ INVALID = [  # both parsers refuse the whole file, so nothing is read from it
     'thinking.effort.x = 1\nthinking.effort = "max"\n',  # a dotted-key table overwritten by a value
     '[thinking.effort]\nx = 1\n[thinking]\neffort = "max"\n',  # a header table overwritten by a value
     'default_model = "kimi-code/k3.1-pro"\r[thinking]\neffort = "max"\n',  # bare CR
+    'default_model = """kimi-code/k3\\q"""\n',  # unknown escape
+    'default_model = """kimi-code/k3\\u002"""\n',  # short \u
+    'default_model = """\\uD800"""\n',  # surrogate: not a Unicode scalar value
+    'default_model = """kimi \\  x"""\n',  # backslash, spaces, then text: not a line ending
+    'default_model = "kimi-code/k3\\u 02e1-pro"\n',  # \u needs exactly 4 hex digits (int() would take " 02e")
+    'default_model = "kimi-code/k3\\uD800"\n',
 ]
 modes = [False] + ([True] if cab.tomllib is not None else [])  # 3.9: the scanner only
 for use_toml in modes:

@@ -70,6 +70,7 @@ from collect_grok_box_activity import (  # noqa: E402
     build_payload,
     collect_box_bots,
     empty_bot as _empty_bot,
+    finite_tree,
     ms_to_pt,
     normalize_bots,
     overlay_client_replicas,
@@ -322,6 +323,7 @@ def pacing(used_percent, reset_at: datetime | None, window_seconds, now: datetim
         return _pace_na("reset time outside window")
     elapsed = 100.0 * max(0.0, window - left) / window
     ahead = used - elapsed
+    ratio = used / elapsed if elapsed > 0 else None  # a huge reading over a sliver of elapsed time overflows
     reasons = []
     if ahead > PACE_AHEAD_POINTS:
         reasons.append(f"more than {PACE_AHEAD_POINTS:g} pts ahead of the clock")
@@ -332,7 +334,7 @@ def pacing(used_percent, reset_at: datetime | None, window_seconds, now: datetim
         "used_pct": used,
         "elapsed_pct": elapsed,
         "ahead_points": ahead,
-        "ratio": used / elapsed if elapsed > 0 else None,
+        "ratio": ratio if ratio is not None and math.isfinite(ratio) else None,
         "marked": bool(reasons),
         "mark_reasons": reasons,
     }
@@ -571,19 +573,62 @@ _KIMI_EFFORT = re.compile(r"[a-z][a-z0-9_-]{0,15}")
 _TOML_BARE_KEY = re.compile(r"[A-Za-z0-9_-]+")
 _TOML_SCALAR = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}[^\s,\]}#]*|[^\s,\]}#]+")  # "date time" or one token
 _TOML_ESCAPES = {"b": "\b", "t": "\t", "n": "\n", "f": "\f", "r": "\r", '"': '"', "\\": "\\"}
+_TOML_HEX = frozenset("0123456789abcdefABCDEF")
+
+
+def _toml_escape(s: str, i: int) -> tuple:
+    """The basic-string escape at s[i] (a backslash) -> (text, end). Like tomllib, raises on an unknown
+    escape, on a \\u / \\U without exactly 4 / 8 hex digits, and on a code point that is not a Unicode
+    scalar value."""
+    e = s[i + 1:i + 2]
+    if e in ("u", "U"):
+        k = 4 if e == "u" else 8
+        digits = s[i + 2:i + 2 + k]
+        if len(digits) != k or not _TOML_HEX.issuperset(digits):
+            raise ValueError("bad unicode escape")
+        cp = int(digits, 16)
+        if 0xD800 <= cp <= 0xDFFF or cp > 0x10FFFF:
+            raise ValueError("escape is not a Unicode scalar value")
+        return chr(cp), i + 2 + k
+    if e not in _TOML_ESCAPES:
+        raise ValueError("bad escape")
+    return _TOML_ESCAPES[e], i + 2
+
+
+def _toml_multiline_basic(body: str) -> str:
+    """Decode a multi-line basic string body (first newline already trimmed, CRLF already LF): escapes,
+    plus the line-ending backslash, which drops itself and every space, tab and newline after it."""
+    out, i, n = [], 0, len(body)
+    while i < n:
+        if body[i] != "\\":
+            out.append(body[i])
+            i += 1
+            continue
+        j = i + 1
+        while j < n and body[j] in " \t":
+            j += 1
+        if j < n and body[j] == "\n":  # line-ending backslash
+            while j < n and body[j] in " \t\n":
+                j += 1
+            i = j
+        else:
+            s, i = _toml_escape(body, i)
+            out.append(s)
+    return "".join(out)
 
 
 def _toml_strings(text: str) -> dict:
-    """{key path tuple: str} for every one-line string value of a TOML document — the tomllib
-    fallback for Python 3.9.
+    """{key path tuple: str} for every string value of a TOML document — the tomllib fallback for
+    Python 3.9. Strings are decoded as tomllib does, multi-line ones included (escapes, line-ending
+    backslash, first newline trimmed, CRLF read as LF), so callers validate the decoded value.
 
     A scanner, not a full validator: it follows [table] headers and bare / quoted / dotted keys, and
     walks every value (multi-line strings, arrays, inline tables) and comment to its end, so nothing
     inside one can be read as a key or a header. Keys under [[array]] headers or inside arrays are not
-    collected. Raises on anything it cannot follow and on TOML's redefinition errors: a key or table
-    defined twice, a table defined both by a header and by keys or a value, a bare CR between lines.
-    Not checked (so a broken file may still be read): keys inside [[array]] entries, control characters
-    inside strings and comments, an implicit super-table later declared as [[array]].
+    collected. Raises on anything it cannot follow, on a bad escape, and on TOML's redefinition errors: a
+    key or table defined twice, a table defined both by a header and by keys or a value, a bare CR
+    between lines. Not checked (so a broken file may still be read): keys inside [[array]] entries,
+    control characters inside strings and comments, an implicit super-table later declared as [[array]].
     """
     found: dict = {}
     assigned: set = set()  # key paths given a value (inline tables included)
@@ -616,14 +661,8 @@ def _toml_strings(text: str) -> dict:
         q, out, i = text[i], [], i + 1
         while i < n and text[i] not in (q, "\n"):
             if q == '"' and text[i] == "\\":
-                e = text[i + 1:i + 2]
-                if e in ("u", "U"):
-                    k = 4 if e == "u" else 8
-                    out.append(chr(int(text[i + 2:i + 2 + k], 16)))
-                    i += 2 + k
-                else:
-                    out.append(_TOML_ESCAPES[e])
-                    i += 2
+                s, i = _toml_escape(text, i)
+                out.append(s)
                 continue
             out.append(text[i])
             i += 1
@@ -631,7 +670,7 @@ def _toml_strings(text: str) -> dict:
             raise ValueError("unterminated string")
         return "".join(out), i + 1
 
-    def multiline(i):  # """...""" or '''...''' at i -> (text if one plain line else None, end)
+    def multiline(i):  # """...""" or '''...''' at i -> (decoded text, end)
         q, j = text[i], i + 3
         while True:
             j = text.find(q * 3, j)
@@ -646,7 +685,8 @@ def _toml_strings(text: str) -> dict:
                     end += 1
                 body = text[i + 3:end - 3]
                 body = body[2:] if body.startswith("\r\n") else body[1:] if body.startswith("\n") else body
-                return (None if any(c in body for c in "\r\n\\") else body), end
+                body = body.replace("\r\n", "\n")
+                return (_toml_multiline_basic(body) if q == '"' else body), end
             j += 1
 
     def key(i):  # dotted key at i -> (parts, end after trailing spaces)
@@ -679,7 +719,7 @@ def _toml_strings(text: str) -> dict:
     def value(i, path):  # walk one value at i -> end; a one-line string is collected under path
         if text.startswith(('"', "'"), i):
             s, i = multiline(i) if text.startswith(('"""', "'''"), i) else string(i)
-            if path is not None and s is not None:
+            if path is not None:
                 found[path] = s
             return i
         if text.startswith(("[", "{"), i):  # array (nothing collected) or inline table (keys extend path)
@@ -920,8 +960,8 @@ def collect_kimi() -> dict:
                     try:
                         lim = float(limit_s)
                         rem = float(remaining_s)
-                        if lim <= 0:
-                            return None
+                        if not (math.isfinite(lim) and math.isfinite(rem)) or lim <= 0:
+                            return None  # "Infinity" / "NaN" strings parse as floats but are no reading
                         pct = max(0.0, min(100.0, 100.0 * (lim - rem) / lim))
                         return pct if ndigits is None else round(pct, ndigits)
                     except (TypeError, ValueError):
@@ -2312,6 +2352,7 @@ QWEN_NOTE = "Qwen Code system prompt adds ~25k input tokens per request"
 _QWEN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}(?:/[A-Za-z0-9][A-Za-z0-9._:-]{0,95})?")
 _QWEN_VERSION = re.compile(r"v?(\d{1,4}\.\d{1,4}\.\d{1,6}(?:-[0-9A-Za-z.]{1,32})?)")
 _QWEN_COUNTERS = ("requests", "inputTokens", "outputTokens", "cachedTokens")
+_QWEN_MAX_COUNTER = 2 ** 53 - 1  # Number.MAX_SAFE_INTEGER: qwen (Node.js) cannot write a larger count exactly
 _OPENROUTER_KEY_LINE = re.compile(rb"""\s*(?:export\s+)?OPENROUTER_API_KEY\s*=\s*['"]?[^\s'"#]""")
 
 
@@ -2365,7 +2406,8 @@ def _qwen_record(line: str):
         if not isinstance(m, dict):
             return None
         counts = {k: m.get(k, 0) for k in _QWEN_COUNTERS}  # a missing counter is 0
-        if not all(isinstance(v, int) and not isinstance(v, bool) and v >= 0 for v in counts.values()):
+        if not all(isinstance(v, int) and not isinstance(v, bool) and 0 <= v <= _QWEN_MAX_COUNTER
+                   for v in counts.values()):
             return None
         per_model[name] = counts
     return sid, ts, per_model
@@ -2399,8 +2441,8 @@ def _qwen_window(sessions: list) -> dict:
     w["unpriced_models"] = len(unpriced)
     w["unpriced_tokens"] = unpriced_tokens
     # Cost covers priced models only: with any unpriced model (even at zero tokens) it is null, or just the
-    # priced part when priced models are there too (unpriced_models says so).
-    w["est_cost_usd"] = round(cost, 6) if priced or not unpriced else None
+    # priced part when priced models are there too (unpriced_models says so). An overflowed sum is null too.
+    w["est_cost_usd"] = round(cost, 6) if (priced or not unpriced) and math.isfinite(cost) else None
     return w
 
 
@@ -2942,7 +2984,7 @@ def _cron_fires_per_week(cron: str):
             try:
                 step = int(field[2:])
                 return max(1.0, span / step)
-            except ValueError:
+            except (ValueError, ZeroDivisionError):
                 return 1.0
         n = 0
         for piece in field.split(","):
@@ -2976,7 +3018,7 @@ def _cron_fires_per_week(cron: str):
         try:
             step = int(minute[2:])
             fires_per_hour = 60.0 / step
-        except ValueError:
+        except (ValueError, ZeroDivisionError):
             fires_per_hour = 1.0
         return round(fires_per_hour * hours_per_day * days, 1)
 
@@ -4330,6 +4372,7 @@ def main() -> None:
         "grok": collect_grok(),
     }
     snap = scrub_tree(snap)  # last line of defense; collectors already use safe_error()
+    snap = finite_tree(snap)  # NaN / ±inf from any collector or API value -> null, for the JSON and the page
 
     publish = json.loads(json.dumps(snap, allow_nan=False))
     if "evidence" in publish.get("kimi", {}):
