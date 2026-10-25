@@ -2347,7 +2347,8 @@ def collect_dsh() -> dict:
 
 # OpenRouter list prices, USD per 1M tokens — estimates only; models not listed show tokens, no cost.
 QWEN_PRICES = {"qwen/qwen3.8-max-0902": {"input": 2.00, "cached_input": 0.25, "output": 6.00}}
-QWEN_TRIAL_START = datetime(2026, 10, 25, tzinfo=PT)  # nightly-audit trial 10/25–10/27; earlier = setup tests
+QWEN_TRIAL_START = datetime(2026, 10, 25, tzinfo=PT)  # first PT day of the nightly-audit trial; earlier = setup tests
+QWEN_TRIAL_END = datetime(2026, 10, 28, tzinfo=PT)  # exclusive: the trial is the PT days 10/25, 10/26 and 10/27
 QWEN_TRIAL_RUNS = 3
 QWEN_NOTE = "Qwen Code system prompt adds ~25k input tokens per request"
 _QWEN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}(?:/[A-Za-z0-9][A-Za-z0-9._:-]{0,95})?")
@@ -2447,6 +2448,11 @@ def _qwen_window(sessions: list) -> dict:
     return w
 
 
+def _qwen_trial_days() -> tuple:
+    """('2026-10-25', '2026-10-27'): the first and last PT day of the trial window."""
+    return QWEN_TRIAL_START.strftime("%Y-%m-%d"), (QWEN_TRIAL_END - timedelta(days=1)).strftime("%Y-%m-%d")
+
+
 def _qwen_excluded(bad: int, future: int) -> str:
     """'1 unreadable line, 2 future-dated records' — what summarize_qwen_usage left out ('' if nothing)."""
     parts = [f"{n} {label}{'' if n == 1 else 's'}" for n, label in
@@ -2494,23 +2500,33 @@ def summarize_qwen_usage(text: str, now: datetime) -> dict:
         w["model"] = _qwen_model_id(name) or "unrecognized model id"
         w["priced"] = name in QWEN_PRICES
         by_model.append(w)
-    trial = {"seat": "trial", "window": "nightly audit 2026-10-25 to 2026-10-27", "starts_pt": iso_pt(QWEN_TRIAL_START)}
+    # Rendered from dates at each refresh, with absolute days only: "starts", then "until", then "ended".
+    first, last = _qwen_trial_days()
+    phase = "not_started" if now < QWEN_TRIAL_START else "running" if now < QWEN_TRIAL_END else "ended"
+    trial = {"seat": "trial", "window": f"nightly audits {first} to {last}", "first_day": first, "last_day": last,
+             "starts_pt": iso_pt(QWEN_TRIAL_START), "ends_pt": iso_pt(QWEN_TRIAL_END), "phase": phase}
     if state == "unreadable":
-        trial.update(runs=None, runs_display=None, setup_test_sessions=None,
+        trial.update(runs=None, runs_display=None, setup_test_sessions=None, later_sessions=None,
                      status=f"trial status unavailable: no readable records ({excluded})")
     else:
-        start_ms = int(QWEN_TRIAL_START.timestamp() * 1000)
-        runs = sum(1 for ts, _ in picked if ts >= start_ms)
+        start_ms, end_ms = (int(t.timestamp() * 1000) for t in (QWEN_TRIAL_START, QWEN_TRIAL_END))
+        runs = sum(1 for ts, _ in picked if start_ms <= ts < end_ms)
+        later = sum(1 for ts, _ in picked if ts >= end_ms)
         shown = f"{min(runs, QWEN_TRIAL_RUNS)}/{QWEN_TRIAL_RUNS}"
-        if now < QWEN_TRIAL_START:
-            status = f"trial starts 10/25 ~3 AM PT; {shown} runs"
+        if phase == "not_started":
+            status = f"starts {first} (nightly ~3 AM PT, until {last}); {shown} runs"
+        elif phase == "running":
+            status = f"{shown} runs since {first}; trial until {last}"
         else:
-            status = f"{shown} runs since 10/25"
-            if runs > QWEN_TRIAL_RUNS:
-                status += f"; {runs} sessions"
+            status = f"ended {last}; {shown} runs"
+        if runs > QWEN_TRIAL_RUNS:
+            status += f"; {runs} sessions"
+        if later:
+            status += f"; {later} later session{'' if later == 1 else 's'} not counted"
         if excluded:
             status += f" (not counted: {excluded})"
-        trial.update(runs=runs, runs_display=shown, setup_test_sessions=len(picked) - runs, status=status)
+        trial.update(runs=runs, runs_display=shown, setup_test_sessions=sum(1 for ts, _ in picked if ts < start_ms),
+                     later_sessions=later, status=status)
     return {
         "state": state,
         "sessions": len(picked),
@@ -3032,19 +3048,28 @@ def _usd_amount(v, allow_negative=False):
     return v if math.isfinite(f) and (allow_negative or f >= 0) else None
 
 
-def collect_openrouter() -> dict:
+def _openrouter_window_labels(now_utc: datetime) -> dict:
+    """Dated labels for the key's UTC windows as of the fetch, so a static page never says "today"."""
+    day = now_utc.astimezone(timezone.utc).date()
+    monday = day - timedelta(days=day.weekday())
+    return {"today_utc": f"Day {day.isoformat()} (UTC)", "week_utc": f"Week from Mon {monday.isoformat()} (UTC)",
+            "month_utc": f"Month {day.strftime('%Y-%m')} (UTC)", "all_time": "All time"}
+
+
+def collect_openrouter(now: datetime | None = None) -> dict:
     """OpenRouter spend of the one key DSH and Qwen Code both use (GET /api/v1/key), in USD. The key's own
     counters cover both seats, so the figures are combined, not split per seat. On any failure every figure
     stays None, which the card shows as "unavailable" (never $0); errors are fixed phrases, never exception
     text."""
+    now = now or datetime.now(timezone.utc)
     out: dict = {
         "ok": False,
         "source": "GET https://openrouter.ai/api/v1/key with OPENROUTER_API_KEY from ~/.dsh/.env (read per build, never stored)",
         "scope": "one shared key: DSH + Qwen Code combined, not split per seat",
         "seats": list(OPENROUTER_SEATS),
         "unit": "USD (OpenRouter credits are US dollars)",
-        "windows": {"today_utc": "current UTC day", "week_utc": "current UTC week, from Monday",
-                    "month_utc": "current UTC month", "all_time": "all time"},
+        "windows": {"today_utc": "Day (UTC)", "week_utc": "Week from Monday (UTC)", "month_utc": "Month (UTC)",
+                    "all_time": "All time"},  # dated once a fetch succeeds
         "spend_usd": dict.fromkeys(name for name, _ in _OPENROUTER_WINDOWS),
         "limit_usd": None,
         "limit_remaining_usd": None,
@@ -3079,7 +3104,8 @@ def collect_openrouter() -> dict:
     out["limit_remaining_usd"] = _usd_amount(data.get("limit_remaining"), allow_negative=True)
     reset = data.get("limit_reset")
     out["limit_reset"] = reset if isinstance(reset, str) and re.fullmatch(r"[a-z]{1,16}", reset) else None
-    out["fetched_at"] = iso_pt()
+    out["windows"] = _openrouter_window_labels(now)
+    out["fetched_at"] = iso_pt(now)
     out["ok"] = True
     return out
 
@@ -3608,17 +3634,20 @@ def render_qwen_body(qwen: dict) -> str:
     chip = "AUTH OK" if qwen.get("ok") else "AUTH / INSTALL"
     err = f'<p class="err">{esc(qwen.get("error"))}</p>' if qwen.get("error") else ""
 
+    first, last = _qwen_trial_days()
     setup_n = trial.get("setup_test_sessions") or 0
     setup = ""
     if setup_n:
         setup = (
             f'<div class="metric-reset">{esc(setup_n)} setup test session{"" if setup_n == 1 else "s"} '
-            "before 10/25 (not trial runs)</div>"
+            f"before {first} (not trial runs)</div>"
         )
+    ended = trial.get("phase") == "ended"
+    trial_tone = "ok" if (trial.get("runs") or 0) >= QWEN_TRIAL_RUNS else "warn" if ended else "unk"
     trial_html = f"""
       <div class="metric">
-        <div class="metric-label">Trial seat · nightly audit 10/25–10/27</div>
-        <div class="status-chip {'ok' if (trial.get('runs') or 0) >= QWEN_TRIAL_RUNS else 'unk'}">TRIAL {esc(trial.get('runs_display') or '—')}</div>
+        <div class="metric-label">Trial seat · nightly audits {first} to {last}</div>
+        <div class="status-chip {trial_tone}">TRIAL {'ENDED ' if ended else ''}{esc(trial.get('runs_display') or '—')}</div>
         <div class="metric-reset">{esc(trial.get('status') or 'trial status unavailable')}</div>
         {setup}
       </div>"""
@@ -3785,10 +3814,11 @@ def render_openrouter_body(orr: dict) -> str:
     """Shared-key OpenRouter spend card: one row per window, "unavailable" unless the fetch succeeded."""
     ok = bool(orr.get("ok"))
     spend = orr.get("spend_usd") or {}
-    labels = (("today_utc", "Today (UTC)"), ("week_utc", "This week (UTC, from Mon)"),
-              ("month_utc", "This month (UTC)"), ("all_time", "All time"))
+    windows = orr.get("windows") or {}
+    labels = (("today_utc", "Day (UTC)"), ("week_utc", "Week from Monday (UTC)"), ("month_utc", "Month (UTC)"),
+              ("all_time", "All time"))
     rows = "".join(
-        f'<tr><td>{label}</td><td class="num">'
+        f'<tr><td>{esc(windows.get(name) or label)}</td><td class="num">'
         f'{esc(_fmt_usd(spend.get(name)) if ok and spend.get(name) is not None else "unavailable")}</td></tr>'
         for name, label in labels
     )

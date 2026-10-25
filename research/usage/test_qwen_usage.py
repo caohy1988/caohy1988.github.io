@@ -70,7 +70,7 @@ for text in ("", "\n\n  \n"):
     assert u["windows"]["all_time"] == {"sessions": 0, "requests": 0, "input_tokens": 0, "cached_tokens": 0,
                                         "output_tokens": 0, "unpriced_models": 0, "unpriced_tokens": 0,
                                         "est_cost_usd": 0.0}, u
-    assert t["status"] == "trial starts 10/25 ~3 AM PT; 0/3 runs", t
+    assert t["status"] == "starts 2026-10-25 (nightly ~3 AM PT, until 2026-10-27); 0/3 runs", t
     assert t["runs_display"] == "0/3" and t["setup_test_sessions"] == 0
     assert "no runs yet" in h and "usage unavailable" not in h and ">DATA<" not in h
 
@@ -92,7 +92,7 @@ assert abs(SMOKE_USD - 0.042968) < 1e-12 and w["est_cost_usd"] == round(SMOKE_US
 assert u["windows"]["last_24h"] == w == u["windows"]["last_7d"]
 assert u["last_session_pt"] == "2026-10-24 10:30 PDT", u["last_session_pt"]
 assert u["trial"]["runs"] == 0 and u["trial"]["setup_test_sessions"] == 1
-assert u["trial"]["status"] == "trial starts 10/25 ~3 AM PT; 0/3 runs"
+assert u["trial"]["status"] == "starts 2026-10-25 (nightly ~3 AM PT, until 2026-10-27); 0/3 runs"
 assert u["models"] == [dict(w, model=MODEL, priced=True)], u["models"]
 assert_private("summary", u)
 
@@ -116,7 +116,7 @@ bad_lines = [
 u, t, h = card("\n".join(bad_lines[:6] + [good] + bad_lines[6:] + [""]), BEFORE)
 assert u["bad_lines"] == len(bad_lines) == 13 and u["sessions"] == 1 and u["state"] == "ok", u
 assert u["windows"]["all_time"]["input_tokens"] == 24755
-assert t["status"] == "trial starts 10/25 ~3 AM PT; 0/3 runs (not counted: 13 unreadable lines)", t
+assert t["status"] == "starts 2026-10-25 (nightly ~3 AM PT, until 2026-10-27); 0/3 runs (not counted: 13 unreadable lines)", t
 assert "<table" in h and ">DATA<" in h and "Not counted from usage_record.jsonl: 13 unreadable lines" in h
 
 # 4. one record per session: the last record wins (qwen's own dedupBySessionId)
@@ -169,13 +169,34 @@ lines = [rec(start - timedelta(milliseconds=1), sid="setup"), rec(start, sid="ru
          rec(start + timedelta(hours=27), sid="run2")]
 u = cab.summarize_qwen_usage("\n".join(lines), AFTER)
 assert (u["trial"]["runs"], u["trial"]["runs_display"], u["trial"]["setup_test_sessions"]) == (2, "2/3", 1), u["trial"]
-assert u["trial"]["status"] == "2/3 runs since 10/25", u["trial"]
+assert u["trial"]["status"] == "2/3 runs since 2026-10-25; trial until 2026-10-27", u["trial"]
 lines += [rec(start + timedelta(hours=h), sid=f"extra{h}") for h in (50, 51, 52)]
 u = cab.summarize_qwen_usage("\n".join(lines), LATE)
-assert (u["trial"]["runs"], u["trial"]["runs_display"]) == (5, "3/3") and u["trial"]["status"] == "3/3 runs since 10/25; 5 sessions"
+assert (u["trial"]["runs"], u["trial"]["runs_display"]) == (5, "3/3") and u["trial"]["status"] == "ended 2026-10-27; 3/3 runs; 5 sessions"
 assert u["future_records"] == 0 and u["sessions"] == 6
 u = cab.summarize_qwen_usage(rec(start - timedelta(hours=1)), start)  # midnight PT: started, 0 runs
-assert u["trial"]["status"] == "0/3 runs since 10/25"
+assert u["trial"]["status"] == "0/3 runs since 2026-10-25; trial until 2026-10-27"
+assert (u["trial"]["phase"], u["trial"]["first_day"], u["trial"]["last_day"]) == ("running", "2026-10-25", "2026-10-27")
+
+# 7a. the trial status is rendered from dates: it says "ended" once 10/27 is over, and sessions after the window
+# are not trial runs
+end = datetime(2026, 10, 28, tzinfo=PT)  # the window is the PT days 10/25, 10/26 and 10/27
+two = [rec(start + timedelta(hours=3), sid="r1"), rec(start + timedelta(hours=27), sid="r2")]
+u, t, h = card("\n".join(two + [rec(end - timedelta(milliseconds=1), sid="r3-late"), rec(end, sid="after1"),
+                                rec(end + timedelta(days=2), sid="after2")]), end + timedelta(days=3))
+assert (t["phase"], t["runs"], t["runs_display"], t["later_sessions"]) == ("ended", 3, "3/3", 2), t
+assert t["status"] == "ended 2026-10-27; 3/3 runs; 2 later sessions not counted", t
+assert "TRIAL ENDED 3/3" in h and "Trial seat · nightly audits 2026-10-25 to 2026-10-27" in h, h
+u, t, h = card("\n".join(two), end)  # midnight after the last night: ended short of three runs
+assert (t["phase"], t["status"]) == ("ended", "ended 2026-10-27; 2/3 runs"), t
+assert 'status-chip warn">TRIAL ENDED 2/3' in h, h
+u, t, h = card("\n".join(two), end - timedelta(milliseconds=1))  # last instant of 10/27: still running
+assert (t["phase"], t["status"]) == ("running", "2/3 runs since 2026-10-25; trial until 2026-10-27"), t
+assert 'status-chip unk">TRIAL 2/3' in h, h
+for when in (BEFORE, AFTER, LATE):  # never relative wording, whatever the date
+    _, t, h = card("\n".join(two), when)
+    for word in ("currently", "this week", "today", "tonight"):
+        assert word not in t["status"].lower() and word not in h.lower(), (when, word)
 
 # 7b. records dated after the collection time are quarantined: no usage, no trial run, visible flag
 u, t, h = card(rec(start), BEFORE)  # Oct 25 00:00 record read on Oct 24 noon
@@ -185,7 +206,7 @@ assert "usage unavailable: no readable records" in h and "1 future-dated record"
 u, t, h = card("\n".join([rec(BEFORE - timedelta(hours=1), sid="past"), rec(start, sid="future"),
                           rec(BEFORE, sid="1ms-late", timestamp=int(BEFORE.timestamp()) * 1000 + 1)]), BEFORE)
 assert (u["sessions"], u["future_records"], u["windows"]["last_24h"]["sessions"]) == (1, 2, 1), u
-assert t["runs"] == 0 and t["status"] == "trial starts 10/25 ~3 AM PT; 0/3 runs (not counted: 2 future-dated records)", t
+assert t["runs"] == 0 and t["status"] == "starts 2026-10-25 (nightly ~3 AM PT, until 2026-10-27); 0/3 runs (not counted: 2 future-dated records)", t
 assert ">DATA<" in h and "2 future-dated records" in h and "<table" in h
 u = cab.summarize_qwen_usage(rec(BEFORE), BEFORE)  # stamped exactly at collection time: counted
 assert u["sessions"] == 1 and u["future_records"] == 0
@@ -210,9 +231,9 @@ cab.now_pt = lambda: BEFORE
 q = cab.collect_qwen()  # no usage_record.jsonl yet
 assert q["ok"] is True and q["cli_version"] == "0.26.1" and q["model"] == MODEL and q["provider"] == "OpenRouter", q
 assert q["auth_ok"] is True and "error" not in q and q["usage"]["sessions"] == 0, q
-assert q["trial"]["status"] == "trial starts 10/25 ~3 AM PT; 0/3 runs" and q["note"] == cab.QWEN_NOTE
+assert q["trial"]["status"] == "starts 2026-10-25 (nightly ~3 AM PT, until 2026-10-27); 0/3 runs" and q["note"] == cab.QWEN_NOTE
 html = cab.render_qwen_body(q)
-assert "no runs yet" in html and "<table" not in html and "trial starts 10/25 ~3 AM PT; 0/3 runs" in html
+assert "no runs yet" in html and "<table" not in html and "starts 2026-10-25 (nightly ~3 AM PT, until 2026-10-27); 0/3 runs" in html
 assert_private("collect_qwen (no runs)", q)
 
 (TMP / ".qwen" / "usage_record.jsonl").write_text(rec(datetime(2026, 10, 24, 10, 30, 52, tzinfo=PT)) + "\nnot json\n")
@@ -220,7 +241,7 @@ q = cab.collect_qwen()
 assert q["usage"]["sessions"] == 1 and q["usage"]["bad_lines"] == 1 and q["trial"]["setup_test_sessions"] == 1
 html = cab.render_qwen_body(q)
 assert "no runs yet" not in html and "<table" in html and "24,755" in html and "$0.0430" in html, html
-assert "1 setup test session before 10/25" in html and "Not counted from usage_record.jsonl: 1 unreadable line " in html
+assert "1 setup test session before 2026-10-25" in html and "Not counted from usage_record.jsonl: 1 unreadable line " in html
 assert "estimated, list price" in html and "Qwen Code system prompt adds ~25k input tokens per request" in html
 assert "Last session 2026-10-24 10:30 PDT" in html
 assert_private("collect_qwen", q)

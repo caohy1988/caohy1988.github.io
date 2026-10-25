@@ -18,6 +18,7 @@ import tempfile
 import unittest
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest import mock
 
@@ -66,7 +67,7 @@ class Home:
         return False
 
 
-def collect(env_text="OPENROUTER_API_KEY=" + KEY + "\n", reply=None, raises=None):
+def collect(env_text="OPENROUTER_API_KEY=" + KEY + "\n", reply=None, raises=None, now=None):
     """collect_openrouter() with a stubbed HTTP call; returns (seat, calls)."""
     calls = []
 
@@ -77,7 +78,7 @@ def collect(env_text="OPENROUTER_API_KEY=" + KEY + "\n", reply=None, raises=None
         return copy.deepcopy(PAYLOAD if reply is None else reply)
 
     with Home(env_text), mock.patch.object(cab, "_openrouter_get", fake_get):
-        return REAL["collect_openrouter"](), calls
+        return REAL["collect_openrouter"](now=now), calls
 
 
 def assert_no_key(test, *blobs):
@@ -166,12 +167,15 @@ class CollectTests(unittest.TestCase):
 
 class RenderTests(unittest.TestCase):
     def test_card_says_combined_and_shows_each_window(self):
-        seat, _ = collect()
+        seat, _ = collect(now=datetime(2026, 10, 25, 3, 0, tzinfo=timezone.utc))  # a Sunday, 10-24 20:00 PT
         html = page(openrouter=seat)
         body = card(html)
         for text in ("DSH + Qwen Code combined", "not split per seat", "$0.2500", "$1.50", "$4.75", "$12.35",
-                     "Today (UTC)", "This week (UTC, from Mon)", "This month (UTC)", "All time"):
+                     "Day 2026-10-25 (UTC)", "Week from Mon 2026-10-19 (UTC)", "Month 2026-10 (UTC)", "All time",
+                     "Fetched 2026-10-24 20:00:00 PDT"):
             self.assertIn(text, body, text)
+        for word in ("Today", "This week", "This month", "currently"):  # dated labels only: the page stays static
+            self.assertNotIn(word, body, word)
         # both seat cards point at the shared-key card instead of repeating the figure
         for seat_id in ("dsh", "qwen"):
             start = html.index(f'id="{seat_id}">')
