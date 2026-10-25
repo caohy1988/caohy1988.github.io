@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""OpenRouter spend card: GET /api/v1/key with the key from ~/.dsh/.env (shared by DSH and Qwen Code).
+"""OpenRouter spend card: GET /api/v1/key with the key from ~/.dsh/.env (shared by DSH, Qwen Code and OpenCode GLM-5.3).
 
     python3 test_openrouter_spend.py
 
@@ -115,8 +115,9 @@ class CollectTests(unittest.TestCase):
         self.assertTrue(seat["ok"], seat)
         self.assertEqual(seat["spend_usd"], {"today_utc": 0.25, "week_utc": 1.5, "month_utc": 4.75,
                                              "all_time": 12.3456})
-        self.assertEqual(seat["seats"], ["DSH", "Qwen Code"])
-        self.assertIn("combined", seat["scope"])
+        self.assertEqual(seat["seats"], ["DSH", "Qwen Code", "OpenCode (GLM-5.3)"])
+        self.assertIn("shared-key totals", seat["scope"])
+        self.assertIn("OpenCode (GLM-5.3)", seat["scope"])
         self.assertNotIn("label", json.dumps(seat))  # the key label (a masked key) is never published
         self.assertNotIn("error", seat)
         assert_no_key(self, seat)
@@ -170,7 +171,7 @@ class RenderTests(unittest.TestCase):
         seat, _ = collect(now=datetime(2026, 10, 25, 3, 0, tzinfo=timezone.utc))  # a Sunday, 10-24 20:00 PT
         html = page(openrouter=seat)
         body = card(html)
-        for text in ("DSH + Qwen Code combined", "not split per seat", "$0.2500", "$1.50", "$4.75", "$12.35",
+        for text in ("Shared-key totals: DSH, Qwen Code and OpenCode (GLM-5.3)", "not split per seat", "$0.2500", "$1.50", "$4.75", "$12.35",
                      "Day 2026-10-25 (UTC)", "Week from Mon 2026-10-19 (UTC)", "Month 2026-10 (UTC)", "All time",
                      "Fetched 2026-10-24 20:00:00 PDT"):
             self.assertIn(text, body, text)

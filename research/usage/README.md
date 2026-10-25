@@ -13,10 +13,14 @@ versioned copies; the Mac source of truth is:
   test_*.py                       # see Tests below
 ```
 
-After changing a script on the Mac, copy it here in the same PR so the hub history tracks it.
-On 2026-10-24 the copies here were reconciled with the Mac builder and are ahead of the Mac
-copies, so they have to be copied to the Mac folder before the next `refresh.sh` run. Until
-then a refresh publishes the older Mac builder's page.
+The two Python files here include the installed Mac's routine-proxy parsing and October 12
+Manage schedule state (weekday refresh paused), plus the hub's collection and privacy fixes.
+To install this version, copy **both** `research/usage/collect_and_build.py` and
+`research/usage/collect_grok_box_activity.py` into
+`/Users/haiyuancao/Documents/agent-analytics-research/usage-dashboard/`, replacing those two
+files together. Keep that folder's `refresh.sh`, caches, inputs and other files. Then run its
+`refresh.sh` as usual. The sibling supplies `finite_tree` and the Grok normalization helpers
+required by the builder. Until both files are copied, refresh uses the older installed version.
 
 ## Tests
 
@@ -39,7 +43,8 @@ Each failure stops the loop and leaves its diagnostic visible.
 | `test_grok_stale.py` | 36h STALE rule, box collector schema, every non-room bot listed |
 | `test_error_redaction.py` | no Bearer token or argv in error fields, snapshot.json, index.html |
 | `test_qwen_usage.py` | Qwen card (usage log parser, cost, dated trial status); Kimi `config.toml` parser, tomllib and the 3.9 fallback agreeing |
-| `test_qwen_audit_runs.py` | Identified nightly audits, outage makeup runs after the planned window, ordinary-session exclusion |
+| `test_qwen_audit_runs.py` | Native Qwen records through the production collector show unavailable audit status; explicit annotations, deduplication and makeup dates |
+| `test_routine_proxy.py` | Installed Mac routine formats, newest Github dumps, paused rows/state and minute-field counting |
 | `test_muse_usage.py` | Muse 7-day usage from `session-index.db` + session logs |
 | `test_pacing.py` | report-only pacing marks on the quota bars |
 | `test_strict_json.py` | snapshot.json is strict JSON: NaN / Infinity become null |
@@ -54,7 +59,7 @@ real snapshot.json / index.html.
 
 - Model `qwen/qwen3.8-max-0902` via OpenRouter, CLI `/usr/local/bin/qwen` (`~/.qwen/settings.json`).
 - Launched through the wrapper `~/.local/bin/qwen-or`, which sources `OPENROUTER_API_KEY` from
-  `~/.dsh/.env` (the key DSH uses). The card checks only that the key is present; it never reads
+  `~/.dsh/.env` (shared by DSH, Qwen Code and OpenCode GLM-5.3). The card checks only that the key is present; it never reads
   it out.
 - Usage log: `~/.qwen/usage_record.jsonl`, one line per finished session; the last record per
   sessionId wins, as in qwen's own reader. The card shows sessions, requests and tokens for 24h,
@@ -65,10 +70,15 @@ real snapshot.json / index.html.
   "scheduled window elapsed; keep/drop pending the third recorded run" while fewer than
   three runs are recorded, or "keep/drop pending review" once three are recorded. The
   calendar alone never marks the trial ended or complete; Haiyuan makes the keep/drop decision.
-  Audit records must carry the explicit `job_type: "nightly-mac-harness-audit"` annotation;
-  native usage records have no job label and do not advance the trial. Identified makeup audits
-  after 2026-10-27 count toward the same three runs. Ordinary sessions still count toward usage.
-- Actual OpenRouter spend is on the shared-key card (below), combined with DSH.
+  Native usage records have no job label, and the installed writer/launcher supplies no audit
+  annotation. No completed Qwen audit receipt source was found on this Mac during reconciliation;
+  without identified audits, JSON reports null runs and the card says
+  "audit status unavailable (no audit receipts)", never a definitive zero. The parser can accept
+  an explicit `job_type: "nightly-mac-harness-audit"` annotation if a producer supplies one;
+  deduplicated makeup audits after 2026-10-27 then count too. Native sessions still count toward
+  usage. A run counter needs a real receipt/annotation producer before runtime adoption.
+- Actual OpenRouter spend is on the shared-key card (below), covering DSH, Qwen Code and
+  OpenCode (GLM-5.3).
 
 ## Why Grok activity needs a box step
 
@@ -93,7 +103,7 @@ bots get no stale mark (an idle side bot is not a broken source), so only roster
 the collector exit 1. The fixed collector has to be copied to the box (and to the Mac folder,
 because `collect_and_build.py` imports `normalize_bots` from it) before extra bots appear.
 
-## OpenRouter spend (DSH + Qwen Code, one key)
+## OpenRouter spend (shared-key totals: DSH, Qwen Code and OpenCode GLM-5.3)
 
 `collect_openrouter()` reads `OPENROUTER_API_KEY` from `~/.dsh/.env` on every build and calls
 `GET https://openrouter.ai/api/v1/key` with it. The request uses urllib, with the key only in an
@@ -102,8 +112,8 @@ snapshot, the page, logs or any file. The card shows that key's own usage counte
 (OpenRouter credits are US dollars) for the UTC day, week (from Monday) and month of the fetch,
 each labelled with its date, plus all time.
 
-DSH and Qwen Code both send requests with this key, and DSH keeps no per-request generation ids,
-so the figures are their **combined** spend, not split per seat. (Qwen's chat logs do record
+DSH, Qwen Code and OpenCode (GLM-5.3) send requests with this key, and DSH keeps no per-request generation ids,
+so the figures are **shared-key totals** covering all three, not split per seat. (Qwen's chat logs do record
 `gen-…` ids; a per-seat split would need one `/api/v1/generation` call per request.) Any failure
 (no key, an HTTP error, a network or TLS error, an unreadable reply) shows "unavailable" on
 every row, never $0. `/api/v1/credits` needs a management key, so it is not used.

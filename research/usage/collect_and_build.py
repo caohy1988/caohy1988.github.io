@@ -2572,6 +2572,13 @@ def summarize_qwen_usage(text: str, now: datetime) -> dict:
             status += f"; {later} later session{'' if later == 1 else 's'} not counted"
         if excluded:
             status += f" (not counted: {excluded})"
+        # Native Qwen records have no job classification and no installed producer adds it.
+        # An absence of identified audits is missing evidence, never a definitive zero.
+        if not runs:
+            runs, shown = None, None
+            status = "audit status unavailable (no audit receipts)"
+            if excluded:
+                status += f" (not counted: {excluded})"
         trial.update(runs=runs, runs_display=shown, setup_test_sessions=sum(1 for ts, _ in picked if ts < start_ms),
                      later_sessions=later, status=status)
     return {
@@ -3031,10 +3038,10 @@ def collect_opencode() -> dict:
     return out
 
 
-# ── OpenRouter spend (one key, shared by DSH and Qwen Code) ────────────────
+# ── OpenRouter spend (one key, shared by DSH, Qwen Code and OpenCode (GLM-5.3)) ────────────────
 
 OPENROUTER_KEY_URL = "https://openrouter.ai/api/v1/key"
-OPENROUTER_SEATS = ["DSH", "Qwen Code"]
+OPENROUTER_SEATS = ["DSH", "Qwen Code", "OpenCode (GLM-5.3)"]
 # (published name, /api/v1/key field): OpenRouter counts UTC days and UTC weeks starting Monday
 _OPENROUTER_WINDOWS = (("today_utc", "usage_daily"), ("week_utc", "usage_weekly"), ("month_utc", "usage_monthly"),
                        ("all_time", "usage"))
@@ -3104,8 +3111,8 @@ def _openrouter_window_labels(now_utc: datetime) -> dict:
 
 
 def collect_openrouter(now: datetime | None = None, *, clock=None) -> dict:
-    """OpenRouter spend of the one key DSH and Qwen Code both use (GET /api/v1/key), in USD. The key's own
-    counters cover both seats, so the figures are combined, not split per seat. On any failure every figure
+    """OpenRouter spend of the shared key used by DSH, Qwen Code and OpenCode (GLM-5.3) (GET /api/v1/key), in USD. The key's own
+    counters cover all three seats, so these are shared-key totals, not split per seat. On any failure every figure
     stays None, which the card shows as "unavailable" (never $0); errors are fixed phrases, never exception
     text."""
     # An injected fixed time keeps historical fixture calls deterministic; production
@@ -3114,7 +3121,7 @@ def collect_openrouter(now: datetime | None = None, *, clock=None) -> dict:
     out: dict = {
         "ok": False,
         "source": "GET https://openrouter.ai/api/v1/key with OPENROUTER_API_KEY from ~/.dsh/.env (read per build, never stored)",
-        "scope": "one shared key: DSH + Qwen Code combined, not split per seat",
+        "scope": "shared-key totals: DSH, Qwen Code and OpenCode (GLM-5.3), not split per seat",
         "seats": list(OPENROUTER_SEATS),
         "unit": "USD (OpenRouter credits are US dollars)",
         "windows": {"today_utc": "Day (UTC)", "week_utc": "Week from Monday (UTC)", "month_utc": "Month (UTC)",
@@ -3213,23 +3220,10 @@ def _cron_fires_per_week(cron: str):
     else:
         days = field_count(dow, 7)
 
-    if minute.startswith("*/"):
-        try:
-            step = int(minute[2:])
-            fires_per_hour = 60.0 / step
-        except (ValueError, ZeroDivisionError):
-            fires_per_hour = 1.0
-        return round(fires_per_hour * hours_per_day * days, 1)
+    # Minute steps, ranges, lists and "*" use the same count as the installed Mac builder.
+    fires_per_hour = field_count(minute, 60)
+    return round(fires_per_hour * hours_per_day * days, 1)
 
-    if "," in minute:
-        # Explicit minute list, e.g. Github EM heartbeat "4,19,34,49 * * * *".
-        per_hour = float(len([p for p in minute.split(",") if p.strip()]))
-        return round(per_hour * hours_per_day * days, 1)
-
-    if "," in hour:
-        return round(field_count(hour, 24) * days, 1)
-
-    return round(hours_per_day * days, 1)
 
 
 def _normalize_cron_cell(raw: str) -> tuple:
@@ -3256,71 +3250,103 @@ def _normalize_cron_cell(raw: str) -> tuple:
 
 
 def _parse_active_routine_table(blob: str, owner: str) -> list:
-    """Parse Active markdown table (## Active or first table)."""
+    """Parse Active/ENABLED (+ Paused/PAUSED) routine tables from a dump.
+
+    Handles both dump shapes: github-bot ('## Active', header 'Name | Cron (PT) | Status | Notes')
+    and collection-bot ('## ENABLED' / '## PAUSED', header 'Routine | Cron (PT) | Folder').
+    Paused rows are kept with status='paused' and fires_per_week=0 so they never add fires.
+    When no explicit enabled section exists (e.g. a headerless table followed only by
+    '## PAUSED'), the first Name/Routine table outside a paused span is treated as enabled.
+    """
     rows = []
     lines = blob.splitlines()
-    # Prefer ## Active section; else first markdown table in file
-    start_i = None
-    for i, line in enumerate(lines):
-        if line.startswith("## Active"):
-            start_i = i + 1
-            break
-    if start_i is None:
-        for i, line in enumerate(lines):
-            if line.startswith("|") and "Name" in line:
-                start_i = i
-                break
-    if start_i is None:
-        return rows
+    HEADER_FIRST_COLS = ("Name", "Routine")
 
-    for line in lines[start_i:]:
-        if line.startswith("## "):
-            break
-        if not line.startswith("|"):
-            # blank after table ends it
-            if rows and line.strip() == "":
-                # allow blank inside; only stop on non-table content after we started data rows
+    def _section_kind(line: str):
+        title = line[3:].strip().lower()
+        if title.startswith(("active", "enabled")):
+            return "enabled"
+        if title.startswith(("paused", "disabled")):
+            return "paused"
+        return None
+
+    headings = [(i, _section_kind(line)) for i, line in enumerate(lines) if line.startswith("## ")]
+    spans = []  # (first_line, end_line, status) ranges to scan for table rows
+    for n, (start, kind) in enumerate(headings):
+        if not kind:
+            continue
+        stop = headings[n + 1][0] if n + 1 < len(headings) else len(lines)
+        spans.append((start + 1, stop, kind))
+    if not any(kind == "enabled" for _, _, kind in spans):
+        # Fallback when no explicit enabled section exists: first markdown table with a
+        # Name/Routine header outside any paused span, treated as enabled. A headerless
+        # table followed by '## PAUSED' must keep its enabled rows; a paused table must
+        # never be adopted as enabled by this fallback.
+        paused_spans = [(start, stop) for start, stop, kind in spans if kind == "paused"]
+        for i, line in enumerate(lines):
+            if not line.startswith("|"):
                 continue
-            if rows and line.strip() and not line.startswith("|"):
+            if any(start <= i < stop for start, stop in paused_spans):
+                continue
+            cols = [c.strip() for c in line.strip("|").split("|")]
+            if cols and cols[0] in HEADER_FIRST_COLS:
+                stop = i + 1
+                while stop < len(lines) and (lines[stop].startswith("|") or not lines[stop].strip()):
+                    stop += 1
+                spans.append((i, stop, "enabled"))
                 break
-            continue
-        cols = [c.strip() for c in line.strip("|").split("|")]
-        if len(cols) < 2 or cols[0] in ("Name",) or cols[0].startswith("-"):
-            continue
-        name = cols[0]
-        cron_raw = cols[1]
-        notes = cols[-1] if len(cols) > 2 else ""
-        if notes in ("Notes",) or set(notes.replace(" ", "")) <= {"-"}:
-            notes = ""
-        cron, kind, display = _normalize_cron_cell(cron_raw)
-        if kind == "event":
+
+    for start, stop, status in spans:
+        for line in lines[start:stop]:
+            if not line.startswith("|"):
+                continue
+            cols = [c.strip() for c in line.strip("|").split("|")]
+            if len(cols) < 2 or cols[0] in HEADER_FIRST_COLS or cols[0].startswith("-"):
+                continue
+            name = cols[0]
+            cron_raw = cols[1]
+            notes = cols[-1] if len(cols) > 2 else ""
+            if notes in ("Notes", "Folder") or set(notes.replace(" ", "")) <= {"-"}:
+                notes = ""
+            cron, kind, display = _normalize_cron_cell(cron_raw)
+            if status == "paused":
+                rows.append({
+                    "owner": owner,
+                    "name": name,
+                    "cron": "(event listener)" if kind == "event" else (cron or display),
+                    "fires_per_week": 0,
+                    "notes": ("PAUSED · " + notes) if notes else "PAUSED",
+                    "status": "paused",
+                })
+                continue
+            if kind == "event":
+                rows.append({
+                    "owner": owner,
+                    "name": name,
+                    "cron": "(event listener)",
+                    "fires_per_week": None,
+                    "notes": (notes + " · event-driven").strip(" ·"),
+                    "status": "enabled",
+                })
+                continue
+            if not cron:
+                rows.append({
+                    "owner": owner,
+                    "name": name,
+                    "cron": display,
+                    "fires_per_week": None,
+                    "notes": notes or "unparsed schedule",
+                    "status": "enabled",
+                })
+                continue
             rows.append({
                 "owner": owner,
                 "name": name,
-                "cron": "(event listener)",
-                "fires_per_week": None,
-                "notes": (notes + " · event-driven").strip(" ·"),
+                "cron": cron,
+                "fires_per_week": _cron_fires_per_week(cron),
+                "notes": notes,
                 "status": "enabled",
             })
-            continue
-        if not cron:
-            rows.append({
-                "owner": owner,
-                "name": name,
-                "cron": display,
-                "fires_per_week": None,
-                "notes": notes or "unparsed schedule",
-                "status": "enabled",
-            })
-            continue
-        rows.append({
-            "owner": owner,
-            "name": name,
-            "cron": cron,
-            "fires_per_week": _cron_fires_per_week(cron),
-            "notes": notes,
-            "status": "enabled",
-        })
     return rows
 
 
@@ -3329,48 +3355,35 @@ def _newest_dump(hunt: Path, glob_pat: str):
     return matches[0] if matches else None
 
 
-def collect_routine_proxy() -> dict:
-    """Fleet routine fire-count proxy — NOT dollars. Newest Collection dump + hardcoded Manage/Github."""
-    vault = Path.home() / "Documents/agent-context"
-    hunt = vault / "Hunt/agent-manage"
+def collect_routine_proxy(hunt: Path | None = None) -> dict:
+    """Fleet routine fire-count proxy — NOT dollars. Newest Collection + Github dumps + Manage."""
+    if hunt is None:
+        hunt = Path.home() / "Documents/agent-context" / "Hunt/agent-manage"
     rows = []
     sources = []
 
-    # Live vault card Agents/agent-manage-bot.md Standing routines (refreshed 2026-10-05).
+    # Live Manage state (2026-10-12 sync): usage refresh + Field Brief watch are PAUSED
+    # (0 fires/wk); Lab collect kick fires 08:55 PT, Lab curate publish 16:45 PT.
     manage = [
-        ("Agent Manage Bot", "Monday specialist ops nudge", "11 8 * * 1", "paused — merged into weekly playbook↔card sync 2026-09-28", "paused"),
-        ("Agent Manage Bot", "Daily harness-lab collect kick", "55 8 * * *", "Agy/Muse/DSH Lab scout", "enabled"),
-        ("Agent Manage Bot", "Weekday usage dashboard refresh", "5 9 * * 1-5", "weekday integrity check", "enabled"),
-        ("Agent Manage Bot", "PR board sweep daily", "9 9 * * *", "CI/conflict/stall → Coding EM; never merge", "enabled"),
-        ("Agent Manage Bot", "Weekly playbook ↔ card sync", "47 10 * * 1", "playbook→card + kill review + ops nudge", "enabled"),
-        ("Agent Manage Bot", "Daily harness-lab curate publish", "45 16 * * *", "KEEP-only Lab publish", "enabled"),
-        ("Agent Manage Bot", "Nightly Mac harness audit", "59 2 * * *", "rotate one Mac CLI; dual-LGTM; no merge", "enabled"),
-        ("Agent Manage Bot", "Coding EM kick pickup check", "6 4,8 * * *", "ledger vs tmux/PRs", "enabled"),
-        ("Agent Manage Bot", "Jev shadow savings tally", "Monday via weekly sync", "paused / folded into Monday weekly sync (Haiyuan kick 2026-10-05); prior 4 8 * * 1-5", "paused"),
-        ("Agent Manage Bot", "Daily Mac CLI update", "53 7 * * *", "bump Mac CLIs + verify defaults", "enabled"),
-        ("Agent Manage Bot", "Field Brief 6h orchestration watch", "50 0,6,12,18 * * *", "paused — Collection :44 sole miss detector", "paused"),
+        ("Weekday usage dashboard refresh", "5 9 * * 1-5", "weekday integrity check", "paused"),
+        ("Field Brief 6h orchestration watch", "50 0,6,12,18 * * *", "detect-only second-line room ping", "paused"),
+        ("Daily harness-lab collect kick", "55 8 * * *", "Agy/Muse/DSH Lab scout", "enabled"),
+        ("Daily harness-lab curate publish", "45 16 * * *", "KEEP-only Lab publish", "enabled"),
     ]
-    # Github Bot durable routines, hardcoded (2026-10-05): the on-disk
-    # *github-bot-active-routines.md dumps went stale (*/5 heartbeat), so the
-    # proxy no longer reads Github rows from dumps — refresh cannot revert.
-    github = [
-        ("Github Bot", "EM heartbeat (all agent tasks)", "4,19,34,49 * * * *", "durable; was */5, token-save */15", "enabled"),
-        ("Github Bot", "Daily vault consolidation 20:57", "57 20 * * *", "durable", "enabled"),
-    ]
-    for owner, name, cron, notes, status in manage + github:
+    for name, cron, notes, status in manage:
         rows.append({
-            "owner": owner,
+            "owner": "Agent Manage Bot",
             "name": name,
             "cron": cron,
             "fires_per_week": _cron_fires_per_week(cron) if status == "enabled" else 0,
-            "notes": notes,
+            "notes": notes if status == "enabled" else "PAUSED · " + notes,
             "status": status,
         })
-    sources.append("Manage Bot live vault card 2026-10-05 (%d)" % len(manage))
-    sources.append("Github Bot hardcoded */15 (4,19,34,49) + vault consolidation (%d)" % len(github))
+    sources.append("Manage Bot (%d)" % len(manage))
 
     dump_specs = [
         ("*collection-bot-active-routines.md", "Collection Bot"),
+        ("*github-bot-active-routines.md", "Github Bot"),
     ]
     dump_paths = []
     for pat, owner in dump_specs:
@@ -3395,11 +3408,10 @@ def collect_routine_proxy() -> dict:
         "rows": rows,
         "total_fires_per_week": round(total, 1),
         "detail": (
-            "Coarse cron math only. Manage Bot live vault card 2026-10-05 + hardcoded "
-            "Github Bot rows (heartbeat */15 at 4,19,34,49; Github dump not read) + "
-            "newest *collection-bot-active-routines.md under Hunt/agent-manage/ (may "
-            "still be stale — no Collection rows invented). Event listeners show as "
-            "(event listener) with no fires/week. Not tokens or plan spend."
+            "Coarse cron math only. Newest *collection-bot-active-routines.md + "
+            "*github-bot-active-routines.md under Hunt/agent-manage/ plus Manage Bot. "
+            "Event listeners show as (event listener) with no fires/week; paused routines count 0. "
+            "Not tokens or plan spend."
         ),
     }
 
@@ -3868,7 +3880,7 @@ def render_opencode_body(oc: dict) -> str:
 
 
 OPENROUTER_POINTER = (
-    '<p class="muted">OpenRouter spend: DSH and Qwen Code use one key, so their spend is shown combined on the '
+    '<p class="muted">OpenRouter spend: DSH, Qwen Code and OpenCode (GLM-5.3) use one key; shared-key totals are on the '
     "OpenRouter spend card.</p>"
 )
 
@@ -3893,7 +3905,7 @@ def render_openrouter_body(orr: dict) -> str:
                  f'{esc(_fmt_usd(orr.get("limit_remaining_usd")))}{reset}</div>')
     fetched = f" Fetched {esc(orr['fetched_at'])}." if ok and orr.get("fetched_at") else ""
     return f"""
-      <p class="pill"><strong>DSH + Qwen Code combined</strong> · one shared key · not split per seat</p>
+      <p class="pill"><strong>Shared-key totals: DSH, Qwen Code and OpenCode (GLM-5.3)</strong> · not split per seat</p>
       {err}
       <div class="table-wrap">
         <table class="bots">
@@ -3902,7 +3914,7 @@ def render_openrouter_body(orr: dict) -> str:
         </table>
       </div>
       {limit}
-      <p class="muted">From OpenRouter's own usage counters for the key in <code>~/.dsh/.env</code> (USD: OpenRouter credits are US dollars).{fetched} Both seats send requests with this key and DSH keeps no per-request ids, so its share cannot be split out: this is their combined spend. The Qwen card's est. cost is a separate list-price estimate from its local usage log.</p>
+      <p class="muted">From OpenRouter's own usage counters for the key in <code>~/.dsh/.env</code> (USD: OpenRouter credits are US dollars).{fetched} DSH, Qwen Code and OpenCode (GLM-5.3) send requests with this key; these are shared-key totals, not a per-seat split. DSH keeps no per-request ids. The Qwen card's est. cost is a separate list-price estimate from its local usage log.</p>
     """
 
 
@@ -4508,7 +4520,7 @@ def render_html(snap: dict) -> str:
     <header class="hero">
       <p class="kicker">Mac CLIs · Grok activity</p>
       <h1>Agent model usage</h1>
-      <p class="lede">At-a-glance quotas for the Opus 5.5 seat, Codex/Astra, Kimi, Agy, Muse Spark, DSH (default small), OpenCode · GLM-5.3 (default small), Qwen Code (trial), OpenRouter spend (DSH + Qwen combined), Grok activity share, plus a routine fires/week proxy (not dollars).</p>
+      <p class="lede">At-a-glance quotas for the Opus 5.5 seat, Codex/Astra, Kimi, Agy, Muse Spark, DSH (default small), OpenCode · GLM-5.3 (default small), Qwen Code (trial), OpenRouter spend (shared-key totals: DSH, Qwen Code and OpenCode GLM-5.3), Grok activity share, plus a routine fires/week proxy (not dollars).</p>
       <div class="meta">
         <span>Last refreshed <strong>{esc(refreshed)}</strong></span>
         <span>Timezone <strong>America/Los_Angeles</strong></span>
@@ -4579,7 +4591,7 @@ def render_html(snap: dict) -> str:
 
       <section class="card" id="openrouter">
         <h2>OpenRouter spend</h2>
-        <p class="sub">GET /api/v1/key · one key shared by DSH + Qwen Code</p>
+        <p class="sub">GET /api/v1/key · shared by DSH, Qwen Code and OpenCode (GLM-5.3)</p>
         {openrouter_body}
       </section>
 
@@ -4628,6 +4640,10 @@ def main() -> None:
         "routine_proxy": collect_routine_proxy(),
         "grok": collect_grok(),
     }
+    # Paused dump rows may use opaque job slugs in notes; publish the routine's human label.
+    for row in snap["routine_proxy"].get("rows") or []:
+        if row.get("status") == "paused":
+            row["notes"] = re.sub(r"`[a-z0-9]+(?:-[a-z0-9]+)+`", lambda _: row["name"], row.get("notes") or "")
     snap = scrub_tree(snap)  # last line of defense; collectors already use safe_error()
     snap = finite_tree(snap)  # NaN / ±inf from any collector or API value -> null, for the JSON and the page
 
@@ -4686,7 +4702,7 @@ def main() -> None:
     o = snap.get("openrouter") or {}
     osp = o.get("spend_usd") or {}
     print(
-        f"OpenRouter: ok={o.get('ok')} (DSH + Qwen combined) today={osp.get('today_utc')} week={osp.get('week_utc')} "
+        f"OpenRouter: ok={o.get('ok')} (shared-key totals: DSH, Qwen Code and OpenCode GLM-5.3) today={osp.get('today_utc')} week={osp.get('week_utc')} "
         f"month={osp.get('month_utc')} all_time={osp.get('all_time')} error={o.get('error')}"
     )
     g = snap["grok"]

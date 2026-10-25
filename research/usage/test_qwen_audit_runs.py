@@ -1,6 +1,9 @@
 """Only identified nightly audits advance the Qwen trial, including outage makeup runs."""
 import json
 import unittest
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
 from datetime import datetime
 
 import collect_and_build as cab
@@ -44,12 +47,50 @@ class QwenAuditRuns(unittest.TestCase):
         self.assertEqual((u["trial"]["runs"], u["duplicate_records"]), (1, 1))
         # As with usage counters, the final record owns the session's classification.
         u = self.summary([record, self.record(28, "audit-makeup", job_type=None)])
-        self.assertEqual(u["trial"]["runs"], 0)
+        self.assertIsNone(u["trial"]["runs"])
 
     def test_setup_and_future_audits_do_not_count(self):
         u = self.summary([self.record(day, f"audit-{day}") for day in (24, 25, 29)])
         self.assertEqual((u["trial"]["runs"], u["future_records"]), (1, 1))
         self.assertEqual(u["trial"]["setup_test_sessions"], 1)
+
+    def test_native_records_through_production_collector_are_unavailable(self):
+        # These are the native v1 producer fields: it never emits a job label.
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            (home / ".qwen").mkdir()
+            (home / ".dsh").mkdir()
+            (home / ".dsh" / ".env").write_text("OPENROUTER_API_KEY=fixture-key\n")
+            (home / ".qwen" / "settings.json").write_text(json.dumps({
+                "model": {"name": "qwen/qwen3.8-max-0902"}}))
+            binary = home / "qwen"
+            binary.write_text("#!/bin/sh\necho 0.26.1\n")
+            binary.chmod(0o700)
+            records = []
+            for day in (25, 26, 28):
+                record = json.loads(self.record(day, f"native-private-{day}"))
+                del record["job_type"]
+                record.update(project="private-project", startTime=record["timestamp"] - 1000,
+                              durationMs=1000, totalLatencyMs=500, files={}, skills={}, tools={})
+                record["models"]["qwen/qwen3.8-max-0902"].update(
+                    inputTokens=25000, cachedTokens=0, outputTokens=10,
+                    thoughtsTokens=0, totalTokens=25010, totalLatencyMs=500)
+                records.append(json.dumps(record))
+            usage_path = home / ".qwen" / "usage_record.jsonl"
+            usage_path.write_text("\n".join(records))
+            for day in (28, 29):
+                with self.subTest(day=day), patch.object(cab.Path, "home", return_value=home), \
+                        patch.object(cab, "QWEN_BIN", binary), \
+                        patch.object(cab, "now_pt", return_value=datetime(2026, 10, day, 12, tzinfo=cab.PT)):
+                    card = cab.collect_qwen()
+                    self.assertTrue(card["ok"])
+                    self.assertEqual(card["usage"]["sessions"], 3)
+                    self.assertIsNone(card["trial"]["runs"])
+                    self.assertIsNone(card["trial"]["runs_display"])
+                    self.assertEqual(card["trial"]["status"], "audit status unavailable (no audit receipts)")
+                    public = json.dumps(card) + cab.render_qwen_body(card)
+                    for private in ("0/3", "native-private", "private-project"):
+                        self.assertNotIn(private, public)
 
     def test_exact_audit_marker_required_and_not_published(self):
         records = [self.record(28, f"ordinary-{i}", marker) for i, marker in enumerate(
@@ -59,7 +100,7 @@ class QwenAuditRuns(unittest.TestCase):
         del native["job_type"]
         records.append(json.dumps(native))
         u = self.summary(records)
-        self.assertEqual((u["sessions"], u["trial"]["runs"]), (6, 0))
+        self.assertEqual((u["sessions"], u["trial"]["runs"]), (6, None))
         u = self.summary(records + [self.record(28, "private-audit-id")])
         self.assertEqual(u["trial"]["runs"], 1)
         public = json.dumps(u) + cab.render_qwen_body({"usage": u, "trial": u["trial"]})
