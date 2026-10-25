@@ -43,6 +43,7 @@ Each failure stops the loop and leaves its diagnostic visible.
 | `test_pacing.py` | report-only pacing marks on the quota bars |
 | `test_strict_json.py` | snapshot.json is strict JSON: NaN / Infinity become null |
 | `test_openrouter_spend.py` | OpenRouter spend card; the key never leaves memory |
+| `test_review_fixes_r1.py` | Credential-shaped model keys, finite pacing overflow, tool-result examples, invalid Muse counters, UTC spend reset boundaries |
 
 They use temp HOMEs, fake keys and stubbed collectors: no network, no real CLI, and never the
 real snapshot.json / index.html.

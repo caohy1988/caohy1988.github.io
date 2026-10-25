@@ -127,7 +127,7 @@ _SECRET_PATTERNS = (
     (re.compile(r"(?i)(authorization['\"]?\s*[:=]\s*['\"]?)(?!(?:(?:bearer|basic|token)\s+)?\[REDACTED\])(?:(bearer|basic|token)\s+)?[^\s'\",\]\)}]+"), r"\1\2 [REDACTED]"),
     (re.compile(r"(?i)\b(bearer)\s+(?!\[REDACTED\])[^\s'\",\]\)}]+"), r"\1 [REDACTED]"),
     (re.compile(r"\beyJ[\w-]{5,}\.[\w-]{5,}\.[\w-]{5,}"), "[REDACTED]"),  # JWT
-    (re.compile(r"\bsk-[\w-]{12,}"), "[REDACTED]"),
+    (re.compile(r"(?i)\bsk-[\w-]{12,}"), "[REDACTED]"),
     (re.compile(r"(?i)\b((?:api[_-]?key|access[_-]?token|refresh[_-]?token|id[_-]?token)['\"]?\s*[:=]\s*['\"]?)(?!\[REDACTED\])[^\s'\",\]\)}]+"), r"\1[REDACTED]"),
 )
 
@@ -155,9 +155,11 @@ def safe_error(e: BaseException, secrets=(), limit: int = 300) -> str:
 
 
 def scrub_tree(obj, secrets=()):
+    """Scrub public values and dynamic dictionary keys before serialization/rendering."""
     if isinstance(obj, dict):
-        return {k: scrub_tree(v, secrets) for k, v in obj.items()}
-    if isinstance(obj, list):
+        return {scrub_secrets(k, secrets) if isinstance(k, str) else k: scrub_tree(v, secrets)
+                for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
         return [scrub_tree(x, secrets) for x in obj]
     if isinstance(obj, str):
         return scrub_secrets(obj, secrets)
@@ -323,8 +325,10 @@ def pacing(used_percent, reset_at: datetime | None, window_seconds, now: datetim
         return _pace_na("window already reset")
     if left > window + PACE_SKEW_S:
         return _pace_na("reset time outside window")
-    elapsed = 100.0 * max(0.0, window - left) / window
+    elapsed = (max(0.0, window - left) / window) * 100.0
     ahead = used - elapsed
+    if not all(math.isfinite(v) for v in (elapsed, ahead)):
+        return _pace_na("invalid derived reading")
     ratio = used / elapsed if elapsed > 0 else None  # a huge reading over a sliver of elapsed time overflows
     reasons = []
     if ahead > PACE_AHEAD_POINTS:
@@ -1607,113 +1611,101 @@ def _collect_grok_from_box() -> dict | None:
 
 
 
-def _muse_find_model_completed(obj, hits, ctx=None, depth=0, malformed=None,
-                                 deadline=None, expired=None):
-    """Collect (ctx, event) for every dict with kind=="model_completed".
+def _muse_runtime_record(obj):
+    """Validate the durable session-record envelope, never payload/example content."""
+    if not isinstance(obj, dict):
+        return False
+    stream = obj.get("stream")
+    return (
+        type(obj.get("schema_version")) is int and obj["schema_version"] == 1
+        and obj.get("record_type") == "event"
+        and isinstance(obj.get("id"), str) and bool(obj["id"])
+        and isinstance(stream, dict) and stream.get("kind") == "session"
+        and isinstance(stream.get("id"), str) and bool(stream["id"])
+        and isinstance(obj.get("payload"), dict)
+    )
 
-    Events sit under payload→…→event; retained frames embed whole records as
-    JSON strings in record_json fields. Only those known record_json strings
-    are ever decoded — model_completed JSON quoted inside tool output or any
-    other string is never parsed, so quoted text cannot be counted as usage.
-    ctx = (record_id, recorded_at_us) of the nearest enclosing record — the
-    dedupe key. goal_usage_attribution records re-report the same usage and
-    are ignored. Unparseable record_json values are recorded in `malformed`
-    (a set of string ids, shared with the prompt finder so one broken frame
-    counts once) for the caller to flag partial. When `deadline` is given,
-    traversal stops as soon as it passes and sets expired[0].
+
+def _muse_runtime_records(obj, marker, depth=0, malformed=None, deadline=None, expired=None):
+    """Yield runtime records only at the log root or in retained-frame children.
+
+    No arbitrary dictionaries, lists, event fields or tool results are traversed.
+    record_json is decoded only in the supported retained-frame envelope.
     """
-    if depth > 8:
-        return
-    if expired is not None and expired[0]:
+    if depth > 8 or (expired is not None and expired[0]):
         return
     if deadline is not None and time.monotonic() > deadline:
         if expired is not None:
             expired[0] = True
         return
-    if isinstance(obj, dict):
-        if obj.get("record_type") and obj.get("id"):
-            ctx = (obj.get("id"), obj.get("recorded_at"))
-        if obj.get("kind") == "model_completed":
-            hits.append((ctx, obj))
+    if _muse_runtime_record(obj):
+        yield obj
+        return  # the record's payload cannot contain another runtime record
+    if not isinstance(obj, dict) or obj.get("retained_frame") != "session_permission_transaction":
+        return
+    children = obj.get("children")
+    if not isinstance(children, list):
+        return
+    for child in children:
+        if deadline is not None and time.monotonic() > deadline:
+            if expired is not None:
+                expired[0] = True
             return
-        for k, v in obj.items():
-            if k == "record_json" and isinstance(v, str) and "model_completed" in v:
-                if deadline is not None and time.monotonic() > deadline:
-                    if expired is not None:
-                        expired[0] = True
-                    return
-                try:
-                    parsed = json.loads(v)
-                except ValueError:
-                    if malformed is not None:
-                        malformed.add(id(v))
-                else:
-                    _muse_find_model_completed(
-                        parsed, hits, ctx, depth + 1, malformed, deadline, expired)
-            else:
-                _muse_find_model_completed(
-                    v, hits, ctx, depth + 1, malformed, deadline, expired)
-            if expired is not None and expired[0]:
-                return
-    elif isinstance(obj, list):
-        for v in obj:
-            _muse_find_model_completed(
-                v, hits, ctx, depth + 1, malformed, deadline, expired)
-            if expired is not None and expired[0]:
-                return
+        if not isinstance(child, dict):
+            continue
+        encoded = child.get("record_json")
+        if not isinstance(encoded, str) or marker not in encoded:
+            continue
+        if type(child.get("child_index")) is not int or child["child_index"] < 0:
+            if malformed is not None:
+                malformed.add(id(encoded))
+            continue
+        try:
+            record = json.loads(encoded)
+        except ValueError:
+            if malformed is not None:
+                malformed.add(id(encoded))
+            continue
+        if not _muse_runtime_record(record) and not (
+            isinstance(record, dict) and record.get("retained_frame") == "session_permission_transaction"
+        ):
+            if malformed is not None:
+                malformed.add(id(encoded))
+            continue
+        yield from _muse_runtime_records(record, marker, depth + 1, malformed, deadline, expired)
+
+
+def _muse_find_model_completed(obj, hits, ctx=None, depth=0, malformed=None,
+                               deadline=None, expired=None):
+    """Read only runtime.session -> run -> model_completed in validated records."""
+    for record in _muse_runtime_records(
+        obj, "model_completed", depth, malformed, deadline, expired
+    ):
+        payload = record["payload"]
+        if record.get("payload_type") != "runtime.session" or payload.get("kind") != "run":
+            continue
+        event = payload.get("event")
+        if isinstance(event, dict) and event.get("kind") == "model_completed":
+            hits.append(((record["id"], record.get("recorded_at")), event))
 
 
 def _muse_find_user_prompts(obj, hits, depth=0, malformed=None, deadline=None,
-                             expired=None):
-    """Collect (record_id, recorded_at_us, intent_id) for user-prompt records.
+                            expired=None):
+    """Read accepted user intents only from validated runtime-record envelopes."""
+    for record in _muse_runtime_records(
+        obj, "user_intent.accepted", depth, malformed, deadline, expired
+    ):
+        if record.get("payload_type") == "runtime.user_intent.accepted":
+            hits.append((record["id"], record.get("recorded_at"), record["payload"].get("intent_id")))
 
-    One runtime.user_intent.accepted record per user prompt in real session
-    logs (counts match the index prompt_count on this Mac). Retained frames
-    embed whole records as JSON strings in record_json fields; only those
-    known record_json strings are ever decoded — prompt JSON quoted inside
-    tool output or any other string is never parsed or counted. Callers
-    dedupe by record id. Unparseable record_json values are recorded in
-    `malformed` (shared with the model finder) for the caller to flag
-    partial. When `deadline` is given, traversal stops as soon as it passes
-    and sets expired[0].
-    """
-    if depth > 8:
-        return
-    if expired is not None and expired[0]:
-        return
-    if deadline is not None and time.monotonic() > deadline:
-        if expired is not None:
-            expired[0] = True
-        return
-    if isinstance(obj, dict):
-        if obj.get("payload_type") == "runtime.user_intent.accepted":
-            payload = obj.get("payload") if isinstance(obj.get("payload"), dict) else {}
-            hits.append((obj.get("id"), obj.get("recorded_at"), payload.get("intent_id")))
-            return
-        for k, v in obj.items():
-            if k == "record_json" and isinstance(v, str) and "user_intent.accepted" in v:
-                if deadline is not None and time.monotonic() > deadline:
-                    if expired is not None:
-                        expired[0] = True
-                    return
-                try:
-                    parsed = json.loads(v)
-                except ValueError:
-                    if malformed is not None:
-                        malformed.add(id(v))
-                else:
-                    _muse_find_user_prompts(
-                        parsed, hits, depth + 1, malformed, deadline, expired)
-            else:
-                _muse_find_user_prompts(
-                    v, hits, depth + 1, malformed, deadline, expired)
-            if expired is not None and expired[0]:
-                return
-    elif isinstance(obj, list):
-        for v in obj:
-            _muse_find_user_prompts(v, hits, depth + 1, malformed, deadline, expired)
-            if expired is not None and expired[0]:
-                return
+
+def _muse_model_id(value) -> str | None:
+    """Accept bounded model identifiers, rejecting credentials before dictionary insertion."""
+    if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,159}", value):
+        return None
+    if any(part.lower().startswith("sk-") for part in value.split("/")):
+        return None
+    return value if scrub_secrets(value) == value else None
 
 
 def _muse_event_day(recorded_us, days, fallback_day, start_key):
@@ -1734,8 +1726,15 @@ def _muse_event_day(recorded_us, days, fallback_day, start_key):
     return fallback_day, False, False
 
 
-def _muse_int(x) -> int:
-    return int(x) if isinstance(x, (int, float)) and not isinstance(x, bool) else 0
+def _muse_int(x) -> int | None:
+    """Missing counters are zero; malformed, negative or non-finite counters are invalid."""
+    if x is None:
+        return 0
+    if isinstance(x, bool) or not isinstance(x, (int, float)) or x < 0:
+        return None
+    if isinstance(x, float) and (not math.isfinite(x) or not x.is_integer()):
+        return None
+    return int(x)
 
 
 def _muse_query_sessions(target, start_us, uri):
@@ -1797,7 +1796,8 @@ def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
     lifetimes are never attributed, and a missing/invalid created_at_us
     contributes zero fallback prompts flagged approximate. Missing or
     oversized logs, malformed model_completed / user_intent /
-    retained-frame record lines, and time-budget overruns (deadline checked
+    retained-frame record lines, invalid model identifiers or counters,
+    and time-budget overruns (deadline checked
     on every line/parse and between files) set partial + usage_note. The
     WAL index is opened read-only with a brief locked-retry; if that open
     or first query fails, a temp copy is queried instead (see
@@ -1830,12 +1830,15 @@ def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
         "malformed_usage_lines": 0,
         "malformed_prompt_lines": 0,
         "malformed_frame_records": 0,
+        "invalid_model_events": 0,
+        "invalid_counter_events": 0,
         "events_out_of_window": 0,
         "partial": False,
         "usage_note": "",
         "prompts_approximate": False,
         "prompts_note": "",
     }
+    day_sessions = {}
     try:
         now = now or now_pt()
         today = now.date()
@@ -1945,9 +1948,7 @@ def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
                                 budget_hit = True
                                 truncated = True
                                 break
-                            key = (ctx[0] if ctx and ctx[0] else None) or (
-                                ev.get("model"), json.dumps(ev.get("usage") or {}, sort_keys=True)
-                            )
+                            key = ctx[0]
                             if key in seen_models:
                                 continue
                             seen_models.add(key)
@@ -1959,12 +1960,20 @@ def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
                                 if valid_ts:
                                     usage["events_out_of_window"] += 1
                                 continue
-                            u = ev.get("usage") or {}
-                            inp = _muse_int(u.get("input_tokens"))
-                            out_t = _muse_int(u.get("output_tokens"))
-                            cached = _muse_int(u.get("cached_tokens")) + _muse_int(u.get("cache_read_tokens"))
-                            reas = _muse_int(u.get("reasoning_tokens"))
-                            model = ev.get("model") or model_id or "unknown"
+                            model = _muse_model_id(ev.get("model") or model_id or "unknown")
+                            if model is None:
+                                usage["invalid_model_events"] += 1
+                                continue
+                            u = ev.get("usage")
+                            counters = [_muse_int(u.get(f)) for f in (
+                                "input_tokens", "output_tokens", "cached_tokens",
+                                "cache_read_tokens", "reasoning_tokens",
+                            )] if isinstance(u, dict) else [None]
+                            if any(v is None for v in counters):
+                                usage["invalid_counter_events"] += 1
+                                continue
+                            inp, out_t, cache_tokens, cache_read, reas = counters
+                            cached = cache_tokens + cache_read
                             drow = days[ev_day]
                             drow["input_tokens"] += inp
                             drow["output_tokens"] += out_t
@@ -2037,6 +2046,10 @@ def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
                     elif created_day is not None and created_day < start_key:
                         created_unknown = False  # provably pre-window
                 total_pc = _muse_int(prompt_count)
+                if total_pc is None:
+                    usage["invalid_counter_events"] += 1
+                    total_pc = 0
+                    usage["prompts_approximate"] = True
                 if created_unknown and total_pc > 0:
                     usage["prompts_approximate"] = True
                 if created_ok and total_pc > 0:
@@ -2078,6 +2091,10 @@ def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
             note_parts.append(
                 f"{usage['malformed_frame_records']} malformed retained-frame record(s) skipped"
             )
+        if usage["invalid_model_events"]:
+            note_parts.append(f"{usage['invalid_model_events']} invalid model identifier event(s) skipped")
+        if usage["invalid_counter_events"]:
+            note_parts.append(f"{usage['invalid_counter_events']} invalid usage counter record(s) skipped")
         if budget_hit:
             note_parts.append("time budget exceeded")
         if note_parts:
@@ -2091,21 +2108,6 @@ def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
                 "window, or with a missing/invalid created_at_us, contribute zero fallback "
                 "prompts."
             )
-        for k in day_keys:
-            days[k]["sessions"] = len(day_sessions[k])
-        active_sessions: set = set()
-        for s in day_sessions.values():
-            active_sessions |= s
-        by_model: dict = {}
-        for d in usage["days"]:
-            for f in zero:
-                if f != "sessions":
-                    usage["totals"][f] += d[f]
-            for m, t in d["models"].items():
-                by_model[m] = by_model.get(m, 0) + t
-        usage["totals"]["sessions"] = len(active_sessions)
-        usage["today"] = {f: days[today.isoformat()][f] for f in zero}
-        usage["by_model"] = dict(sorted(by_model.items(), key=lambda kv: -kv[1]))
     except Exception as e:
         usage["usage_error"] = safe_error(e)
         usage["partial"] = True
@@ -2113,6 +2115,22 @@ def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
             usage["usage_note"] = (
                 f"usage scan failed ({usage['usage_error']}) — totals may undercount"
             )
+    # Finalize even if a later record failed after valid activity was accumulated.
+    active_sessions: set = set()
+    by_model: dict = {}
+    for d in usage["days"]:
+        sessions = day_sessions.get(d["date"], set())
+        d["sessions"] = len(sessions)
+        active_sessions.update(sessions)
+        for f in zero:
+            if f != "sessions":
+                usage["totals"][f] += d[f]
+        for model, tokens in d["models"].items():
+            by_model[model] = by_model.get(model, 0) + tokens
+    usage["totals"]["sessions"] = len(active_sessions)
+    if usage["days"]:
+        usage["today"] = {f: usage["days"][-1][f] for f in zero}
+    usage["by_model"] = dict(sorted(by_model.items(), key=lambda kv: -kv[1]))
     return usage
 
 
@@ -3057,12 +3075,14 @@ def _openrouter_window_labels(now_utc: datetime) -> dict:
             "month_utc": f"Month {day.strftime('%Y-%m')} (UTC)", "all_time": "All time"}
 
 
-def collect_openrouter(now: datetime | None = None) -> dict:
+def collect_openrouter(now: datetime | None = None, *, clock=None) -> dict:
     """OpenRouter spend of the one key DSH and Qwen Code both use (GET /api/v1/key), in USD. The key's own
     counters cover both seats, so the figures are combined, not split per seat. On any failure every figure
     stays None, which the card shows as "unavailable" (never $0); errors are fixed phrases, never exception
     text."""
-    now = now or datetime.now(timezone.utc)
+    # An injected fixed time keeps historical fixture calls deterministic; production
+    # samples both sides of the request and retries a UTC reset boundary once.
+    clock = clock or ((lambda: now) if now is not None else (lambda: datetime.now(timezone.utc)))
     out: dict = {
         "ok": False,
         "source": "GET https://openrouter.ai/api/v1/key with OPENROUTER_API_KEY from ~/.dsh/.env (read per build, never stored)",
@@ -3082,7 +3102,15 @@ def collect_openrouter(now: datetime | None = None) -> dict:
         out["error"] = "OPENROUTER_API_KEY not found in ~/.dsh/.env"
         return out
     try:
-        body = _openrouter_get(OPENROUTER_KEY_URL, key)
+        for _attempt in range(2):
+            started_at = clock()
+            body = _openrouter_get(OPENROUTER_KEY_URL, key)
+            fetched_at = clock()
+            if started_at.astimezone(timezone.utc).date() == fetched_at.astimezone(timezone.utc).date():
+                break
+        else:
+            out["error"] = "OpenRouter /api/v1/key request crossed a UTC reset boundary twice"
+            return out
     except urllib.error.HTTPError as e:
         out["error"] = f"OpenRouter /api/v1/key returned HTTP {int(e.code)}"
         return out
@@ -3105,8 +3133,8 @@ def collect_openrouter(now: datetime | None = None) -> dict:
     out["limit_remaining_usd"] = _usd_amount(data.get("limit_remaining"), allow_negative=True)
     reset = data.get("limit_reset")
     out["limit_reset"] = reset if isinstance(reset, str) and re.fullmatch(r"[a-z]{1,16}", reset) else None
-    out["windows"] = _openrouter_window_labels(now)
-    out["fetched_at"] = iso_pt(now)
+    out["windows"] = _openrouter_window_labels(fetched_at)
+    out["fetched_at"] = iso_pt(fetched_at)
     out["ok"] = True
     return out
 
