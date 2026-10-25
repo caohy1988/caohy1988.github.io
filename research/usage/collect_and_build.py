@@ -3362,13 +3362,21 @@ def collect_routine_proxy(hunt: Path | None = None) -> dict:
     rows = []
     sources = []
 
-    # Live Manage state (2026-10-12 sync): usage refresh + Field Brief watch are PAUSED
-    # (0 fires/wk); Lab collect kick fires 08:55 PT, Lab curate publish 16:45 PT.
+    # Full Standing routines roster from Agents/agent-manage-bot.md (2026-10-24).
+    # Keep paused rows at 0 fires/wk; pickup check now fires only at 08:06 PT.
     manage = [
-        ("Weekday usage dashboard refresh", "5 9 * * 1-5", "weekday integrity check", "paused"),
-        ("Field Brief 6h orchestration watch", "50 0,6,12,18 * * *", "detect-only second-line room ping", "paused"),
+        ("Monday specialist ops nudge", "11 8 * * 1", "merged into weekly playbook ↔ card sync", "paused"),
         ("Daily harness-lab collect kick", "55 8 * * *", "Agy/Muse/DSH Lab scout", "enabled"),
+        ("Weekday usage dashboard refresh", "5 9 * * 1-5", "weekday integrity check", "paused"),
+        ("PR board sweep daily", "9 9 * * *", "CI/conflict/stall → Coding EM; never merge", "enabled"),
+        ("Weekly playbook ↔ card sync", "47 10 * * 1", "playbook → card + kill review + ops nudge", "enabled"),
         ("Daily harness-lab curate publish", "45 16 * * *", "KEEP-only Lab publish", "enabled"),
+        ("Nightly Mac harness audit", "59 2 * * *", "rotate one Mac CLI; review required; no merge", "enabled"),
+        ("Coding EM kick pickup check", "6 8 * * *", "ledger vs tmux/PRs; one re-wake; escalate if stuck", "enabled"),
+        ("Jev shadow savings tally", "4 8 * * 1-5", "tally runs inside Monday weekly sync", "paused"),
+        ("Watch Tenex evals guide parts 2–3", "46 9 * * 2", "weekly check for the next guide parts", "enabled"),
+        ("Daily Mac CLI update", "53 7 * * *", "verify model/effort defaults; DSH manual updates only", "enabled"),
+        ("Field Brief 6h orchestration watch", "50 0,6,12,18 * * *", "detect-only second-line room ping", "paused"),
     ]
     for name, cron, notes, status in manage:
         rows.append({

@@ -24,6 +24,35 @@ REVIEWER_FIXTURE = """## ENABLED
 
 
 class RoutineProxy(unittest.TestCase):
+    def test_full_manage_roster_and_weekly_total(self):
+        # Every row in Agents/agent-manage-bot.md Standing routines, 2026-10-24.
+        expected = {
+            "Monday specialist ops nudge": ("11 8 * * 1", "paused", 0),
+            "Daily harness-lab collect kick": ("55 8 * * *", "enabled", 7),
+            "Weekday usage dashboard refresh": ("5 9 * * 1-5", "paused", 0),
+            "PR board sweep daily": ("9 9 * * *", "enabled", 7),
+            "Weekly playbook ↔ card sync": ("47 10 * * 1", "enabled", 1),
+            "Daily harness-lab curate publish": ("45 16 * * *", "enabled", 7),
+            "Nightly Mac harness audit": ("59 2 * * *", "enabled", 7),
+            "Coding EM kick pickup check": ("6 8 * * *", "enabled", 7),
+            "Jev shadow savings tally": ("4 8 * * 1-5", "paused", 0),
+            "Watch Tenex evals guide parts 2–3": ("46 9 * * 2", "enabled", 1),
+            "Daily Mac CLI update": ("53 7 * * *", "enabled", 7),
+            "Field Brief 6h orchestration watch": ("50 0,6,12,18 * * *", "paused", 0),
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            result = cab.collect_routine_proxy(hunt=Path(directory))
+        rows = result["rows"]
+        self.assertEqual(len(rows), len(expected))
+        self.assertTrue(all(r["owner"] == "Agent Manage Bot" for r in rows))
+        actual = {r["name"]: (r["cron"], r["status"], r["fires_per_week"]) for r in rows}
+        self.assertEqual(actual, expected)
+        self.assertEqual(result["total_fires_per_week"], 44)
+        self.assertIn("Manage Bot (12)", result["source"])
+        for row in rows:
+            if row["status"] == "paused":
+                self.assertTrue(row["notes"].startswith("PAUSED · "))
+
     def test_reviewer_fixture_keeps_168_fires_and_paused_row(self):
         rows = cab._parse_active_routine_table(REVIEWER_FIXTURE, "Collection Bot")
         self.assertEqual([(r["name"], r["status"], r["fires_per_week"]) for r in rows],
@@ -65,7 +94,7 @@ class RoutineProxy(unittest.TestCase):
             self.assertEqual(rows["paused heartbeat"]["fires_per_week"], 0)
             for name in ("Weekday usage dashboard refresh", "Field Brief 6h orchestration watch"):
                 self.assertEqual((rows[name]["status"], rows[name]["fires_per_week"]), ("paused", 0))
-            self.assertEqual(result["total_fires_per_week"], 168 + 672 + 14)
+            self.assertEqual(result["total_fires_per_week"], 168 + 672 + 44)
 
     def test_minute_field_counts_match_mac_behavior(self):
         for minute, weekly in (("*", 10080), ("*/15", 672), ("4,19,34,49", 672),
