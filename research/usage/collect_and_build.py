@@ -40,6 +40,7 @@ MUSE_SHARE = Path.home() / ".local/share/muse"
 MUSE_SETTINGS = Path.home() / ".config/muse/settings.json"
 MUSE_PLAN = "Max"  # user-stated 2026-10-12; Muse exposes no plan API
 MUSE_USAGE_DAYS = 7
+MUSE_USAGE_MAX_COUNTER = 2 ** 64 - 1  # support unsigned 64-bit producer counters
 MUSE_USAGE_MAX_FILE_BYTES = 200 * 1024 * 1024  # skip + flag session logs larger than this
 MUSE_USAGE_TIME_BUDGET_S = 20.0  # on exceed, the usage scan stops and marks partial (deadline checked on every scanned line/parse and between files)
 DSH_BIN = Path.home() / ".local/bin/dsh"
@@ -126,8 +127,8 @@ def redact(obj):
 _SECRET_PATTERNS = (
     (re.compile(r"(?i)(authorization['\"]?\s*[:=]\s*['\"]?)(?!(?:(?:bearer|basic|token)\s+)?\[REDACTED\])(?:(bearer|basic|token)\s+)?[^\s'\",\]\)}]+"), r"\1\2 [REDACTED]"),
     (re.compile(r"(?i)\b(bearer)\s+(?!\[REDACTED\])[^\s'\",\]\)}]+"), r"\1 [REDACTED]"),
-    (re.compile(r"\beyJ[\w-]{5,}\.[\w-]{5,}\.[\w-]{5,}"), "[REDACTED]"),  # JWT
-    (re.compile(r"(?i)\bsk-[\w-]{12,}"), "[REDACTED]"),
+    (re.compile(r"eyJ[\w-]{5,}\.[\w-]{5,}\.[\w-]{5,}"), "[REDACTED]"),  # JWT, including inside identifiers
+    (re.compile(r"(?i)sk-[\w-]{12,}"), "[REDACTED]"),
     (re.compile(r"(?i)\b((?:api[_-]?key|access[_-]?token|refresh[_-]?token|id[_-]?token)['\"]?\s*[:=]\s*['\"]?)(?!\[REDACTED\])[^\s'\",\]\)}]+"), r"\1[REDACTED]"),
 )
 
@@ -1626,7 +1627,8 @@ def _muse_runtime_record(obj):
     )
 
 
-def _muse_runtime_records(obj, marker, depth=0, malformed=None, deadline=None, expired=None):
+def _muse_runtime_records(obj, marker, depth=0, malformed=None, deadline=None, expired=None,
+                          rejected=None):
     """Yield runtime records only at the log root or in retained-frame children.
 
     No arbitrary dictionaries, lists, event fields or tool results are traversed.
@@ -1641,7 +1643,21 @@ def _muse_runtime_records(obj, marker, depth=0, malformed=None, deadline=None, e
     if _muse_runtime_record(obj):
         yield obj
         return  # the record's payload cannot contain another runtime record
-    if not isinstance(obj, dict) or obj.get("retained_frame") != "session_permission_transaction":
+    if not isinstance(obj, dict):
+        return
+    payload = obj.get("payload")
+    if isinstance(payload, dict):
+        event = payload.get("event")
+        recognizable = (
+            obj.get("payload_type") == "runtime.user_intent.accepted"
+            or (obj.get("payload_type") == "runtime.session" and payload.get("kind") == "run"
+                and isinstance(event, dict) and event.get("kind") == "model_completed")
+        )
+        if recognizable:
+            if rejected is not None:
+                rejected.add(id(obj))
+            return  # flag the envelope without descending into its payload
+    if obj.get("retained_frame") != "session_permission_transaction":
         return
     children = obj.get("children")
     if not isinstance(children, list):
@@ -1672,14 +1688,14 @@ def _muse_runtime_records(obj, marker, depth=0, malformed=None, deadline=None, e
             if malformed is not None:
                 malformed.add(id(encoded))
             continue
-        yield from _muse_runtime_records(record, marker, depth + 1, malformed, deadline, expired)
+        yield from _muse_runtime_records(record, marker, depth + 1, malformed, deadline, expired, rejected)
 
 
 def _muse_find_model_completed(obj, hits, ctx=None, depth=0, malformed=None,
-                               deadline=None, expired=None):
+                               deadline=None, expired=None, rejected=None):
     """Read only runtime.session -> run -> model_completed in validated records."""
     for record in _muse_runtime_records(
-        obj, "model_completed", depth, malformed, deadline, expired
+        obj, "model_completed", depth, malformed, deadline, expired, rejected
     ):
         payload = record["payload"]
         if record.get("payload_type") != "runtime.session" or payload.get("kind") != "run":
@@ -1690,10 +1706,10 @@ def _muse_find_model_completed(obj, hits, ctx=None, depth=0, malformed=None,
 
 
 def _muse_find_user_prompts(obj, hits, depth=0, malformed=None, deadline=None,
-                            expired=None):
+                            expired=None, rejected=None):
     """Read accepted user intents only from validated runtime-record envelopes."""
     for record in _muse_runtime_records(
-        obj, "user_intent.accepted", depth, malformed, deadline, expired
+        obj, "user_intent.accepted", depth, malformed, deadline, expired, rejected
     ):
         if record.get("payload_type") == "runtime.user_intent.accepted":
             hits.append((record["id"], record.get("recorded_at"), record["payload"].get("intent_id")))
@@ -1727,10 +1743,10 @@ def _muse_event_day(recorded_us, days, fallback_day, start_key):
 
 
 def _muse_int(x) -> int | None:
-    """Missing counters are zero; malformed, negative or non-finite counters are invalid."""
+    """Missing counters are zero; only integral unsigned 64-bit counts are supported."""
     if x is None:
         return 0
-    if isinstance(x, bool) or not isinstance(x, (int, float)) or x < 0:
+    if isinstance(x, bool) or not isinstance(x, (int, float)) or x < 0 or x > MUSE_USAGE_MAX_COUNTER:
         return None
     if isinstance(x, float) and (not math.isfinite(x) or not x.is_integer()):
         return None
@@ -1830,6 +1846,7 @@ def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
         "malformed_usage_lines": 0,
         "malformed_prompt_lines": 0,
         "malformed_frame_records": 0,
+        "rejected_runtime_records": 0,
         "invalid_model_events": 0,
         "invalid_counter_events": 0,
         "events_out_of_window": 0,
@@ -1937,11 +1954,12 @@ def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
                             truncated = True
                             break
                         frame_malformed: set = set()
+                        runtime_rejected: set = set()
                         expired = [False]
                         hits: list = []
                         _muse_find_model_completed(
                             obj, hits, malformed=frame_malformed,
-                            deadline=deadline, expired=expired,
+                            deadline=deadline, expired=expired, rejected=runtime_rejected,
                         )
                         for ctx, ev in hits:
                             if expired[0] or time.monotonic() > deadline:
@@ -1984,13 +2002,15 @@ def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
                             day_sessions[ev_day].add(session_id)
                         if truncated:
                             usage["malformed_frame_records"] += len(frame_malformed)
+                            usage["rejected_runtime_records"] += len(runtime_rejected)
                             break
                         phits: list = []
                         _muse_find_user_prompts(
                             obj, phits, malformed=frame_malformed,
-                            deadline=deadline, expired=expired,
+                            deadline=deadline, expired=expired, rejected=runtime_rejected,
                         )
                         usage["malformed_frame_records"] += len(frame_malformed)
+                        usage["rejected_runtime_records"] += len(runtime_rejected)
                         for rec_id, rec_at, intent_id in phits:
                             if expired[0] or time.monotonic() > deadline:
                                 budget_hit = True
@@ -2091,6 +2111,8 @@ def _collect_muse_usage(share_dir: Path, now: datetime | None = None) -> dict:
             note_parts.append(
                 f"{usage['malformed_frame_records']} malformed retained-frame record(s) skipped"
             )
+        if usage["rejected_runtime_records"]:
+            note_parts.append(f"{usage['rejected_runtime_records']} rejected runtime record(s) skipped")
         if usage["invalid_model_events"]:
             note_parts.append(f"{usage['invalid_model_events']} invalid model identifier event(s) skipped")
         if usage["invalid_counter_events"]:

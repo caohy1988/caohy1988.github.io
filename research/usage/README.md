@@ -44,6 +44,7 @@ Each failure stops the loop and leaves its diagnostic visible.
 | `test_strict_json.py` | snapshot.json is strict JSON: NaN / Infinity become null |
 | `test_openrouter_spend.py` | OpenRouter spend card; the key never leaves memory |
 | `test_review_fixes_r1.py` | Credential-shaped model keys, finite pacing overflow, tool-result examples, invalid Muse counters, UTC spend reset boundaries |
+| `test_review_fixes_r2.py` | Embedded credential identifiers, bounded Muse counters through serialization, rejected runtime envelopes without tool-result counting |
 
 They use temp HOMEs, fake keys and stubbed collectors: no network, no real CLI, and never the
 real snapshot.json / index.html.
@@ -64,7 +65,7 @@ real snapshot.json / index.html.
 
 ## Why Grok activity needs a box step
 
-CLI bars (Claude/Fable, Codex/Astra, Kimi, Agy, Muse, DSH, Qwen Code) are collected live on the Mac.
+CLI bars (Fable, Codex/Astra, Kimi, Agy, Muse, DSH, Qwen Code) are collected live on the Mac.
 Grok Bots activity comes from `/home/box/agent-data/agents` + `agent-transcripts`, which the
 Mac **cannot see**. On the Mac, `collect_and_build.py` falls back to the cached
 `grok_box_activity.json` beside it. If nobody refreshes that cache, week-old last-activity
