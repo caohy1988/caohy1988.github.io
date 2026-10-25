@@ -34,6 +34,10 @@ dates used to render as if current.
 Output carries counts, sizes and timestamps only — no transcript text, no secrets.
 Entries with no transcript dir (e.g. Jev) are listed as empty rows with
 `missing_transcript: true`; nothing is invented. Rooms / placeholders in `GROK_SKIP_NAMES` are dropped.
+Every other bot under `agents/` is listed after the five `GROK_ORDER` roster rows. Those extra
+bots get no stale mark (an idle side bot is not a broken source), so only roster bots can make
+the collector exit 1. The fixed collector has to be copied to the box (and to the Mac folder,
+because `collect_and_build.py` imports `normalize_bots` from it) before extra bots appear.
 
 ## 36h STALE rule
 

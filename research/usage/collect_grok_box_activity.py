@@ -9,6 +9,10 @@ transcript replicas under Application Support when those are newer.
 Freshness: any roster bot whose source is >24h old while peers are fresh gets
 stale:true. Missing agent dirs fail loudly. Collector prints STALE_SOURCES and
 exits 1 when any roster bot is stale or missing.
+
+Every bot under agents/ is listed: the GROK_ORDER roster first, then the rest
+by name (rooms/placeholders in GROK_SKIP_NAMES are dropped). Bots outside the
+roster carry no stale mark and never fail the collector.
 """
 
 from __future__ import annotations
@@ -55,7 +59,7 @@ GROK_NOTE = (
     "Activity share from local Grok Bot transcripts — not Cursor plan dollars. "
     "Last-activity from agents/<id>/ (live) + Mac client replicas when newer; "
     "Manage also from its routine receipts log; "
-    "stale:true when source >24h while peers are fresh."
+    "roster bots get stale:true when their source is >24h old while peers are fresh."
 )
 GROK_LINKS = {
     "usage_billing": "grokbot://app/v1/settings?id=plan",
@@ -504,16 +508,29 @@ def _is_jev(b: dict) -> bool:
     return (b.get("id") or NAME_TO_ID.get(b.get("name") or "")) == JEV_ID
 
 
+def _is_roster(b: dict) -> bool:
+    return b.get("id") in ROSTER_IDS or b.get("name") in GROK_ORDER
+
+
 def apply_source_freshness(bots: list[dict], now: datetime | None = None) -> list[str]:
+    """Stale marks + problem labels for roster bots. A bot outside the roster gets its source age but
+    no stale mark: an idle side bot is not a broken source, and it must not fail the collector."""
     now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     now_ts = now.timestamp()
     fresh_exists = any(
         isinstance(b.get("source_mtime_epoch"), (int, float))
         and (now_ts - float(b["source_mtime_epoch"])) / 3600.0 <= SOURCE_STALE_AFTER_HOURS
-        for b in bots
+        for b in bots if _is_roster(b)
     )
     problems = []
     for b in bots:
+        if not _is_roster(b):
+            age = b.get("source_mtime_epoch")
+            if isinstance(age, (int, float)):
+                b["source_age_hours"] = round((now_ts - float(age)) / 3600.0, 1)
+            b["stale"] = False
+            b["stale_reason"] = None
+            continue
         if b.get("missing_agent_dir"):
             b["stale"] = True
             b["stale_reason"] = f"roster agent dir missing: agents/{b.get('id')}"
@@ -554,14 +571,14 @@ def apply_source_freshness(bots: list[dict], now: datetime | None = None) -> lis
 
 
 def normalize_bots(bots: list[dict]) -> list[dict]:
+    """Roster rows first (zero rows for missing roster names), then every other bot by name; rooms and
+    placeholders in GROK_SKIP_NAMES are dropped. Bots outside GROK_ORDER are kept, never filtered out."""
     bots = list(bots)
     have = {b.get("name") for b in bots}
     for name in GROK_ORDER:
         if name not in have:
             bots.append(empty_bot(name))
     bots = [b for b in bots if b.get("name") not in GROK_SKIP_NAMES]
-    # Drop unknown non-roster agents (keep roster + any already named in ORDER)
-    bots = [b for b in bots if b.get("name") in set(GROK_ORDER)]
     rank = {n: i for i, n in enumerate(GROK_ORDER)}
     bots.sort(key=lambda b: (rank.get(b.get("name"), 99), b.get("name") or ""))
     fleet_at = sum((b.get("messages") or {}).get("assistant_tool") or 0 for b in bots)
