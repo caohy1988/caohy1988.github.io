@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-10-26-0034: Traces must score the harness separately, and tool faults need their own telemetry</title>
+  <meta name="description" content="Field Brief 2026-10-26-0034: Traces must score the harness separately, and tool faults need their own telemetry">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-10-26-0034-muse.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 AM PT · Mon Oct 26, 2026 · Muse</p>
+    <article>
+<h1>Field Brief — 2026-10-26-0034: Traces must score the harness separately, and tool faults need their own telemetry</h1>
+<p><strong>Writer: Muse (<code>muse-wonder-full-1.0</code>)</strong> · Delivery: Markdown handoff only; Collection owns HTML, catalog and push. · Window: ~12h since the 2026-10-25-1234 brief (~12:34 PT Sun Oct 25 – ~00:34 PT Mon Oct 26, 2026; 2026-10-25T19:34Z–2026-10-26T07:34Z). Effort: high. Path: fresh. For: Haiyuan Cao, TL of BQAA (BigQuery Agent Analytics) + ADK.</p>
+<h2>Read this first</h2>
+<p><strong>Industry is quiet; Academy carries the slot.</strong> All 20 tracked PyPI/npm registry lookups succeeded and none shows an upload in-window. Vendor changelog tops did not move into the window. There is therefore <strong>no Industry NEW and no Progress</strong> — do not read the quiet as missing data; the clocks were checked directly.</p>
+<p><strong>Two Academy papers clear the bar, both from the Monday arXiv batch (new verified all-CS ceiling 2610.32982; 695 IDs above the prior 2610.31671 line screened by title).</strong> TraceTrial-Bench (2610.32285) gives BQAA a concrete, released trace schema discipline: score task outcomes and harness obligations on separate score sheets, keep evidence boundary-specific, and never promote co-occurring failures to causation without manual validation. MCP-Injector (2610.32555) gives the complementary tool-boundary lesson: under a fault mix calibrated from 57,240 real MCP incident threads, quality collapses mainly by <em>exposure</em>, not dose, and ungrounded “tool-bypass” answers silently inflate fulfillment credit. Both were read as full PDFs (every section, table and appendix) before ranking; read scope is stated per card.</p>
+<p><strong>What BQAA should take this week:</strong> (1) persist a harness-layer verdict next to every task verdict — TraceTrial finds 31.1% of 3,420 runs pass the task while failing at least one harness criterion (Table 10), so outcome-only tables hide reliability debt; (2) log tool failures as (mode × persistence) and split success into grounded vs. ungrounded — MCP-Injector shows 16% of fulfillment credit under faults came from runs below its grounding threshold (§6.1). Keep Trace-as-State <code>2609.02702</code> pinned; neither paper displaces it.</p>
+<h2>Industry</h2>
+<h3>NEW</h3>
+<p>None. No product-level release, launch post or material capability ship was confirmed in-window.</p>
+<h3>Progress</h3>
+<p>None. No existing catalog card has a material in-window move.</p>
+<h3>One-line mentions — no ranks</h3>
+<ul><li><strong>Registries (all lookups succeeded, zero in-window):</strong> PyPI latest uploads — pydantic-ai 2.61.0 (Oct 24), openai-agents 0.24.0 (Oct 15), langchain-core 1.7.0 (Oct 22), agno 3.1.10 (Oct 23), arize-phoenix 20.26.1 (Oct 25 18:34Z, already NOTE'd last slot), braintrust 0.48.0 (Oct 21), weave 0.54.0 (Oct 23), opik 2.2.119 (Oct 23), inspect-ai 0.3.285 (Oct 25 14:29Z, already Progressed last slot), litellm 1.106.4 (Oct 25), livekit-agents 1.8.9 (Oct 24), langfuse 5.0.4 (Oct 21); npm newest — @langchain/core 1.3.0 (Oct 22), ai 7.0.153 (Oct 24), @mastra/core 1.80.0-alpha.3 (Oct 25, prerelease NOTE at most, unchanged), @anthropic-ai/claude-code 2.1.310 (Oct 23), @letta-ai/letta-code 0.34.24 (Oct 25, already Progressed), promptfoo 0.125.1 (Oct 25). Method: <code>https://pypi.org/pypi/&lt;pkg&gt;/json</code> and <code>https://registry.npmjs.org/&lt;pkg&gt;</code> via curl, window 2026-10-25T19:34Z–2026-10-26T07:35Z.
+</li><li><strong>Vendor tops unchanged:</strong> <a href="https://langfuse.com/changelog">Langfuse changelog</a> newest entry Oct 23 (FIPS mode); <a href="https://docs.langchain.com/langsmith/changelog">LangSmith changelog</a> tops at Oct 12–19 week; <a href="https://www.braintrust.dev/docs/changelog">Braintrust changelog</a> still month-dated (page modified Oct 24) — see Unconfirmed.
+</li><li><strong>Snowflake Oct 26 item resolved as irrelevant:</strong> <a href="https://docs.snowflake.com/en/release-notes/new-features">release-notes index</a> (fetched this slot) lists “Oct 26, 2026 — Custom error messages for feature policy rules.” Not agent analytics; the prior slot's future-dated exclusion is closed with no card.
+</li></ul>
+<h2>Academy</h2>
+<h3>NEW 1 — <a href="https://arxiv.org/abs/2610.32285">TraceTrial-Bench: score the harness on its own sheet, or success will hide its failures</a></h3>
+<p><strong>arXiv:</strong> <a href="https://arxiv.org/abs/2610.32285">https://arxiv.org/abs/2610.32285</a> (v1, submitted 23 Oct 2026; announced in the Mon Oct 26 batch). <strong>Full PDF read</strong> — every part read, including methods (§§3–4), results (§5, Tables 6–10), limitations (§6) and Appendices A–F (taxonomy, adapters, Trace IR schema Tables 26–29, verdict rules, heatmaps, five case studies). Cao et al. (TraceLite AI; CAS / Zhongguancun Academy / Tsinghua / BIT).</p>
+<p><strong>What it is.</strong> A 95-task, mechanism-oriented benchmark that treats the <em>native harness</em> as the system under test across 4 harnesses (Claude Code, Codex, DeepSeek Harness, OpenClaw) × 9 models = 3,420 selected runs (§4.1). Reliability is organized into seven components — Context, Execution, Governance, Lifecycle, Observability, Tools, Verification (Figure 4; Observability has only 7 tasks, Verification 1 — coverage is uneven). Native traces are normalized into a provenance-preserving Trace IR (common envelope + event families in Table 2; full schema Tables 26–28), evidence is selected by declared per-criterion selectors (MEA, §3.3.2), and Agent vs. Harness criteria are scored on separate sheets (50/50 combined score, §3.4).</p>
+<p><strong>Numbers to quote (with their tables).</strong> Only 286/3,420 runs (8.4%) pass every criterion in both layers, while 1,351 (39.5%) pass all Agent criteria (§5.1). <strong>1,065 runs (31.1%) achieve task success despite ≥1 failed Harness criterion</strong> (Table 10) — the paper's central warning against outcome-only evaluation. Harness Macro spans 59.8% (Codex) to 72.0% (OpenClaw); Claude Code leads task success (44.0%) but not Harness satisfaction (Table 6), so the two rankings genuinely diverge. By dimension, Execution is weakest pooled (64.6% Harness Micro) and Observability strongest (84.3%; Table 9) — read that as “the 7 observability tasks chosen were mostly passed,” not as field-wide observability maturity. Candidate failure-attribution links activate in 842/1,700 joint-failure runs (49.5%; 1,633 endpoint pairs, §5.5).</p>
+<p><strong>Honesty the brief must keep.</strong> The authors are unusually disciplined, and Collection should preserve their distinctions: an <em>activated candidate link is not validated propagation</em> — validation requires manual endpoint reconciliation, an observable intermediate distortion and competing-explanation review (§3.5, Table 34), and the paper reports <strong>no corpus-level estimate of link precision, selector recall or judge agreement</strong> (§3.6). Limitations (§6.1): one selected execution per cell (no within-cell repeatability), uneven mechanism coverage, varying judge budgets (§4.2: single judge model, mixed token caps), and state-2 harness verdicts that depend on the Agent outcome (Table 4) — so the two layers are distinct but not statistically independent. Treat harness scores as <em>operational criterion satisfaction</em>, in the authors' own phrase, not confirmed-defect rates.</p>
+<p><strong>BQAA read.</strong> This is directly importable schema guidance: (a) store <code>agent_verdict</code> and <code>harness_verdict</code> as separate columns — collapsing them loses the 31.1%; (b) record evidence <em>boundary</em> per claim (external state vs. model-facing result vs. provider declaration, Table 25) — a tool result has several non-equivalent representations and BigQuery should not silently substitute one for another; (c) keep unmatched tool calls/results explicit (<code>tool_result = null</code> ≠ empty success, §C.3) and never heuristically pair ambiguous records (§3.3.1); (d) if BQAA ever exposes “attribution,” copy the claim ladder (verdict → confirmed defect → candidate link → validated propagation) instead of a single blame label. Released tasks/traces/verdicts (repo linked on the paper's title page) make this checkable rather than rhetorical.</p>
+<h3>NEW 2 — <a href="https://arxiv.org/abs/2610.32555">MCP-Injector: calibrated tool faults collapse quality by exposure, and ungrounded answers hide it</a></h3>
+<p><strong>arXiv:</strong> <a href="https://arxiv.org/abs/2610.32555">https://arxiv.org/abs/2610.32555</a> (v1, submitted 23 Oct 2026; announced Mon Oct 26). <strong>Full PDF read</strong> — every part read, including fault calibration (§4, Table 2), protocol (§5), results (§6, Tables 4–5), limitations (§7) and Appendices A–I plus the NeurIPS checklist. Iannillo et al. (Univ. Luxembourg / Tilburg / GSSI / Naples).</p>
+<p><strong>What it is.</strong> A drop-in, protocol-aware fault-injection proxy on the MCP tool-call boundary: six operators (minor mistake, incorrect output, invalid output, explicit error, delay, silent drop; Table 1) × three persistence regimes (permanent / transient / intermittent), with selection weights calibrated from 57,240 classified issue/PR threads across 1,774 public MCP repos (human audit κ = 0.93 mode / 0.80 persistence on 117 threads, §4). The mined mix is permanent-heavy (91.3% permanent; explicit-error/permanent alone 65.6% of injectable mass, Table 3) — the authors explicitly call it a <em>stress profile</em>, not an operational failure rate (§4). Experiment: 1,350 cells (2 gpt-oss backbones × 3 stacks — MCP-Bench plan-and-execute, OpenAI Agents SDK, LangChain — × 3 proxy conditions × 25 MCP-Bench tasks × 3 seeds, §5).</p>
+<p><strong>Numbers to quote.</strong> Under faults, pooled task-completion score falls 60% (8.08 → 3.23/10; paired Δ −4.85, all nine metrics BH-corrected p &lt; 0.001, Table 5), and the drop persists at 57% among runs that complete under both conditions — i.e. mostly quality loss, not just non-completion (§6.1, Appendix D). Partial degradation is the modal outcome (56% of 450 fault cells, Figure 3). Crucially, Appendix C finds an <strong>exposure effect, not dose-response</strong>: cells with ≥1 fired fault score 2.72 vs. 6.93 for zero-dose cells, while the per-fault dose coefficient is ~0 — the first fault does most of the damage, and dose is confounded with tool-call volume. Scale does not buy resilience <em>for these two backbones under this setup</em>: resilience-ratio model coefficient −0.009 (p = 0.96, wide CI), pooled completion 91.1% (120B) vs. 95.6% (20B) reported as descriptive only (§6.3). Stack differences are <strong>suggestive, not established</strong> (one interaction p = 0.048, one p = 0.074, no multiplicity correction, unequal fault exposure across stacks, §6.2) — do not card “LangChain is most resilient” as a finding. The sleeper result for analytics: <strong>tool bypass</strong> (plausible answers with no tool evidence) exists without faults and, under faults, runs below the grounding threshold supply 16% of all fulfillment credit vs. 5% fault-free, so grounded fulfillment falls 63% rather than 58% (§6.1).</p>
+<p><strong>Limitations (authors' §7, endorsed here).</strong> One model family, one serving setup, 16K context; MCP-Bench is easy fault-free (95–100% completion), limiting transfer to harder workloads; transient/intermittent regimes are effectively untested (9 of 1,905 fired events); content operators omit schema drift/truncation; LLM-judge noise remains despite 5× median scoring. Quote the 60% as “under this permanent-heavy stress profile on 25 single-server tasks,” never as a production failure rate.</p>
+<p><strong>BQAA read.</strong> Tool-error telemetry deserves first-class columns: operator-equivalent mode (explicit error vs. wrong-but-valid vs. schema violation vs. delay vs. drop), persistence guess (same tool failing every call vs. once), and post-failure action (retry / switch / fallback — Appendix G: switch 57%, fallback 22%, retry 21% pooled, stack-dependent). Without the mode split, silent content faults (19.1% of the profile) look like model reasoning errors in aggregate. And every “success” metric on a warehouse should have a grounded twin (success <em>with</em> tool evidence) — otherwise bypass behavior, which needs no fault to occur, inflates exactly the number leadership watches during an incident.</p>
+<h3>Scouted, not ranked</h3>
+<ul><li><strong><a href="https://arxiv.org/abs/2610.32483">When Agents Fail: Model or Harness—Who's to Blame?</a></strong> — <strong>full PDF read, deliberately not ranked.</strong> Solid crossed design (52,168 trajectories, R = 4, bootstrap CIs) introducing Valid Completion Rate, Model–Harness Fit and Token Load (top-5% runs consuming ~83% of one configuration's tokens, §6.4.2). Not ranked because the catalog already carries this thesis repeatedly (<code>arxiv-2609-11987-harness-or-model-isolation</code>, <code>same-model-harness</code>, <code>arxiv-2610-04433-what-does-a-harness-buy…</code>, <code>arxiv-2610-22466-harness-delta-attribution</code>); a third harness-vs-model card in one batch would inflate. Revisit only if BQAA adopts VCR-style valid-completion as a stored metric and needs the citation.
+</li><li><strong><a href="https://arxiv.org/abs/2610.31678">Validating the Comparison, Not Just the Scorer</a></strong> — abstract + metadata only (not full-PDF read; do not quote beyond this): prompt-conditional scorer error can shrink an apparent 9.3-point effect to ~2.3 points in its audit setup. Relevant to judge validation, but single-author, narrow (invented-entity prompts), and weaker BQAA leverage than the two ranked papers this slot.
+</li><li><strong><a href="https://arxiv.org/abs/2610.31972">Reproducible Evaluation as the Substrate for Safe Prompt Compression</a></strong> — abstract only: regenerable offline eval harness over mutable enterprise data + correctness-gated prompt compression (3.5–7.6% shrink). Interesting for eval-on-warehouse freshness; production-agent N = 1 per abstract, needs full read before any future card.
+</li><li><strong><a href="https://arxiv.org/abs/2610.31698">Understanding Tool-Mediated Interaction Failures in Agentic GUI Software</a></strong> — abstract only: 335 real GUI-tool failures, 86.6% with silent incorrectness. GUI-state divergence is adjacent to, not inside, BQAA's warehouse-analytics core.
+</li><li><strong><a href="https://arxiv.org/abs/2610.32060">Understanding Communication Failures in Multi-Agent LLM Systems</a></strong> — abstract only: taxonomy over 3,211 failed multi-agent trajectories; recovery/consensus failures dominate. Multi-agent debate dynamics, not trace-schema or telemetry method.
+</li><li><strong><a href="https://arxiv.org/abs/2610.31710">Compact-Bench</a></strong> — abstract only: context-compaction damage (5–64% of full-history successes) across 14 summarizers. Noted for the compaction-boundary event in TraceTrial's IR; not independently ranked without a full read.
+</li><li>Screen scope note: 817 entries parsed from <a href="https://arxiv.org/list/cs/new">https://arxiv.org/list/cs/new</a> (show=2000; second page empty), 695 IDs above 2610.31671 title-screened on agent/observability/tracing/evaluation/failure/SQL/telemetry terms; 8 abstracts pulled via the arXiv API; 3 full PDFs read (the maximum for this slot). Papers whose relevance lives only in body text under a generic title can be missed by any title screen — stated plainly rather than papered over.
+</li></ul>
+<h2>Six-week EV</h2>
+<ul><li><strong>TraceTrial-Bench (2610.32285):</strong> medium-high. If its released traces get reused, “harness-layer pass rate” becomes a comparable column across agent stacks within weeks — valuable to BQAA as an external schema reference. Watch for: independent re-runs with repeated executions per cell (its n = 1 is the soft spot) and any validated-propagation follow-up with measured precision. If neither appears in six weeks, keep it as schema guidance, not as a leaderboard.
+</li><li><strong>MCP-Injector (2610.32555):</strong> medium. Fault injection at the MCP boundary is cheap to adopt pre-deployment, and the calibrated profile gives BQAA-relevant error taxonomies a defensible prior. Watch for: multi-server / harder-benchmark replications and whether vendors start logging persistence-aware tool errors. Downgrade if replications show the effect is mostly “easy benchmark + permanent errors.”
+</li><li><strong>Industry quiet:</strong> no EV change. A Sunday-evening zero on verified registry clocks is information, not a gap to fill next slot by lowering the bar.
+</li></ul>
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>TraceTrial-Bench:</strong> store harness verdicts separately from task verdicts — 31.1% of runs succeed while the harness fails, and outcome-only tables cannot see it.
+</li><li><strong>TraceTrial evidence discipline:</strong> a tool result's external, model-facing and normalized forms are different claims; keep boundary + provenance per row, and leave ambiguous call/result pairs unlinked.
+</li><li><strong>MCP-Injector:</strong> first tool fault does most of the damage (exposure, not dose) — alert on first-fault-per-run and mode × persistence, not raw error counts alone.
+</li><li><strong>Grounded success:</strong> always pair fulfillment/success with a tool-evidence-gated twin; ungrounded bypass supplied 16% of fulfillment credit under faults.
+</li><li><strong>Industry:</strong> verified quiet — 20/20 registry clocks checked, zero in-window uploads; spend no schema effort chasing this window.
+</li></ul>
+<h2>Unconfirmed</h2>
+<table>
+<tr><th>Item</th><th>What was not confirmed</th><th>Where I looked</th></tr>
+<tr><td>Weave hosted releases</td><td>Any in-window hosted rollout</td><td>gap: <a href="https://docs.wandb.ai/weave/reference/release-notes">https://docs.wandb.ai/weave/reference/release-notes</a> 301-redirects to the CoreWeave docs host and the fetched page exposes only access-gated content (rechecked this slot). PyPI <code>weave</code> 0.54.0 (Oct 23) succeeded but SDK timing does not settle hosted timing.</td></tr>
+<tr><td>Braintrust Loop / Patterns</td><td>Exact rollout day/time</td><td>Rechecked <a href="https://www.braintrust.dev/docs/changelog">https://www.braintrust.dev/docs/changelog</a> this slot: entries remain month-dated (page modified Oct 24, before the window). No dated primary source establishes an in-window release.</td></tr>
+<tr><td>Galileo / Splunk dated entries</td><td>Newest dated entry this slot</td><td>gap: fetch of <a href="https://agent-observability-docs.splunk.com/release-notes-saas">https://agent-observability-docs.splunk.com/release-notes-saas</a> returned no extractable dated entries via curl this slot (prior slot's successful read showed Oct 13 newest). Not reported as “no release.”</td></tr>
+<tr><td>Title-screen completeness</td><td>Relevant papers under generic titles</td><td>Screened all 695 above-threshold titles by keyword and read 8 abstracts + 3 full PDFs; body-only relevance under a generic title remains possible. Method stated in Academy scouted note.</td></tr>
+</table>
+<h2>Housekeeping</h2>
+<p><strong>Packs used:</strong> none. FB_MERGE slot=2026-10-26-0034 packs=0 raw=0 unique=0 drop_catalog=0 drop_seen=0 drop_both=0 fresh=0 (cand=0 low=0); <code>_runs/fb-2026-10-26-0034/fresh-items.md</code> is legitimately empty (collectors paused per Haiyuan's 2026-10-22 20:50 PT order; routines paused 10-25 12:29 PT). <strong>Gaps (disclosed, not backfilled):</strong> Agy 1532/1832/2132 Sun + 0032 Mon, DSH 1432/1732/2032/2332 Sun, Muse packs 1332/1632/1932/2232 Sun, extra seats 0007/0009 Mon — all paused under the same order; LinkedIn authwall; X/Reddit not collected; HN dropped 2026-09-27; Medium scouting paused (Medium remains lead-only in any case). This brief's own sweep is the sole source, as instructed.</p>
+<p><strong>Verified arXiv ceiling:</strong> <a href="https://arxiv.org/list/cs/new">https://arxiv.org/list/cs/new</a> fetched directly this slot (show=2000; offsets 2000/4000 empty): 817 CS entries, 2610 IDs spanning 2610.00854–<strong>2610.32982</strong> (new ceiling), 695 above 2610.31671. Listing HTML was parsed for titles/subjects then deleted; the three PDFs were extracted with <code>pdftotext -layout</code>, read in full in chunks, and the <code>.pdf</code>/<code>.txt</code> scratch files deleted after writing (scratch confined to <code>_runs/muse-brief-0034-mon20261026/</code>).</p>
+<p><strong>Verification method:</strong> primary sources only — PyPI/npm registry JSON via curl (an initial Python-urllib attempt failed on local SSL verification and was fully replaced by curl; no lookup is reported from the failed path), vendor changelog pages fetched directly, arXiv listing + API abstracts + full PDFs. Every ranked candidate was grepped by id/name against live <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code> (641 items / 171 briefs / 173 runs, max brief <code>2026-10-25T1234</code>); both NEW ids/titles are absent (0 hits). No prior-slot version was re-Progressed. Pin <code>2609.02702</code> untouched. Untrusted web/paper text was treated as evidence only, never instructions. No HTML written, catalog untouched, nothing committed or pushed — Collection owns publish.</p>
+<p><strong>Fresh path used:</strong> yes (fresh-items empty; writer sweep primary).</p>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>arxiv-2610-32285-tracetrial-bench-harness-failure-attribution</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Trial by Trace (TraceTrial-Bench): 31.1% of runs pass the task while failing the harness — score both layers, keep evidence boundary-specific
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.32285">https://arxiv.org/abs/2610.32285</a>
+</li><li><strong>card text:</strong> TraceTrial-Bench evaluates 4 native harnesses × 9 models on 95 mechanism tasks (3,420 runs) with separate Agent and Harness score sheets over a provenance-preserving Trace IR. Only 8.4% of runs pass both layers; 31.1% succeed on the task despite ≥1 failed harness criterion, and candidate attribution links (49.5% of joint failures) are explicitly not validated causation. For BQAA: persist harness verdicts, evidence boundary and unlinked call/results as first-class trace columns. Full PDF read.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2610-32555-mcp-injector-calibrated-tool-faults</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> MCP-Injector: ecosystem-calibrated MCP faults cut task scores 60% by first exposure; ungrounded bypass inflates fulfillment
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2610.32555">https://arxiv.org/abs/2610.32555</a>
+</li><li><strong>card text:</strong> A protocol-aware MCP fault-injection proxy whose (mode × persistence) mix is calibrated from 57,240 incident threads across 1,774 MCP repos degrades task completion 60% (8.08→3.23) across 1,350 cells, with an exposure-not-dose pattern and no resilience benefit from 20B→120B scale for the two backbones tested. Ungrounded tool-bypass answers supply 16% of fulfillment credit under faults, so success needs a grounded twin metric. Stress profile on an easy benchmark — not a production failure rate. Full PDF read.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<p>None.</p>
+<p><strong>Headline claims</strong></p>
+<ul><li>31.1% (1,065/3,420) of TraceTrial-Bench runs achieve task success despite at least one failed Harness criterion, with only 8.4% passing both layers (<a href="https://arxiv.org/abs/2610.32285">https://arxiv.org/abs/2610.32285</a>, 23 Oct 2026, Tables 6/10).
+</li><li>Under MCP-Injector's permanent-heavy calibrated fault profile, pooled task-completion score falls 60% from 8.08 to 3.23/10, and grounded fulfillment falls 63% once ungrounded bypass credit is excluded (<a href="https://arxiv.org/abs/2610.32555">https://arxiv.org/abs/2610.32555</a>, 23 Oct 2026, §6.1/Table 5).
+</li><li>All 20 tracked PyPI/npm packages show zero uploads in 2026-10-25T19:34Z–2026-10-26T07:35Z on direct registry-JSON checks (e.g. <a href="https://pypi.org/pypi/inspect-ai/json">https://pypi.org/pypi/inspect-ai/json</a>, checked 26 Oct 2026).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Mon Oct 26, 2026 · 12:34 AM PT · Muse</span>
+    </div>
+  </footer>
+</body>
+</html>
