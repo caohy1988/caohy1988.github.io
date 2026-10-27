@@ -218,3 +218,41 @@ time { white-space: nowrap; }
   .footer { display: block; max-width: none; padding: 8pt 0 0; }
   .footer-inner { display: block; }
 }
+
+.compare.price-units { min-width: 980px; }
+.compare.price-estimates { min-width: 900px; }
+.compare.price-estimates .c-volume { width: 12%; }
+.compare.price-estimates .c-ingest { width: 18%; }
+.compare.price-estimates .c-cost { width: 23.333%; }
+.price-chart-figure { margin-top: 8px; }
+.price-chart { display: block; width: 100%; height: 540px; border: 1px solid var(--line); background: var(--paper); }
+.price-chart text { fill: var(--ink); font-family: var(--sans); font-size: 13px; }
+.price-chart .chart-grid-lines line { stroke: var(--line); stroke-width: 1; }
+.price-chart .chart-axis { fill: var(--muted); font-size: 12px; font-weight: 600; }
+.price-chart .chart-heading { font-size: 14px; font-weight: 700; }
+.price-chart .chart-label { font-weight: 600; }
+.price-chart .chart-value { text-anchor: end; font-variant-numeric: tabular-nums; }
+.price-chart .chart-ticks text { fill: var(--muted); text-anchor: middle; font-size: 12px; }
+.price-chart .bar-ls { fill: #1f5f8b; }
+.price-chart .bar-obs { fill: #66707b; }
+.price-chart .bar-bq { fill: #91c3e8; stroke: #1f5f8b; stroke-width: 1; }
+
+@media screen and (max-width: 760px) {
+  .compare.price-units, .compare.price-estimates { min-width: 0; }
+}
+@media (max-width: 700px) {
+  .price-chart text { font-size: 12px; }
+  .price-chart .chart-heading { font-size: 12px; }
+  .price-chart .chart-axis { font-size: 11px; }
+  .price-chart .chart-ticks text { font-size: 10px; }
+}
+@media print {
+  .compare.price-units, .compare.price-estimates { min-width: 0; }
+  .price-chart-figure { break-inside: avoid; page-break-inside: avoid; }
+  .price-chart { border-color: #999; }
+  .price-chart text, .price-chart .chart-axis, .price-chart .chart-ticks text { fill: #000; }
+  .price-chart .chart-grid-lines line { stroke: #bbb; }
+  .price-chart .bar-ls { fill: #1f5f8b; }
+  .price-chart .bar-obs { fill: #66707b; }
+  .price-chart .bar-bq { fill: #cce6f5; stroke: #1b2129; }
+}
