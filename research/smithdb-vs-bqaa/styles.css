@@ -78,10 +78,75 @@ p { margin: 0 0 16px; }
 .borrow li::marker { font: 700 0.9em var(--sans); color: var(--steel); }
 .gaps li::marker { color: var(--muted); }
 
-/* Comparison table: scrolls sideways inside its own focusable region when the column is narrow */
-.table-wrap { overflow-x: auto; max-width: 100%; margin: 6px 0 26px; }
-.compare { width: 100%; min-width: 680px; border-collapse: collapse; table-layout: fixed; font: 14.5px/1.55 var(--sans); }
-.compare caption { caption-side: top; text-align: left; padding: 0 0 10px; font: 600 14.5px/1.4 var(--sans); color: var(--ink-2); }
+/* Plain-terms box: a short, friendly summary at the top of a chapter.
+   It only restates points made with citations in the chapter below it. */
+.plain-box { max-width: 720px; margin: 0 0 24px; padding: 16px 18px 6px; background: var(--wash); border: 1px solid var(--line); border-radius: 4px; font-family: var(--sans); }
+.plain-box .plain-title { margin: 0 0 8px; font: 700 16px/1.35 var(--sans); color: var(--ink); }
+.plain-box p { margin: 0 0 10px; font-size: 16px; line-height: 1.6; color: var(--ink-2); }
+.plain-box ul { margin: 0 0 10px; padding-left: 1.4em; }
+.plain-box li { margin: 0 0 6px; font-size: 16px; line-height: 1.55; color: var(--ink-2); }
+.plain-box .plain-note { font-size: 14px; color: var(--muted); }
+.hero .plain-box { margin-top: 22px; }
+
+/* New visuals. Every visual is paired in the page with a plain-text list beside it.
+   Length, position and the printed word carry the meaning; a colour never does on its own. */
+.viz { margin: 6px 0 26px; max-width: 860px; font-family: var(--sans); }
+.viz figcaption { padding: 0 0 10px; font: 650 15px/1.45 var(--sans); color: var(--ink-2); }
+.viz-text { margin: 12px 0 0; padding-left: 1.5em; font-size: 15px; line-height: 1.6; max-width: 720px; }
+.viz-text li { margin: 0 0 8px; }
+.viz .viz-note { margin: 10px 0 0; font-size: 14px; line-height: 1.55; color: var(--muted); max-width: 720px; }
+/* Which tool fits which job: one row per job. */
+.job-fit { border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.job-row { display: grid; grid-template-columns: minmax(0, 1.1fr) 28px minmax(0, 1fr); gap: 10px; align-items: center; padding: 14px 16px; background: var(--paper); }
+.job-row + .job-row { border-top: 1px solid var(--line); }
+.job-row:nth-child(even) { background: #f7f9fb; }
+.job-name { font-size: 15.5px; line-height: 1.5; color: var(--ink-2); }
+.job-name strong { display: block; color: var(--ink); }
+.job-arrow { text-align: center; color: var(--steel); font-weight: 700; }
+.job-tool { font-size: 15.5px; line-height: 1.5; color: var(--ink-2); }
+.job-tool strong { display: block; font-size: 16px; color: var(--ink); }
+/* Evidence map: a grid like a heat map, but the word in each cell is the status.
+   Border style repeats the word (solid = Documented, dashed = Announced,
+   dotted = UNVERIFIED or not documented in the sources reviewed). */
+.ev-scroll { overflow-x: auto; max-width: 100%; }
+.ev-map { display: grid; grid-template-columns: 150px repeat(3, minmax(150px, 1fr)); gap: 6px; min-width: 680px; font-size: 14px; line-height: 1.45; }
+.ev-head, .ev-dim { padding: 9px 10px; font-weight: 700; color: var(--ink); background: var(--wash); border: 1px solid var(--line-2); border-radius: 3px; }
+.ev-cell { padding: 9px 10px; color: var(--ink-2); background: var(--paper); border-radius: 3px; }
+.ev-cell strong { display: block; color: var(--ink); }
+.ev-doc { border: 2px solid var(--ink-2); }
+.ev-ann { border: 2px dashed var(--ink-2); }
+.ev-unv { border: 2px dotted var(--ink-2); }
+/* Simple labelled bars (retention). Bar length plus the printed value both show the size. */
+.bars { border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px 6px; background: var(--paper); }
+.bar-row { display: grid; grid-template-columns: minmax(140px, 210px) minmax(0, 1fr) minmax(110px, auto); gap: 6px 14px; align-items: center; margin: 0 0 12px; }
+.bar-label { font-size: 14.5px; line-height: 1.4; color: var(--ink-2); }
+.bar-track { background: var(--wash); border: 1px solid var(--line); border-radius: 3px; min-height: 26px; display: flex; align-items: center; }
+.bar-fill { display: block; flex: none; min-height: 24px; background: var(--steel); border-radius: 2px 0 0 2px; }
+.bar-value { padding: 2px 0; font-size: 14px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.bar-row.no-bar .bar-value { padding: 2px 8px; font-weight: 600; }
+.bar-row.no-bar .bar-track { background: var(--paper); border-style: dashed; }
+/* SmithDB latency chart (numbers are also in the table above it). The chart keeps its
+   designed width and scrolls sideways on narrow screens, so its labels stay readable. */
+.latency-scroll { overflow-x: auto; max-width: 100%; }
+.latency-chart { display: block; width: 100%; min-width: 860px; height: auto; border: 1px solid var(--line); background: var(--paper); }
+.latency-chart text { fill: var(--ink); font-family: var(--sans); font-size: 13px; }
+.latency-chart .lc-bar { fill: var(--steel); }
+.latency-chart .lc-grid { stroke: var(--line); stroke-width: 1; }
+.latency-chart .lc-axis { fill: var(--muted); font-size: 12px; font-weight: 600; }
+.latency-chart .lc-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+@media screen and (max-width: 760px) {
+  .job-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .job-arrow { text-align: left; }
+  .bar-row { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .plain-box { padding: 14px 14px 4px; }
+}
+
+/* Comparison table: scrolls sideways inside its own focusable region when the column is narrow.
+   The border and the hint text make the scroll area easy to spot on a small screen. */
+.table-wrap { overflow-x: auto; overflow-y: visible; max-width: 100%; margin: 6px 0 26px; border: 1px solid var(--line); border-radius: 4px; }
+.table-hint { margin: 0 0 8px; font: 13.5px/1.5 var(--sans); color: var(--muted); max-width: 720px; }
+.compare { width: 100%; min-width: 680px; border-collapse: separate; border-spacing: 0; table-layout: fixed; font: 15px/1.6 var(--sans); }
+.compare caption { caption-side: top; text-align: left; padding: 12px 12px 10px; font: 650 15px/1.45 var(--sans); color: var(--ink-2); background: var(--paper); }
 .compare .c-dim { width: 18%; }
 .compare .c-a { width: 38%; }
 .compare .c-b { width: 44%; }
@@ -98,9 +163,42 @@ pre code { overflow-wrap: normal; }
 .compare.three { min-width: 760px; }
 .compare.three .c-dim { width: 19%; }
 .compare.three .c-sys { width: 27%; }
-.compare th, .compare td { text-align: left; vertical-align: top; padding: 12px; border-bottom: 1px solid var(--line); }
-.compare thead th { font-size: 13px; font-weight: 650; color: var(--muted); background: var(--wash); border-bottom: 1px solid var(--line-2); }
+.compare th, .compare td { text-align: left; vertical-align: top; padding: 13px 12px; border-bottom: 1px solid var(--line); }
+.compare tbody tr:last-child th, .compare tbody tr:last-child td { border-bottom: 0; }
+/* Zebra rows: a light wash on alternate rows so a long row is easy to follow across.
+   The wash never carries meaning by itself; row headings stay in plain bold text. */
+.compare tbody tr:nth-child(even) th, .compare tbody tr:nth-child(even) td { background: #f7f9fb; }
+.compare thead th { font-size: 13.5px; font-weight: 700; line-height: 1.4; color: var(--ink-2); background: var(--wash); border-bottom: 2px solid var(--line-2); border-top: 1px solid var(--line); }
 .compare tbody th { font-weight: 650; color: var(--ink); }
+/* Sticky header row. On wide screens the table fits the column, so the header can stick
+   to the top of the page (below the site bar). On narrow screens the wrap becomes its
+   own scroll box and the header sticks to the top of that box instead. */
+@media screen and (min-width: 1024px) {
+  /* Tables that fit the column need no sideways scroll, so let the page be the scroll box.
+     This only applies once the study column is wider than the table minimum width. */
+  .table-wrap:has(> .compare:not(.three):not(.price-estimates)) { overflow: visible; }
+}
+@media screen and (min-width: 901px) and (max-width: 1023px) {
+  /* In this range the study column is not yet wide enough to drop the scroll ancestor,
+     so ordinary tables get the same bounded scroll box as the wide tables. */
+  .table-wrap:has(> .compare:not(.three):not(.price-estimates)) { overflow: auto; max-height: 85vh; }
+  .table-wrap:has(> .compare:not(.three):not(.price-estimates)) .compare thead th { top: 0; }
+}
+@media screen and (min-width: 901px) {
+  /* Wide tables keep their own scroll box; the header sticks inside that box. */
+  .table-wrap:has(> .compare.three), .table-wrap:has(> .compare.price-estimates) { overflow: auto; max-height: 85vh; }
+  .table-wrap:has(> .compare.three) .compare thead th, .table-wrap:has(> .compare.price-estimates) .compare thead th { top: 0; }
+  .compare thead th { position: sticky; top: 76px; z-index: 3; }
+  /* Keep the row heading in view when a wide table scrolls sideways. */
+  .compare.three tbody th[scope="row"], .compare.price-estimates tbody th[scope="row"] { position: sticky; left: 0; z-index: 2; background: var(--paper); box-shadow: 1px 0 0 var(--line); }
+  .compare.three tbody tr:nth-child(even) th[scope="row"], .compare.price-estimates tbody tr:nth-child(even) th[scope="row"] { background: #f7f9fb; }
+}
+@media screen and (max-width: 900px) {
+  .table-wrap { overflow: auto; max-height: 78vh; }
+  .compare thead th { position: sticky; top: 0; z-index: 3; }
+  .compare caption { position: sticky; left: 0; }
+}
+.compare .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* Learning visuals: timeline and architecture (text-first; colour never carries meaning alone) */
 .figure { margin: 6px 0 26px; max-width: 860px; }
@@ -115,7 +213,6 @@ pre code { overflow-wrap: normal; }
 .arch-notes { margin: 12px 0 0; padding-left: 1.5em; font-family: var(--sans); font-size: 14.5px; line-height: 1.55; max-width: 720px; }
 .arch-notes li { margin: 0 0 8px; }
 @media screen and (max-width: 760px) {
-  .compare.three { min-width: 0; }
   .timeline li { grid-template-columns: minmax(0, 1fr); gap: 1px; }
   .timeline time { font-size: 13px; }
 }
@@ -148,20 +245,23 @@ time { white-space: nowrap; }
   .contents a { padding: 5px 0; }
   .footer { display: block; }
 }
-/* Narrow screens: each table row becomes a block. Header cells stay in the accessibility tree
-   (visually hidden, not display: none) and the explicit table roles in the markup keep the cells
-   associated with them; the visible labels come from data-label and are hidden from speech. */
+/* Narrow screens: tables stay tables and scroll sideways inside their bounded wrapper.
+   Their base minimum widths stay in force, and the header row sticks to the top of the wrapper. */
 @media screen and (max-width: 760px) {
-  .compare, .compare caption, .compare tbody, .compare tr, .compare th, .compare td { display: block; }
-  .compare { min-width: 0; table-layout: auto; }
-  .compare.perf { min-width: 0; }
-  .compare colgroup { display: none; }
-  .compare thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
-  .compare tbody tr { padding: 12px 0 4px; border-top: 2px solid var(--line-2); }
-  .compare tbody tr:last-child { border-bottom: 1px solid var(--line); }
-  .compare tbody th { padding: 0 0 6px; border: 0; font-size: 17px; }
-  .compare td { padding: 2px 0 12px; border: 0; }
-  .compare td::before { content: attr(data-label); content: attr(data-label) / ""; display: block; margin-bottom: 2px; font: 650 13px/1.4 var(--sans); color: var(--muted); }
+  .table-wrap { overflow: auto; max-height: 78vh; }
+  .compare { display: table; min-width: 680px; table-layout: fixed; }
+  .compare caption { display: table-caption; }
+  .compare colgroup { display: table-column-group; }
+  .compare thead { display: table-header-group; }
+  .compare tbody { display: table-row-group; }
+  .compare tr { display: table-row; }
+  .compare th, .compare td { display: table-cell; }
+  .compare.perf { min-width: 520px; }
+  .compare.three { min-width: 760px; }
+  .compare.price-units { min-width: 980px; }
+  .compare.price-estimates { min-width: 900px; }
+  .compare thead th { position: sticky; top: 0; z-index: 3; }
+  .compare td::before { content: none; }
 }
 @media (max-width: 700px) {
   body { font-size: 17px; }
@@ -199,8 +299,21 @@ time { white-space: nowrap; }
   h3 { font-size: 12.5pt; margin: 12pt 0 4pt; }
   .chapter-number, h2, h3, .compare caption { break-after: avoid; page-break-after: avoid; }
   p, li { orphans: 3; widows: 3; }
-  .table-wrap { overflow: visible; margin-bottom: 12pt; }
+  .table-wrap { overflow: visible; max-height: none; margin-bottom: 12pt; border: 0; }
+  .table-hint { display: none; }
   .compare { min-width: 0; font-size: 8.5pt; line-height: 1.4; }
+  .compare caption { position: static; padding: 0 0 6pt; }
+  .compare thead th, .compare tbody th[scope="row"] { position: static; }
+  .compare tbody tr:nth-child(even) th, .compare tbody tr:nth-child(even) td { background: none; }
+  .plain-box { background: none; border: 0.75pt solid #999; padding: 6pt 8pt 2pt; max-width: none; }
+  .plain-box p, .plain-box li { font-size: 9pt; color: #000; }
+  .viz { max-width: none; break-inside: avoid; page-break-inside: avoid; }
+  .viz figcaption, .viz-text, .viz .viz-note { font-size: 8.5pt; color: #000; }
+  .job-row:nth-child(even) { background: none; }
+  .ev-scroll { overflow: visible; }
+  .ev-map { min-width: 0; font-size: 8pt; }
+  .latency-scroll { overflow: visible; }
+  .latency-chart { border-color: #999; min-width: 0; }
   .compare.three { min-width: 0; }
   .compare thead { display: table-header-group; }
   .compare thead th { background: none; }
@@ -224,8 +337,8 @@ time { white-space: nowrap; }
 .compare.price-estimates .c-volume { width: 12%; }
 .compare.price-estimates .c-ingest { width: 18%; }
 .compare.price-estimates .c-cost { width: 23.333%; }
-.price-chart-figure { margin-top: 8px; }
-.price-chart { display: block; width: 100%; height: 540px; border: 1px solid var(--line); background: var(--paper); }
+.price-chart-figure { margin-top: 8px; overflow-x: auto; }
+.price-chart { display: block; width: 100%; min-width: 640px; height: 540px; border: 1px solid var(--line); background: var(--paper); }
 .price-chart text { fill: var(--ink); font-family: var(--sans); font-size: 13px; }
 .price-chart .chart-grid-lines line { stroke: var(--line); stroke-width: 1; }
 .price-chart .chart-axis { fill: var(--muted); font-size: 12px; font-weight: 600; }
@@ -237,9 +350,7 @@ time { white-space: nowrap; }
 .price-chart .bar-obs { fill: #66707b; }
 .price-chart .bar-bq { fill: #91c3e8; stroke: #1f5f8b; stroke-width: 1; }
 
-@media screen and (max-width: 760px) {
-  .compare.price-units, .compare.price-estimates { min-width: 0; }
-}
+/* Price tables keep their base minimum widths on phones and scroll sideways in their wrapper. */
 @media (max-width: 700px) {
   .price-chart text { font-size: 12px; }
   .price-chart .chart-heading { font-size: 12px; }
@@ -248,8 +359,8 @@ time { white-space: nowrap; }
 }
 @media print {
   .compare.price-units, .compare.price-estimates { min-width: 0; }
-  .price-chart-figure { break-inside: avoid; page-break-inside: avoid; }
-  .price-chart { border-color: #999; }
+  .price-chart-figure { break-inside: avoid; page-break-inside: avoid; overflow: visible; }
+  .price-chart { border-color: #999; min-width: 0; }
   .price-chart text, .price-chart .chart-axis, .price-chart .chart-ticks text { fill: #000; }
   .price-chart .chart-grid-lines line { stroke: #bbb; }
   .price-chart .bar-ls { fill: #1f5f8b; }
