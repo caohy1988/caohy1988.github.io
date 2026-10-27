@@ -94,9 +94,31 @@ p { margin: 0 0 16px; }
 /* Code blocks for DDL and SQL recipes */
 pre { margin: 0 0 18px; padding: 14px 16px; background: var(--wash); border: 1px solid var(--line); border-radius: 4px; overflow-x: auto; font: 13.5px/1.55 var(--mono); max-width: 720px; }
 pre code { overflow-wrap: normal; }
+/* Three-way matrix: one dimension column plus three system columns */
+.compare.three { min-width: 760px; }
+.compare.three .c-dim { width: 19%; }
+.compare.three .c-sys { width: 27%; }
 .compare th, .compare td { text-align: left; vertical-align: top; padding: 12px; border-bottom: 1px solid var(--line); }
 .compare thead th { font-size: 13px; font-weight: 650; color: var(--muted); background: var(--wash); border-bottom: 1px solid var(--line-2); }
 .compare tbody th { font-weight: 650; color: var(--ink); }
+
+/* Learning visuals: timeline and architecture (text-first; colour never carries meaning alone) */
+.figure { margin: 6px 0 26px; max-width: 860px; }
+.figure figcaption { padding: 0 0 10px; font: 600 14.5px/1.4 var(--sans); color: var(--ink-2); }
+.timeline { list-style: none; margin: 0; padding: 0; font-family: var(--sans); border-top: 1px solid var(--line-2); }
+.timeline li { display: grid; grid-template-columns: 118px 150px minmax(0, 1fr); gap: 6px 16px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; line-height: 1.5; }
+.timeline time { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.timeline .tl-sys { font-weight: 650; color: var(--steel); }
+.arch-scroll { overflow-x: auto; max-width: 100%; }
+.arch-svg { width: 100%; min-width: 860px; height: auto; display: block; border: 1px solid var(--line); background: var(--paper); }
+.scroll-hint { margin: 8px 0 0; font: 13px/1.5 var(--sans); color: var(--muted); }
+.arch-notes { margin: 12px 0 0; padding-left: 1.5em; font-family: var(--sans); font-size: 14.5px; line-height: 1.55; max-width: 720px; }
+.arch-notes li { margin: 0 0 8px; }
+@media screen and (max-width: 760px) {
+  .compare.three { min-width: 0; }
+  .timeline li { grid-template-columns: minmax(0, 1fr); gap: 1px; }
+  .timeline time { font-size: 13px; }
+}
 
 /* Sourcebook */
 .chapter .source-list { list-style: none; margin: 0; padding: 0; font-family: var(--sans); }
@@ -179,10 +201,19 @@ time { white-space: nowrap; }
   p, li { orphans: 3; widows: 3; }
   .table-wrap { overflow: visible; margin-bottom: 12pt; }
   .compare { min-width: 0; font-size: 8.5pt; line-height: 1.4; }
+  .compare.three { min-width: 0; }
   .compare thead { display: table-header-group; }
   .compare thead th { background: none; }
   .compare th, .compare td { padding: 4pt 5pt; border-bottom: 0.75pt solid #999; }
   .compare tr { break-inside: avoid; page-break-inside: avoid; }
+  .figure { max-width: none; margin-bottom: 12pt; }
+  .figure figcaption { font-size: 9pt; color: #000; }
+  .timeline li { grid-template-columns: 70pt 90pt minmax(0, 1fr); font-size: 8.5pt; padding: 3pt 0; }
+  .timeline .tl-sys { color: #000; }
+  .arch-scroll { overflow: visible; }
+  .arch-svg { min-width: 0; border-color: #999; }
+  .scroll-hint { display: none; }
+  .arch-notes { font-size: 8.5pt; max-width: none; }
   .chapter .source-list li { padding: 3pt 0; font-size: 9pt; border-color: #bbb; }
   .footer { display: block; max-width: none; padding: 8pt 0 0; }
   .footer-inner { display: block; }
