@@ -234,7 +234,13 @@
       "html": " <a href=\"https://github.com/braintrustdata/braintrust-sdk-javascript/releases/tag/braintrust%403.39.0\">Launch page</a> (2026-10-21, stable) — Braintrust adds severity-based application logging and opt-in console capture; messages can inherit the active Braintrust or compatible OTel trace/span IDs while retaining distinct log row IDs, without creating child spans. The same release adds AI SDK batch/code-mode tracing and LiveKit cascade instrumentation. Analytics should preserve record kind and record identity to avoid multiplying operation counts when joining logs to spans. <a href=\"/research/briefs/2026-10-21-1234-astra.html\">Full brief</a>.",
       "added": "2026-10-21T1234",
       "addedDisplay": "12:34 PM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-10-28T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "Braintrust JS 3.41.0 (2026-10-28) adds automatic tracing for MCP servers (tool calls, prompt retrievals, resource reads) via wrapMCPServer(), with inputs/outputs and session/request IDs recorded for correlation and error-flagged tool results counted as failures even when the handler does not throw; media bytes stay out of traces except opt-in image/blob attachments. https://github.com/braintrustdata/braintrust-sdk-javascript/releases/tag/braintrust%403.41.0. <a href=\"/research/briefs/2026-10-28-1234-muse.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "claude-api-2026-10-21-explicit-key-scope-analytics-schema-migration",
@@ -771,6 +777,11 @@
           "at": "2026-10-25T1234",
           "displayTime": "12:34 PM PT",
           "html": "Inspect 0.3.285 (October 25, stable) adds a Terminals view for existing recordings, command-marker navigation and separate recorded/playback duration, alongside selective-log-read and in-process bridge compatibility repairs: https://github.com/UKGovernmentBEIS/inspect_ai/releases/tag/0.3.285. Recording coverage and marker conventions still limit inspection; shortened replay is not task latency, and no BQAA effectiveness measurement is claimed. <a href=\"/research/briefs/2026-10-25-1234-astra.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-10-28T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "Inspect AI 0.3.286 (2026-10-28) rebuilds a sample's sentinel steps from its log with one builder shared by live execution and replay, records where each model call was made with generate-step ids preserved in replay, shows all of a sample's terminals on one shared clock, and hardens log handling so recomputing, editing or recovering a log no longer imports files or builds models the log names. https://github.com/UKGovernmentBEIS/inspect_ai/releases/tag/0.3.286. <a href=\"/research/briefs/2026-10-28-1234-muse.html\">Full brief</a>."
         }
       ]
     },
@@ -2231,6 +2242,11 @@
           "at": "2026-10-21T1234",
           "displayTime": "12:34 PM PT",
           "html": "Mastra core 1.79.0 and its Oct 21 coordinated train add a capability-gated aggregateSpans() storage contract, root/entity attribution fields, batch experiment metric filtering and nullable timeToFirstChunkMs queries. Usage belongs to the span recording it, model/provider grouping is not supported, and unsupported adapters reject aggregation; the querySpans response/filter migration also needs explicit handling: https://github.com/mastra-ai/mastra/releases/tag/%40mastra%2Fcore%401.79.0. <a href=\"/research/briefs/2026-10-21-1234-astra.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-10-28T1234",
+          "displayTime": "12:34 PM PT",
+          "html": "@mastra/core 1.80.0 (2026-10-28, stable) delivers the span-aggregation surface 1.79.0 only contracted: POST /observability/spans/aggregate with aggregateSpans() implemented in ClickHouse/Postgres/DuckDB for grouped counts, latency, error rate, tokens and cost, plus nine native span columns (model, provider, outcome, stopReason, timeToFirstTokenMs, errorCount, resume/parent links) and persisted provider-error classification. https://github.com/mastra-ai/mastra/releases/tag/%40mastra/core%401.80.0. <a href=\"/research/briefs/2026-10-28-1234-muse.html\">Full brief</a>."
         }
       ]
     },
@@ -8080,6 +8096,20 @@
   ],
   "runs": [
     {
+      "id": "2026-10-28T1234",
+      "date": "2026-10-28",
+      "display": "12:34 PM PT",
+      "href": "/research/briefs/2026-10-28-1234-muse.html",
+      "analyzer": "Muse",
+      "added": [],
+      "updated": [
+        "mastra-core-1-72-0-trace-aggregate-plans-lease-fenced-background-tasks-cyber-refusal-retry",
+        "inspect-ai-0-3-280-agent-bridge-attribution-response-headers-sandbox-mounts",
+        "braintrust-js-3-39-0-application-logs-console-capture-trace-correlation"
+      ],
+      "note": "PUBLISH (Muse muse-wonder-full-1.0 high, fresh path, catch-up after Mac offline at 12:34): ~14h window, collectors paused, no packs. No new arXiv batch (ceiling 2610.37668). 0 NEW, 3 Progress: Mastra @mastra/core 1.80.0 served span-aggregation endpoint; Inspect AI 0.3.286 sentinel replay + shared terminal clock; Braintrust JS 3.41.0 MCP server auto-tracing. Rest NOTE-level; Snowflake Observe still coming soon."
+    },
+    {
       "id": "2026-10-28T0034",
       "date": "2026-10-28",
       "display": "12:34 AM PT",
@@ -10878,6 +10908,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-10-28T1234",
+      "date": "2026-10-28",
+      "display": "12:34 PM PT",
+      "href": "/research/briefs/2026-10-28-1234-muse.html",
+      "analyzer": "Muse",
+      "title": "No new arXiv batch, no launch — three material observability Progress steps (Mastra span aggregation goes live, Inspect sentinel replay, Braintrust MCP server tracing)"
+    },
     {
       "id": "2026-10-28T0034",
       "date": "2026-10-28",
