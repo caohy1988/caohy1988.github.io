@@ -147,7 +147,7 @@
     .cl-weeks::before { content: ""; position: absolute; top: 10px; bottom: 10px; left: 7px; width: 2px; background: var(--line); }
     .cl-week { position: relative; margin: 0 0 14px; background: var(--cream); border: 1px solid var(--line); border-radius: 12px; }
     .cl-week::before { content: ""; position: absolute; top: 17px; left: -27px; width: 10px; height: 10px; border: 2px solid var(--accent-dark); border-radius: 50%; background: var(--paper); }
-    .cl-week[open]::before { background: var(--accent-dark); }
+    .cl-weeks > .cl-week:first-child::before { background: var(--accent-dark); }
     .cl-week > summary { display: block; position: relative; padding: 12px 16px 12px 40px; list-style: none; cursor: pointer; border-radius: 12px; }
     .cl-week > summary::-webkit-details-marker { display: none; }
     .cl-week > summary::before { content: ""; position: absolute; top: 18px; left: 17px; width: 7px; height: 7px; border-right: 2px solid var(--ink-soft); border-bottom: 2px solid var(--ink-soft); transform: rotate(-45deg); }
@@ -168,6 +168,7 @@
     .cl-older { padding: 12px 16px 13px 40px; }
     .cl-older .cl-head { margin: 0 0 4px; }
     .cl-older-text { margin: 0; font-size: 0.92rem; color: var(--ink-soft); }
+    .cl-howto { font-size: 0.9rem; }
     @media (max-width: 900px) { td code, th code { overflow-wrap: anywhere; } }
     @media (max-width: 760px) {
       .rules-grid, .day { grid-template-columns: minmax(0, 1fr); }
@@ -208,6 +209,9 @@
       td:first-child { font-weight: 600; }
       #controls-inventory td:first-child, #pipeline td:first-child { font-weight: 400; }
       td[data-label]:not(:first-child)::before, #pipeline td[data-label]:first-child::before { content: attr(data-label); display: block; font-size: 0.76rem; font-weight: 600; color: var(--ink-soft); }
+    }
+    @media print {
+      .cl-week::details-content { content-visibility: visible; display: block; }
     }
     @media (prefers-reduced-motion: no-preference) {
       .cl-week > summary::before { transition: transform 0.15s ease; }
@@ -1283,20 +1287,23 @@ ask → Manage Bot
   </section>
   <section id="changelog" class="changelog">
     <h2>Changelog</h2>
-    <p class="ov-sub">What changed on this page, newest first, one group per week (weeks start on Monday). Open a week for a one-line summary of each change, then every entry in full as originally logged; the § numbers link to the sections an entry touched. To log a change, add its summary line and its full entry at the top of the current week, then update that week’s entry count.</p>
+    <p class="ov-sub">What changed on this page, newest first, one group per week (weeks start on Monday). Each week lists a one-line summary of every change, then each entry in full as logged; the § numbers link to the sections an entry touched. Every week starts open, so the full text prints and turns up in find-in-page; click a week’s heading to fold it.</p>
+    <p class="ov-sub cl-howto">To log a change, add its summary line and its full entry at the top of the current week, update that week’s entry count, and set the Updated date at the top of the page. The first change in a new week starts a new group above the others: a <code>&lt;details class="cl-week" open&gt;</code> whose id is <code>changelog-</code> plus that Monday’s date (YYYY-MM-DD), with the Monday-to-Sunday range and “1 entry” in its summary; keep <code>open</code> on every week.</p>
     <div class="cl-weeks">
       <details class="cl-week" id="changelog-2026-10-26" open>
-        <summary><span class="cl-head"><span class="cl-name">Oct 26 – Nov 1, 2026</span> <span class="cl-count">2 entries</span></span></summary>
+        <summary><span class="cl-head"><span class="cl-name">Oct 26 – Nov 1, 2026</span> <span class="cl-count">3 entries</span></span></summary>
         <ul class="cl-lines">
+          <li><time datetime="2026-10-28">Oct 28</time>Page redesign: plain-language overview with diagrams, rules at a glance, this weekly changelog, phone-friendly tables</li>
           <li><time datetime="2026-10-28">Oct 28</time>Charter test 6: a new bot or seat must say why the work can’t be a skill or routine on an existing seat</li>
           <li><time datetime="2026-10-28">Oct 28</time>Runs skipped while the Mac is offline are owed until one catch-up run pays them back</li>
         </ul>
         <ol class="cl-entries">
+          <li><time datetime="2026-10-28">2026-10-28</time><p>page redesign (Haiyuan’s ask): a plain-language overview with diagrams at the top (layers and seats, the Field Brief and code flows, GREEN / YELLOW / RED lanes, a day on the fleet), rules at a glance linking to the full rules, this weekly changelog at the bottom in place of the long Updated line, and tables that stack on phones; reference sections unchanged (<a href="#overview">overview</a>, <a href="#rules">rules at a glance</a>, <a href="#changelog">changelog</a>)</p></li>
           <li><time datetime="2026-10-28">2026-10-28</time><p>charter test 6 (Haiyuan 06:49 PT): a new bot or seat is created only if its creation note says why the work cannot be a skill or routine on an existing seat, in one Why separate: line naming one of seven allowed reasons; five tests become six, role cards unchanged (<a href="#extend">§17</a>)</p></li>
           <li><time datetime="2026-10-28">2026-10-28</time><p>skipped runs need payback once the Mac is online (Haiyuan 01:18 PT): a run skipped while the Mac was offline, down or exec-wedged is owed, and one catch-up run for the whole window pays it back once spawn-ok passes; the Monday kill review flags an owed skip with no payback; replaces the 10-18 rule that outage runs count as skip (<a href="#launch">§8</a>, <a href="#grok-patterns">§12</a>, <a href="#spacex-keeps">§16</a>, <a href="#controls-inventory">controls inventory</a>)</p></li>
         </ol>
       </details>
-      <details class="cl-week" id="changelog-2026-10-19">
+      <details class="cl-week" id="changelog-2026-10-19" open>
         <summary><span class="cl-head"><span class="cl-name">Oct 19 – 25, 2026</span> <span class="cl-count">16 entries</span></span></summary>
         <ul class="cl-lines">
           <li><time datetime="2026-10-25">Oct 25</time>Skill lint adopted: report-only, rerun in the Monday sync</li>
@@ -1335,7 +1342,7 @@ ask → Manage Bot
           <li><time datetime="2026-10-19">2026-10-19</time><p>Lab at 175 cards (<a href="#usage">§11</a>)</p></li>
         </ol>
       </details>
-      <details class="cl-week" id="changelog-2026-10-12">
+      <details class="cl-week" id="changelog-2026-10-12" open>
         <summary><span class="cl-head"><span class="cl-name">Oct 12 – 18, 2026</span> <span class="cl-count">3 entries</span></span></summary>
         <ul class="cl-lines">
           <li><time datetime="2026-10-18">Oct 18</time>Spawn-ok probe after Mac trouble, one catch-up Lab pack after missed days, outages recorded once</li>
