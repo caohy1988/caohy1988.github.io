@@ -68,7 +68,7 @@
     .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start; padding-bottom: 36px; }
     .list > .empty { grid-column: 1 / -1; }
     .card { min-width: 0; overflow-wrap: break-word; background: var(--cream); border: 1px solid var(--line); border-top: 4px solid var(--st, var(--line)); border-radius: 14px; padding: 14px 18px 0; box-shadow: 0 1px 0 rgba(16,24,40,0.03); scroll-margin-top: 16px; }
-    .card:target { box-shadow: 0 0 0 3px rgba(232, 115, 36, 0.4); }
+    .card:target, .card.is-target { box-shadow: 0 0 0 3px rgba(232, 115, 36, 0.4); }
     .card-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; margin: 0 0 10px; }
     .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid var(--st-line, var(--line)); border-radius: 999px; background: var(--st-bg, var(--paper-2)); color: var(--st-ink, var(--ink-soft)); font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
     .badge::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--st, var(--ink-faint)); }
@@ -357,11 +357,16 @@
       ? "Showing all " + cards.length + " cards, newest first."
       : "Showing " + shown + " of " + cards.length + " cards: " + STATUS[f].label + ".";
   }
+  // Cards render after the browser resolved the URL's fragment, so on a fresh load :target never
+  // matches; the is-target class carries the same ring and follows the hash.
   function focusHash() {
     var id = "";
     try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { id = location.hash.slice(1); }
     var el = id && document.getElementById(id);
+    var marked = document.querySelectorAll("#list > .card.is-target");
+    for (var i = 0; i < marked.length; i++) if (marked[i] !== el) marked[i].classList.remove("is-target");
     if (!el || !el.classList || !el.classList.contains("card")) return;
+    el.classList.add("is-target");
     if (el.hidden) setFilter("all");
     el.scrollIntoView({ block: "start" });
   }
