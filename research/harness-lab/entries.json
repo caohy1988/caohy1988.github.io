@@ -19,7 +19,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "overclaim: how often a coding agent says “done” when the work failed",
+      "whatItIs": "A small command-line tool that compares an agent's final “done” message with a hidden check the agent never saw. In the author's first study, failed runs on solvable tasks were still reported as done 11 times out of 14.",
+      "whyItMatters": "Our rule is that a real check, not the agent's word, decides when work is done, and this tool can measure whether such a gate helps. In the author's tests, an end-of-task check gave no detectable reduction; reference only, not installed here."
     },
     {
       "id": "cheat-drill-39-cheat-moves-blocked-vs-legit-blocked-held-out-21-of-25-2026-10-14",
@@ -37,7 +40,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "cheat-drill: test whether your guard hooks stop known agent cheat moves",
+      "whatItIs": "A dependency-free command-line tool that feeds 39 known agent cheat moves, such as editing a test in place or skipping git hooks, to the hooks and permission rules meant to catch them. It scores what is blocked next to legitimate actions wrongly blocked.",
+      "whyItMatters": "Our rule says a guard must be able to fail, and this is the same kind of probe for hook guards, with false blocks counted too. In the author's runs, a typical hook guarding protected files by path stopped 9 of 39; reference only."
     },
     {
       "id": "harness-wrangler-paired-runs-confidence-interval-no-headroom-ablate-trigger-set-2026-10-14",
@@ -55,7 +61,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Harness Wrangler: measure whether a skill, rule or hook really helps",
+      "whatItIs": "A command-line and desktop tool that repeats graded agent tasks with and without a skill, rule file, hook or model change and reports the difference with a confidence interval. If the agent already succeeds without the change, it reports “no headroom”.",
+      "whyItMatters": "Another Lab card notes our three-clean-runs rule only catches large regressions and asks for paired comparisons with error bars, which this runs. No license file ships, so pattern only; any real experiment costs model spend and needs Haiyuan."
     },
     {
       "id": "agent-perch-frozen-two-signals-dialog-keys-banner-alert-only-file-mailbox-2026-10-14",
@@ -73,7 +82,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agent-perch: rules for when an always-on agent should be restarted",
+      "whatItIs": "A one-file supervisor for always-on agents in terminal sessions. It calls an agent frozen only when the screen is unchanged and a known marker shows, answers known dialogs with set keys instead of restarting, and only alerts on a usage-limit banner.",
+      "whyItMatters": "Our stall watchdog acts on a stale log, and this adds rules for when a screen should and should not cause a restart. Its restart doesn't check that the old process exited, which our resume rule requires; reference only, not installed."
     },
     {
       "id": "agentic-vault-skeleton-imported-agents-md-off-limits-map-skill-catalog-two-session-cache-2026-10-14",
@@ -91,7 +103,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Agentic Vault Skeleton: a notes-vault layout any AI agent can navigate",
+      "whatItIs": "A notes-vault template built so any agent can find its way without reading everything: one rules file for all agents, a small folder map with a private folder off limits, a skill catalog read instead of the skills, and a two-session cache.",
+      "whyItMatters": "Our vault already gives every agent one shared contract file, much like its single rules file. Its session-memory steps are instructions the agent follows, not hooks that run, and its privacy guard lives in a separate repo; reference only, not installed."
     },
     {
       "id": "cyrilxbt-memory-loop-write-consolidate-recall-apply-2026-10-13",
@@ -120,7 +135,10 @@
         "monthly memory-value audit (not adopted: a new standing cost)",
         "verify a lesson before writing it (covered: claim vs record, code decides done)",
         "tell a newly switched model the protocol (covered: AGENTS.md is wired into every CLI home by install-agent-hooks.sh)"
-      ]
+      ],
+      "plainTitle": "A four-step memory loop: write, consolidate, recall, apply",
+      "whatItIs": "An article arguing that agent memory should be short lessons, not longer transcripts: write only what is new with a one-line summary on top, merge or delete stale lessons, load only what applies, and say which lesson changed the work.",
+      "whyItMatters": "We took its four rules into the daily consolidation we already run, with no new routine, and notes and done receipts now say which recalled lesson was applied. Deleting a lesson still needs Haiyuan's approval of the specific items."
     },
     {
       "id": "workflow-script-harness-unmodified-node-test-scripted-agents-counter-trace-named-errors-2026-10-13",
@@ -138,7 +156,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "workflow-script-harness: run agent workflow scripts offline in tests",
+      "whatItIs": "A test harness that runs a coding CLI's workflow scripts unchanged, with scripted agent replies in place of real agents and no network. It tracks steps with counters, not timestamps, so tests of parallel steps don't depend on timing.",
+      "whyItMatters": "Its FAQ still asks for one final real run before a script is trusted, close to how our replay check sits inside the three-clean-runs rule, where live runs stay the bar. It applies only where a seat on that CLI runs such scripts; reference only."
     },
     {
       "id": "the-docket-numbered-rulings-governs-hook-stop-judge-fail-stale-2026-10-13",
@@ -156,7 +177,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "The Docket: a ledger of numbered rulings that a judge checks changes against",
+      "whatItIs": "A coding-agent plugin that keeps a repo's decisions from being undone, using a ledger of numbered rulings. Before an edit it prints the rulings cited nearby; at the stop, a separate judge session checks changes to files that cite a ruling and can block the stop.",
+      "whyItMatters": "Our standing rules are dated decision notes where a later note can narrow part of an earlier one; this keeps that shape inside a code repo and adds a judge of the change. The judge most likely shares the agent's model and blind spots; reference only."
     },
     {
       "id": "prove-it-done-receipts-verifier-reruns-said-never-counts-one-per-instrument-2026-10-13",
@@ -174,7 +198,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "prove-it-done: a skill that backs “done” with checks a script re-runs",
+      "whatItIs": "An agent skill where each piece of proof is a one-line check, such as a command, a file or a commit, that a bundled script re-runs and marks pass or fail. Self-reports are recorded but never counted, and two checks through the same tool count as one.",
+      "whyItMatters": "Our done report's verified line lists only checks that ran, with evidence, and its same-tool rule would add a count of independent sources to it. It is a skill, not a gate, so nothing stops an agent skipping it unless a hook or CI step enforces it; reference only."
     },
     {
       "id": "bouncer-pretooluse-hard-rules-before-jev-observe-default-calibration-gate-2026-10-13",
@@ -192,7 +219,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "bouncer: a tool-call checker that runs hard rules before asking a judge model",
+      "whatItIs": "A plugin that checks each proposed tool call: hard rules and an allowlist settle clear cases in code, and a fast judgment model answers seven questions about the rest. It ships in observe mode, which only logs what it would have decided.",
+      "whyItMatters": "Some of our decision-layer gates run in shadow and never block, as observe mode does, but before going live we ask a gate to beat always guessing the majority answer, a different bar from its accuracy check. Reference only; live gating or model spend needs Haiyuan."
     },
     {
       "id": "five-second-report-stop-hook-seven-sections-who-owes-next-resend-cap-2026-10-13",
@@ -209,7 +239,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "five-second-report: a quick status report when an agent turn changes things",
+      "whatItIs": "A hook for two coding CLIs, for people running many agents at once: a turn that changed something should end in ordered status sections, such as done, pending and decision, and if it doesn't, the agent is asked to re-send, by default at most twice a session.",
+      "whyItMatters": "Our done report covers PR and job reports and the manager bot's non-trivial done reports, not each turn, and our runs are mostly one-shot jobs, not long chats. A done section here is shape, not evidence; reference only, not installed."
     },
     {
       "id": "overnight-receipts-per-branch-receipt-merge-fix-kill-needs-you-2026-10-12",
@@ -227,7 +260,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "overnight-receipts: a morning report on each branch an unattended agent left",
+      "whatItIs": "A command-line tool that reads coding-agent session logs and local git branches after unattended runs and prints one receipt per branch, worst first, with test status, a merge, fix or kill suggestion and a list of what still needs you.",
+      "whyItMatters": "Our coding agents run unattended overnight, and our done report wants its verified line backed by checks that ran; a receipt built from test exit codes and git state is that evidence. It assumes one coding CLI's log layout; reference only."
     },
     {
       "id": "agent-chain-doctor-30-silent-stop-checks-exposed-guarded-unknown-startup-watchdog-2026-10-12",
@@ -245,7 +281,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agent-chain-doctor: check a scheduled agent's launch chain for silent stops",
+      "whatItIs": "A read-only shell script that inspects how a scheduled agent is launched, from the system scheduler to the session script, against 30 checks for silent stops such as a stale lock or a laptop asleep through its window, printing evidence for each problem.",
+      "whyItMatters": "Our stall watchdog acts on a stale log, but a job that never starts produces no output; this audits the launch chain before the window. Zero findings means only that these checks found nothing, not that the chain is fine; reference only."
     },
     {
       "id": "starlane-mapcheck-vault-audit-read-only-agents-tick-caps-circuit-breaker-2026-10-12",
@@ -263,7 +302,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "starlane: a vault harness with read-only agents and capped routines",
+      "whatItIs": "A personal tool, shared as is, that wraps a Markdown notes vault: it audits links and leaked secrets, sends work to read-only specialist agents, and runs approved routines under a time limit, a daily cap and a circuit breaker.",
+      "whyItMatters": "Its read-only agent roster is a possible boundary for read-only research agents, and its routine caps put our run-limits rule inside a scheduler. Built for one user on one machine; reference only, not installed."
     },
     {
       "id": "dsh-doc-review-isolated-subagent-json-schema-token-gate-multi-round-convergence-2026-10-12",
@@ -281,7 +323,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Document reviews in an isolated sub-agent, with a cost check first",
+      "whatItIs": "A plugin for one coding CLI that runs a document review in an isolated sub-agent and returns a fixed-format report on facts, completeness, necessity and format. It estimates token cost first and asks for confirmation above a set limit.",
+      "whyItMatters": "Our blind reviews shouldn't bloat the drafting session, and an isolated reviewer with a fixed report fits that for one seat; its cost check is our run-limits rule inside the tool. Built for preview releases that may change; reference only."
     },
     {
       "id": "clear-resume-handover-note-disk-warm-cache-resume-before-clear-2026-10-12",
@@ -299,7 +344,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "clear-resume: save a short handover note before clearing a long agent chat",
+      "whatItIs": "A plugin that writes a short plain-text handover, with the goal, next action, status, decisions and failed attempts, before you clear a long chat, and loads it into the fresh session. An opt-in mode can write it shortly before the prompt cache expires.",
+      "whyItMatters": "Our handoff packet similarly keeps the objective and decisions. In the author's small tests, a warm handover cost about 9–10× less than returning to a long session after its cache expired, a saving only if you come back; reference only."
     },
     {
       "id": "agent-docs-lint-dead-ref-model-name-unreferenced-agent-broken-anchor-2026-10-11",
@@ -317,7 +365,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "agent-docs-lint: find dead links and hard-coded model names in agent docs",
+      "whatItIs": "A command-line checker, with no model calls, that scans agent instruction files for links and paths to missing files, hard-coded model names from a set list, agent or skill files no doc mentions, and links to missing sections.",
+      "whyItMatters": "Our shared contract file cites its decision notes as file paths, the kind of reference its dead-link check reads, and Haiyuan approved a pointer check from this card for the playbook. The tool itself is not installed."
     },
     {
       "id": "learn-from-mistakes-agent-judges-cli-counts-per-source-cited-records-checked-2026-10-11",
@@ -334,7 +385,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "learn-from-mistakes: find the mistakes coding agents keep repeating",
+      "whatItIs": "An agent skill plus a command-line tool: the agent reads past records, such as a defect log, and labels what went wrong; the tool counts repeated causes per source, never adding sources together, and flags advice citing records that don't exist.",
+      "whyItMatters": "Our rule drafts a fix once a correction appears twice or more in our list of past mistakes; this adds a spread across days, keeps sources apart and checks the evidence. No license file, so pattern only; reference only."
     },
     {
       "id": "compaction-stress-lab-1-in-5-exact-details-kept-keep-exact-paragraph-7-of-72-2026-10-11",
@@ -351,7 +405,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "compaction-stress-lab: what agents forget when their context is summarized",
+      "whatItIs": "A study, on two small models, of what coding agents forget when their context is summarized. On real sessions the author found one summary kept about 1 in 5 exact tool-printed details; a keep-exact paragraph roughly doubled that, though in live runs it cut steps, not failures.",
+      "whyItMatters": "Our runs are mostly one-shot jobs, not long chats, so it bears only on seats whose runs compact; there, its advice to save exact values to a notes file first sits beside our handoff packet. Reference only, not installed."
     },
     {
       "id": "juli-os-agents-enter-only-resend-gutted-path-resolver-pane-probes-cooldown-2026-10-11",
@@ -369,7 +426,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "juli-os agents: a terminal-session runtime that tells waiting from working",
+      "whatItIs": "A runtime that runs coding agents in terminal sessions. It confirms each typed message arrived, re-sends only a lost Enter key and never the text, and reads the screen to tell an agent awaiting input from one still working.",
+      "whyItMatters": "Our long runs launch in terminal sessions under a stall watchdog that acts on a stale log, and a screen read that tells waiting from working would be a second signal. It targets one coding CLI, so only the patterns transfer; reference only, not installed."
     },
     {
       "id": "harness-creator-three-a-week-code-gates-signal-came-back-2026-10-10",
@@ -387,7 +447,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "harness-creator: up to 3 proposed fixes a week from repeated corrections",
+      "whatItIs": "A plugin that reads your last 7 days of agent sessions, finds corrections you keep repeating, and proposes at most 3 rules, hooks or skills a week, backed by quotes. Changes are applied only after you approve them, with a backup and undo.",
+      "whyItMatters": "Our rule drafts a fix once a correction appears twice or more in our list of past mistakes; this mines session history instead and caps proposals. Its correction patterns were checked only on synthetic samples; reference only."
     },
     {
       "id": "claim-gate-five-claim-rules-named-evidence-lines-once-per-turn-2026-10-10",
@@ -405,7 +468,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "claim-gate: make a reply show evidence for “done”, counts and absences",
+      "whatItIs": "A hook that runs when the agent stops and looks for evidence behind claims like “all done”, a count, “nothing uses this” or “every”. It doesn't judge truth; by default it blocks at most once per turn and says what evidence to add.",
+      "whyItMatters": "The part now in our playbook is the rule that a check must be able to fail, which its self-test follows by breaking each detector on purpose. The hook itself is not installed, and it checks for evidence, not truth."
     },
     {
       "id": "tamperproof-test-files-read-only-shell-allowlist-verify-on-dirty-stop-2026-10-10",
@@ -423,7 +489,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "tamperproof: block agent edits to existing test files, even via the shell",
+      "whatItIs": "A plugin that blocks an agent from editing or overwriting existing test files, including through shell commands, while still allowing new test files. When the agent stops with uncommitted changes, it runs the tests and hands any failures back to the agent.",
+      "whyItMatters": "Under our rules a real check such as a passing test run decides done, and this blocks tampering when it is attempted. Its stop check runs only on uncommitted changes, so a seat of ours that commits before stopping is not re-tested; reference only."
     },
     {
       "id": "cliffhanger-checklist-first-stop-subagentstop-blocked-escape-stats-2026-10-10",
@@ -440,7 +509,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Cliffhanger: block an agent's stop while its own checklist has open items",
+      "whatItIs": "A hook and skill for headless or overnight runs: when the agent tries to stop, it rebuilds the agent's own checklist and blocks the stop while items are open, unless the agent names a blocker or another escape applies.",
+      "whyItMatters": "It acts at the stop with no model call, but its background-task escape means it is no check on our rule against exiting while waiting on background work. Per its FAQ, the skill, not the hook, did the work in the author's benchmark; reference only."
     },
     {
       "id": "dsh-claude-compat-claude-dir-bridge-project-dsh-user-order-2026-10-10",
@@ -458,7 +530,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A plugin that lets one coding CLI reuse another's skills, rules and hooks",
+      "whatItIs": "A plugin for one coding CLI that reads another coding CLI's project and user config folders in place, so both share skills, commands, rules, agents and three hook events. Same-name entries resolve in a fixed order, project first.",
+      "whyItMatters": "Our install script already puts the vault's contract file and shared skills into that seat; this would add the other CLI's folders in a stated order and leave that wiring alone. A plugin change made from this seat also changes the other CLI; reference only."
     },
     {
       "id": "dsh-goal-wait-gate-hold-goal-rounds-during-live-background-work-2026-10-09",
@@ -475,7 +550,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Hold automatic goal prompts while an agent waits on background work",
+      "whatItIs": "One coding CLI's goal mode keeps prompting an agent that ended its turn to wait on a background job or subagent, using up its round budget. This plugin holds those prompts until the work settles, then resumes the goal.",
+      "whyItMatters": "It fits the goal-mode side of our rule against ending a turn to wait on background work and then committing: an agent that does wait gets no goal prompts until the work settles. Built for pre-release versions; reference only, not installed."
     },
     {
       "id": "jev-belay-transcript-evidence-first-one-jev-call-unverified-done-2026-10-09",
@@ -493,7 +571,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A stop check that asks a judge model only when no check passed after edits",
+      "whatItIs": "A hook that runs when the agent stops. If nothing changed, or a test, build or lint run passed after the last change, it lets the stop through; otherwise one call to a judgment model decides whether to block.",
+      "whyItMatters": "It keeps the order of our rule that a real check outranks the decision layer's completion check: a passing check ends the turn with no model call. On 100 model-labeled stops from the author's own sessions it blocked 8, 7 rightly; reference only."
     },
     {
       "id": "agent-delegate-exit-65-no-change-config-header-echo-stdin-dev-null-2026-10-09",
@@ -511,7 +592,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agent-delegate: hand a spec to a coding agent and catch runs that did nothing",
+      "whatItIs": "A shell harness that hands a written spec to a coding agent with nobody watching. If neither git status nor the latest commit moved, it turns a success exit into a no-change code, and it prints the agent's config header so a quiet effort downgrade shows.",
+      "whyItMatters": "Our wrapper already fails a push-required run on a dirty tree or unchanged commit; its no-change code is a looser signal for any run, and the header would show each run's effort. Its defaults would need overrides for our seats; reference only."
     },
     {
       "id": "verified-ops-starter-freshness-wrap-rollout-exit-contract-mutants-2026-10-09",
@@ -529,7 +613,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "verified-ops-starter: check that a scheduled job's work really landed",
+      "whatItIs": "A small kit that replaces a scheduled job's self-report with evidence: it checks the output is fresh, flags a job that exits cleanly but left its output unchanged, and uses exit codes where a dead checker or one that measured nothing can't look clean.",
+      "whyItMatters": "The part now in our playbook is the rule that a check must be able to fail, which its self-test puts in runnable form by breaking each check on purpose first. The kit itself is not installed."
     },
     {
       "id": "vigil-claim-vs-check-missed-window-catchup-degraded-2026-10-09",
@@ -547,7 +634,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Vigil: check a scheduled job's claims against outside evidence",
+      "whatItIs": "A verification layer that watches a scheduled job from outside and keeps what the job claims apart from evidence you declare. It reports a window where nothing even tried to run as missed, can re-run it, and flags identical output a set number of runs in a row.",
+      "whyItMatters": "Our Field Brief miss-watch applies the same missed-window idea to one routine, and its demo bug, a dead source that looks like a quiet day, is what our rule on negative claims records as a gap. Reference only, not installed."
     },
     {
       "id": "brindle-check-exit-0-done-status-line-not-trusted-usage-pause-resume-2026-10-08",
@@ -565,7 +655,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "brindle: a milestone is done only when its check command passes",
+      "whatItIs": "A supervisor that runs several coding agents side by side, each on its own branch by default. A milestone counts as done only when its check command passes, never on a model's word, and a new session re-runs checks instead of trusting saved status lines.",
+      "whyItMatters": "It builds our rule that a real check decides done into the driver, and its distrust of saved status lines matches our staged watchdog, which logs a session's status but never lets it decide a kill or resume. Source-available, not open source, so pattern only."
     },
     {
       "id": "authority-demo-dispatch-time-recheck-signed-finding-check-writable-2026-10-08",
@@ -583,7 +676,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "authority-demo: re-check an approval right before the step runs",
+      "whatItIs": "A runnable demo in which an approved agent payout is refused at the moment it would run, because the payee was frozen while it waited for approval. The refusal is saved in a signed record of what the check read, when, and whether the check could be edited.",
+      "whyItMatters": "The part now in our playbook is the approval re-check: anything approved earlier is checked again right before it runs. The demo itself is not installed and, with no license, is pattern only."
     },
     {
       "id": "kanon-guard-must-be-able-to-fail-coverage-figure-no-configuration-2026-10-08",
@@ -601,7 +697,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Kanon: a guard must be able to fail, and a detector says what it checked",
+      "whatItIs": "An opinionated agent workflow with a rulebook of about 200 rules, each with its reason. Key ideas: prove each guard can fail by breaking what it protects, make every detector report what it examined, and record a missing measurement as absent, never zero.",
+      "whyItMatters": "Its rule that a guard must be able to fail is now in our playbook, as a test procedure behind our rules on failed lookups and real checks. By its own notes these principles are mostly prose rules; the workflow itself is not installed."
     },
     {
       "id": "ai-baton-workspace-rules-file-per-machine-health-stamp-leaked-value-gate-2026-10-08",
@@ -619,7 +718,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "ai-baton: a workspace kit with one rules file and per-machine health checks",
+      "whatItIs": "A workspace kit for one coding CLI: every session loads one shared rules file, a health command audits each machine's setup and stamps the result, and a gate blocks PRs that leak values or skip a version bump.",
+      "whyItMatters": "We already wire the shared contract file into our coding agents' setups; a per-machine stamp would show which machine last proved its copy. In its loop, approved PRs with passing checks merge themselves, while ours pass a human gate; reference only, not installed."
     },
     {
       "id": "agent-ops-guardrails-real-value-leak-check-observe-first-go-gate-2026-10-07",
@@ -637,7 +739,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agent-ops-guardrails: catch real secret leaks and gate an agent's changes",
+      "whatItIs": "Field notes from letting a coding CLI run a home lab with root: a leak check searches the agent's output for the real secret values, and the author says it found 7 leaks a pattern check missed. An experimental gate, observe-only by default, allows changes only inside a human-approved plan.",
+      "whyItMatters": "Its rollout, a simulation on your own history and then a week in observe mode, mirrors how we move a blocking gate from shadow to active. Its checks run with the agent's own rights, and stopping a hostile agent needs a separate process not built yet; reference only, not installed."
     },
     {
       "id": "sessionlens-verdict-calibrated-checks-rule-follow-up-2026-10-07",
@@ -655,7 +760,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "SessionLens: reviews agent sessions that write or fix tests",
+      "whatItIs": "An editor extension that flags tests never run, pass claims with no run before them and weakened assertions in agent sessions. Your “confirm” or “false” verdicts tune its calibrated checks, and a check confirmed at least twice, the default, becomes a proposed rule.",
+      "whyItMatters": "It is a measured form of our rule that a repeated lesson becomes a proposed skill change, and it charts how often a finding shows up before and after you mark its rule as moved. Experimental, with no headless mode in its docs; reference only, not installed."
     },
     {
       "id": "vibeguard-destructive-bash-block-outcome-only-record-pre-push-ancestry-2026-10-07",
@@ -673,7 +781,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "vibeguard: a hook tool that blocks a few destructive commands and checks pushes",
+      "whatItIs": "A command-line tool that adds hooks to several coding CLIs: it blocks a small set of destructive shell commands, records only the latest outcome, never the raw command or output, and a per-repo pre-push check rejects remote deletions, tag replacement and non-fast-forward pushes.",
+      "whyItMatters": "One tool could cover two of our coding seats, and its push check could guard the pushes our coding runs must make. Its own docs say it can be bypassed and is not a sandbox, so host permissions and repo protection stay the control; reference only, not installed."
     },
     {
       "id": "tokenpilot-path-launcher-usage-counters-no-causation-2026-10-07",
@@ -691,7 +802,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "TokenPilot: counts coding-CLI tokens on your machine, with no proxy",
+      "whatItIs": "A tool whose launchers wrap installed coding CLIs to count tokens locally, storing no prompts or code and starting the original CLI unchanged if setup fails. Its docs say its cache figures neither measure total savings nor prove the tool caused a reduction.",
+      "whyItMatters": "Its careful wording is a model for how our usage dashboard states savings. Three of our seats are not among its providers, and its docs don't say what its reduce mode changes; reference only, not installed."
     },
     {
       "id": "tmux-agent-status-session-file-state-not-hooks-sticky-done-2026-10-07",
@@ -718,7 +832,10 @@
         "Codex lsof-to-rollout matching (not adopted)",
         "'done until viewed' window display (not adopted)",
         "installing the tmux plugin (not installed)"
-      ]
+      ],
+      "plainTitle": "tmux-agent-status: agent status from the agent's own session state, not hooks",
+      "whatItIs": "A terminal plugin that shows each coding agent's status in the window list, read from the agent's own saved session state instead of hooks, so an Esc interrupt, which fires no hook, doesn't leave a window stuck on “working”.",
+      "whyItMatters": "In the playbook: the stall watchdog's stale-run line logs one coding CLI's session-file status, for logging only, never to decide a kill or resume. Staged, not live until Haiyuan approves; the plugin itself is not installed."
     },
     {
       "id": "ruttla-two-probe-rules-exit-2-nothing-measured-2026-10-06",
@@ -736,7 +853,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Ruttla: a quality gate whose rules must prove they can fail",
+      "whatItIs": "A local quality gate that turns a proven failure into a rule, which must fail on a broken test case and pass on a healthy one. Its exit code is a contract: one code means a blocking finding, another means nothing was measured, which is not a success.",
+      "whyItMatters": "It turns two of our rules, on negative claims and on a real check deciding done, into an exit code a script can test. Its idea that a check must be able to fail is in the playbook; the tool, an early preview, is not installed."
     },
     {
       "id": "sandbox-run-detached-worktree-verify-main-tree-byte-identical-2026-10-06",
@@ -754,7 +874,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "sandbox-run: verify in a separate copy and confirm the repo state is unchanged",
+      "whatItIs": "A tool that runs build, test or lint commands in a separate temporary copy of the repo, not the live checkout, so writes can't leak back and a pass comes from a clean rebuild. It then checks that the main tree's version-control state is byte-identical before and after.",
+      "whyItMatters": "Our launch wrapper already fails a run that must push when the tree is dirty, and this tool targets build leftovers mixing into a change. It isolates only the verify step; reference only, not installed."
     },
     {
       "id": "claude-tmux-session-state-marks-cache-cold-warning-2026-10-06",
@@ -780,7 +903,10 @@
         "window state marks (not adopted)",
         "prompt-cache cold marks (not adopted)",
         "installing the tmux plugin (not installed)"
-      ]
+      ],
+      "plainTitle": "A terminal plugin that marks agent state and a prompt cache about to go cold",
+      "whatItIs": "A terminal plugin that marks each window of one coding CLI as working, done with a background command still running, or waiting on you. It also times the prompt cache and changes the window name's color as the cache nears going cold.",
+      "whyItMatters": "The playbook cites it only as a second source for one caveat: the session file is undocumented, so the watchdog's status line stays logging only, with its reader re-checked after each CLI update (staged, not live). The marks were not adopted; not installed."
     },
     {
       "id": "effortless-per-prompt-effort-judge-cache-countdown-2026-10-06",
@@ -798,7 +924,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "effortless: a judge picks reasoning effort per prompt, plus a cache countdown",
+      "whatItIs": "A mod for one coding CLI where a judge, our decision layer when a key is set or else a small model, picks the reasoning effort for each prompt. A footer countdown shows the prompt cache's time left and offers to compact once it goes cold.",
+      "whyItMatters": "A candidate for effort routing through our decision layer, though a trial would have to fit our max-effort defaults. Its docs say the benchmark measures effort choice, not cost or answer quality, and don't say how it sets effort; reference only, not installed."
     },
     {
       "id": "proof-of-done-stop-hook-claim-after-last-edit-2026-10-06",
@@ -816,7 +945,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "proof-of-done: blocks a “tests pass” claim the transcript doesn't back up",
+      "whatItIs": "A plugin for one coding CLI that, when the agent stops, checks claims like “tests pass”, “build succeeds” or “deployed” against the session's own transcript. The latest matching command after the last relevant edit must have run and succeeded, or the stop is blocked.",
+      "whyItMatters": "It would enforce, at the moment the agent stops, our rule that a real check, not the agent's word, decides done. Its scores come from a synthetic test set whose author also wrote the detector, and it matches English keywords only; reference only, not installed."
     },
     {
       "id": "five-field-role-card-promotion-ladder-2026-10-05",
@@ -851,7 +983,10 @@
         "Light Mission DoD",
         "handoff packet",
         "five-test charter"
-      ]
+      ],
+      "plainTitle": "A five-field job card for each bot, plus a clear promotion ladder",
+      "whatItIs": "A guide arguing that a bot's job contract is lasting infrastructure: one sentence of ownership expanded into five fields (what it owns, its inputs, what it may do, what it must ask before doing, and when it is done).",
+      "whyItMatters": "We adopted both ideas: each bot's vault card opens with the five fields, and each bot lists its earned standing approvals, with evidence and what revokes them. We kept our three-clean-runs rule at 3 runs, not the author's 5."
     },
     {
       "id": "memory-engineering-fast-slow-provenance-2026-10-05",
@@ -882,7 +1017,10 @@
         "two-account tests (out of scope: single-user fleet)",
         "claim-vs-record checks (already covered)",
         "negative-claim lookups (already covered)"
-      ]
+      ],
+      "plainTitle": "Memory engineering: five buckets, two clocks and provenance cards",
+      "whatItIs": "An article arguing that the first job of memory engineering is routing context to the right bucket: live source, team skill, team memory, private note or task state. The author says the ledger, review dates and eval process are proposals, not verified product features.",
+      "whyItMatters": "We adopted four parts: fast-changing facts like quota or a PR's latest commit are re-fetched live before any action or claim, every fact goes to one of five buckets, new decision notes and rule memories carry a provenance card, and bad memory is fixed at its source first."
     },
     {
       "id": "tenex-eval-driven-development-2026-10-05",
@@ -899,7 +1037,10 @@
         "replay",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Tenex: a guide to eval-driven development for agents",
+      "whatItIs": "A guide that defines an eval as a grader applied to a trace and recommends turning bad production traces into offline regression cases. It asks for repeated-run pass bars, model judges checked against hand labels, and at least one grader on the agent's path, not just its answer.",
+      "whyItMatters": "Ideas to try: turn failed runs into regression cases in our replay set, check any judge before its scores gate a promotion, and keep one path check in the coding loop. Lab only; no playbook change."
     },
     {
       "id": "claude-code-dispatch-mechanical-dispatch-orchestrator-write-deny-2026-10-05",
@@ -918,7 +1059,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Checks that route subagent launches and stop the orchestrator writing code",
+      "whatItIs": "A set of checks that run before each tool call: they print one line per subagent launch, stop launches that name no model from silently inheriting the parent's premium model, and deny code edits in the orchestrator session so it must brief a worker.",
+      "whyItMatters": "It would turn written rules, that our chat bots never write code and each seat runs at max effort, into checks that deny, and it fits our decision layer's simplest-baseline rule. In the author's replay test a keyword rule beat a model classifier; not installed."
     },
     {
       "id": "titan-receipts-poaw-independent-verifier-anchor-2026-10-05",
@@ -936,7 +1080,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Titan Receipts: signed commit receipts checked by an independent verifier",
+      "whatItIs": "Titan gives every commit a signed, hash-chained receipt that can be verified offline, and its CI check runs its own pinned verifier, never the repo's copy. A second project checks the destination: when an agent claims a push, it asks the code host and signs a pass or fail receipt.",
+      "whyItMatters": "Our receipt rules, “gap, not zero” and “verified means the check ran”, are self-administered today; this shows how an outside check could back them. Patterns only, copy nothing; not run."
     },
     {
       "id": "bastionfuse-honeytokens-taint-then-egress-sticky-fuse-2026-10-05",
@@ -954,7 +1101,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "bastionfuse: decoy secrets that taint a session and trip a fuse",
+      "whatItIs": "A containment tool that assumes the model itself may be the attacker and relies only on controls outside it. It plants decoy secrets, files and tools; once a session reads a decoy, any later call that can send data trips a fuse that stays tripped.",
+      "whyItMatters": "It adds the canary that two guardrail tools on our list lack, and its built-in limits only log “would trip” until real sessions are reviewed, like our shadow-to-active steps. Its docs call it tamper-evident, not tamper-proof; reference only, not run."
     },
     {
       "id": "cache-live-control-priced-wait-ttl-precedence-2026-10-05",
@@ -972,7 +1122,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "cache-live-control: pick each chat's prompt-cache lifetime and when to wait",
+      "whatItIs": "A plugin for one coding CLI that sets the prompt-cache lifetime for the main chat and for subagents separately, mid-session. Its priced-wait rule: on a one-hour cache, delegate anything past roughly 30 tool calls and wait, since waiting is free; on a five-minute cache, work directly.",
+      "whyItMatters": "The cache ideas already on our list measure or reorder the cache, but none picks its lifetime, so this fills that gap. Its measurement is the author's own 12 runs; a documentation pattern for now, not installed."
     },
     {
       "id": "token-weather-usage-pacing-vs-clock-cache-miss-cause-2026-10-05",
@@ -990,7 +1143,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "token-weather-usage: usage paced against the clock, plus why the cache missed",
+      "whatItIs": "A status-bar mod for one coding CLI that shows usage limits against elapsed time: yellow when usage runs ahead of the clock, red when far ahead or nearly used up. Its cache indicator shows the time left and names the cause of each miss, such as a model change.",
+      "whyItMatters": "It points at the axis our usage dashboard lacks: with a bare percentage, 74% used with 24 minutes left looks the same as 74% with two hours left. A pacing column and miss causes could come from data we already collect, with nothing installed."
     },
     {
       "id": "loupe-sha-bound-review-envelopes-circuit-breakers-2026-10-04",
@@ -1016,7 +1172,10 @@
         "verdict bound to the head SHA (already the review verdict line)",
         "fingerprinted findings with alias lineage (not adopted)",
         "SHA-bound envelopes and append-only ledger (not adopted; loupe not installed)"
-      ]
+      ],
+      "plainTitle": "loupe: commit-tied review records and breakers for rounds that don't converge",
+      "whatItIs": "Review plumbing with no model inside: each request and verdict is tied to a commit, findings get fingerprints so they can't quietly change between rounds, and circuit breakers block the next handoff until a human records a decision.",
+      "whyItMatters": "Only its circuit-breaker idea is in the playbook: before blind review of a multi-file doc or policy change, sweep it all against the newest sources; a new high-priority finding in unchanged text means another full sweep. The rest was not adopted; not installed."
     },
     {
       "id": "corralai-critic-not-writer-reproduce-or-demote-2026-10-04",
@@ -1034,7 +1193,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "corralai: an audit engine where the critic must differ from the writer",
+      "whatItIs": "An auditing engine that plants faults and runs your own test suite against each, so the share caught is measured, not self-reported. Its reviewer must attach a script to each claim, unreproduced claims are demoted, and it won't start if the critic matches the writer.",
+      "whyItMatters": "It refuses, rather than just discourages, what our review rule forbids: an implementer reviewing its own work. Its author-reported blind-spot overlap across models is worth reading before any multi-seat review; its license limits us to patterns, and it was not run."
     },
     {
       "id": "delivery-harness-autonomy-error-budget-engine-lock-2026-10-04",
@@ -1052,7 +1214,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "delivery-harness: task-type autonomy with an error budget and a locked engine",
+      "whatItIs": "A delivery harness whose engine is copied into each project and hash-locked. Fixes must fail before and pass after, old tests run at the base version so the agent can't weaken them, and autonomy per task type is withdrawn automatically when its error budget is exceeded.",
+      "whyItMatters": "It could supply the automatic half of our autonomy ladder's demotion rule and fits the install-drift checks in our nightly Mac audit. The idea is to borrow its three named mechanisms, not install the platform; not run."
     },
     {
       "id": "ai-jury-cross-vendor-cli-review-jury-2026-10-04",
@@ -1070,7 +1235,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "ai-jury: a review jury of models from several vendors, with a verifying chair",
+      "whatItIs": "A review jury that runs coding CLIs, hosted models and local models read-only, each given the diff. They review independently, then rebut each other, and a chair verifies before writing one verdict, or the panel votes.",
+      "whyItMatters": "It fits our blind reviews and evidence-before-verdict habit, and a local model could add a third reviewer at no marginal cost. Fanning out costs tokens, so any standing use needs Haiyuan; not run."
     },
     {
       "id": "stk-read-side-outlines-claude-codex-hooks-2026-10-04",
@@ -1088,7 +1256,10 @@
         "Muse Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "STK: turns oversized file reads into outlines for two coding CLIs",
+      "whatItIs": "A hook-based tool: when the agent reads a whole oversized file, it gets a line-numbered outline instead and fetches only the parts it needs, while small or scoped reads pass through unchanged.",
+      "whyItMatters": "It is the read-side partner of an output-trimming tool already on our list, and its report keeps our dashboard's rule that bytes are not tokens: an upper bound on bytes avoided, not net savings. Mac behavior is unverified; not installed."
     },
     {
       "id": "untrusted-content-is-data-not-instructions-2026-10-04",
@@ -1104,7 +1275,10 @@
         "Field Brief",
         "review"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Untrusted content is data: quote instructions, never follow them",
+      "whatItIs": "An 11-step write-up of a chat-bot team's own workflow keeps one standing rule: treat every email, page and document as untrusted data, and if it contains instructions, quote them and don't follow them.",
+      "whyItMatters": "Now playbook policy for what our collectors read online, PR text, tool output and other agents' output: a reviewer or gate takes its policy from its own prompt and the playbook, never from what it reviews. It is policy text; nothing enforces it."
     },
     {
       "id": "failure-taxonomy-replay-set-worst-of-three-2026-10-04",
@@ -1120,7 +1294,10 @@
         "repeat-lesson",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Count failure types first, then replay real failures and judge the worst run",
+      "whatItIs": "An evals guide says to read 100 or more outputs and count failure types before building graders. A second guide adds an eval set built from your own failures, run three times and judged on the worst run.",
+      "whyItMatters": "The replay half is playbook policy: a set of real failures where a case passes only if all three runs pass, one with a reworded instruction. Labeling and counting our own failures by type is a trial not yet started, and no replay set exists yet."
     },
     {
       "id": "emergency-stop-every-layer-2026-10-04",
@@ -1136,7 +1313,10 @@
         "tmux",
         "jev"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Separate kill switches, so an emergency stop checks every layer",
+      "whatItIs": "A guide to always-on cloud agents keeps three separate kill switches, for the main agent, its delegated tasks and its scheduled routines, because pausing the main agent does not cancel the others.",
+      "whyItMatters": "Now a playbook check list: a stop is verified on five layers, from the bot and its routines to in-flight tasks, open ledger entries and any active decision-layer gate. Stopping a bot stays in the red risk lane and needs Haiyuan's approval; the list is not permission."
     },
     {
       "id": "wake-dedupe-key-budget-auto-pause-2026-10-04",
@@ -1153,7 +1333,10 @@
         "EM",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Salix: event watchers with a dedupe key, a wake budget and auto-pause",
+      "whatItIs": "Comma's Salix lets an agent write tiny sandboxed watcher programs that run outside the model and wake the main agent only when needed. Each wake carries a dedupe key and a budget, and a watcher over budget pauses itself with a reason.",
+      "whyItMatters": "Ideas to try: give every bot-to-bot wake a stable key so a repeated delivery fires once, cap wakes per routine, and pause a routine at its cap with the reason recorded. Trial idea, not started."
     },
     {
       "id": "recalibrate-or-retire-on-model-change-2026-10-04",
@@ -1170,7 +1353,10 @@
         "rules",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Re-check gates and rules when a model or version in the path changes",
+      "whatItIs": "An evals guide says to calibrate a cheap gate once against ground truth, then re-audit it when the model, the judge or the domain changes.",
+      "whyItMatters": "A model-change sweep is in the playbook: when a model or version in the path changes, re-run the decision layer's shadow report and the replay set, and check whether each lint, hook or prompt rule still earns its place. Its first real use is the next such change."
     },
     {
       "id": "confirm-old-process-dead-before-resume-2026-10-04",
@@ -1193,7 +1379,10 @@
       ],
       "skippedAsCovered": [
         "fencing token per worker (not adopted)"
-      ]
+      ],
+      "plainTitle": "A timeout doesn't prove the old worker stopped, so check before resuming",
+      "whatItIs": "A post on an open-source, alpha cloud-agent runtime that keeps the agent replaceable and commits each step before acting. It notes that a timeout does not prove the old worker stopped, so a fencing token keeps a stale worker from acting.",
+      "whyItMatters": "Now in the playbook: our stall watchdog resumes a stalled run only after the old agent process is confirmed gone, or else parks it as an unknown outcome. Staged, not live until Haiyuan approves; fencing tokens were not adopted."
     },
     {
       "id": "approval-rate-per-category-decision-queue-2026-10-04",
@@ -1208,7 +1397,10 @@
         "autonomy",
         "policy"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "When almost every prompt is approved, use a boundary instead",
+      "whatItIs": "A guide to six harness decisions prefers operating-system write and network boundaries to approval prompts, citing a 93% approval rate for prompts; that figure is second-hand and was not verified.",
+      "whyItMatters": "Now playbook policy: track how often Haiyuan approves each category in the decision queue, and propose any category approved more than about 90% of the time for green or yellow lane policy, or a boundary, instead of a prompt."
     },
     {
       "id": "batch-triage-findings-root-cause-2026-10-04",
@@ -1224,7 +1416,10 @@
         "repeat-lesson",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Log findings, review them in a batch and fix the common cause",
+      "whatItIs": "A summary of the Poteto and Matt Pocock interview: findings go into one doc and are reviewed in a batch days later to find common causes, a coordinator agent groups related reports, and human review is strict spot-checking, not review of each PR.",
+      "whyItMatters": "Our nightly Mac audit and other audit agents could log findings in one place for a weekly root-cause review instead of fixing each one. Backlog; only the summary was read, not the interview."
     },
     {
       "id": "memory-admission-accepted-vs-draft-notes-2026-10-04",
@@ -1240,7 +1435,10 @@
         "context",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Accepted or draft notes: only reviewed work should change what agents trust",
+      "whatItIs": "A post on an alpha agent runtime says work enters the shared workspace only after other agents challenge its conclusions and evidence. The lesson for us: only reviewed work should change what future agents trust.",
+      "whyItMatters": "Today every research and wiki note in our vault reads as truth. The idea is a draft or accepted state, with draft notes treated as leads to check, not facts; backlog, with no format chosen and no note changed."
     },
     {
       "id": "structured-tool-errors-pruned-tool-menus-2026-10-04",
@@ -1256,7 +1454,10 @@
         "tokens",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Structured tool errors and lean, lazily loaded tool menus",
+      "whatItIs": "A guide to six harness decisions asks for structured error messages from tools, tools loaded only when needed, and unused tools pruned from the menu.",
+      "whyItMatters": "Our own helper scripts could return errors that name the field, the valid value and the next step, and tool-server descriptions could stay on disk until a task needs them. Backlog; no helper has been changed."
     },
     {
       "id": "completion-check-evidence-not-narrative-2026-10-04",
@@ -1273,7 +1474,10 @@
         "review",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Give the completion check evidence, not the agent's own story",
+      "whatItIs": "An evals guide says a judge should get yes-or-no questions with evidence and be checked against human labels. It reports that a judge which saw only the chat did no better than chance.",
+      "whyItMatters": "Our decision layer's completion check could get exit codes, links and the done report instead of the agent's account, and verdicts could name the reviewer model and version. Backlog; that check stays shadow and advisory, and a real check still decides done."
     },
     {
       "id": "citation-claim-support-check-shadow-2026-10-04",
@@ -1290,7 +1494,10 @@
         "shadow",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Check citations claim by claim and accept only above a confidence bar",
+      "whatItIs": "An evals guide points to a typed judge and small detectors that check whether a claim is supported. The idea: ask one question per claim, “is it supported by this excerpt?”, and accept it only above a confidence threshold.",
+      "whyItMatters": "In the Field Brief's citation step, our decision layer or a small detector would answer each question. A first trial would be shadow only, inside an existing gate that logs and never blocks; not started, no threshold chosen."
     },
     {
       "id": "restate-the-ask-before-starting-2026-10-04",
@@ -1305,7 +1512,10 @@
         "handoffs",
         "EM"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Restate the goal and the problem before starting work",
+      "whatItIs": "A one-sentence social post quoting a most-used prompt: “restate in your own words what you think my goals are and what the problem I'm trying to solve is.”",
+      "whyItMatters": "Now one line in the playbook's light definition of done for missions: before a non-trivial task, the agent restates the goal and the problem, and that is compared with the intent before work starts."
     },
     {
       "id": "three-run-proof-detection-floor-2026-10-04",
@@ -1320,7 +1530,10 @@
         "promotion gate",
         "routines"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Three clean runs only catch large regressions, so say so",
+      "whatItIs": "An evals guide asks for paired comparisons with error bars and a stated detection floor, meaning how small a regression the test setup can catch.",
+      "whyItMatters": "Now a playbook caveat on our three-clean-runs rule: three runs only catch large regressions, so a promotion note says so and lists every case that got worse, even when all three runs passed."
     },
     {
       "id": "five-tests-before-a-new-bot-2026-10-04",
@@ -1335,7 +1548,10 @@
         "autonomy",
         "routines"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Five tests to pass before creating a new always-on bot",
+      "whatItIs": "A guide to always-on agents runs five tests before one is created: a specific goal, its own sources, a working style, an approval boundary and a cadence.",
+      "whyItMatters": "Now a five-test charter for any new bot in the playbook's guide to extending the team, with cadence read as its trigger, a schedule or an event. The guide's product and pricing claims were not checked."
     },
     {
       "id": "oversight-readable-output-controlled-language-2026-10-04",
@@ -1351,7 +1567,10 @@
         "review",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Make agent output easy to understand with short, controlled-language reports",
+      "whatItIs": "A social post arguing that as agents do more of the work, people spend more time understanding their output, so it should be easy to understand. In rising order of preference it lists controlled-language writing, diagrams, HTML pages and custom explainer videos.",
+      "whyItMatters": "Reports Haiyuan must judge, like done reports, decision-queue items and PR summaries, could use short sentences with one fact each and defined terms. A style rule only, to be tried first on the decision queue and done report before any playbook change."
     },
     {
       "id": "throwaway-explainer-from-receipt-evidence-2026-10-04",
@@ -1367,7 +1586,10 @@
         "review",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Throwaway explainers for hard reviews, built only from verified evidence",
+      "whatItIs": "A social post argues that cheap, discardable, custom artifacts are now worth generating for oversight. The idea here: for a large or risky change, an optional throwaway diagram or explainer page could help Haiyuan review it.",
+      "whyItMatters": "A polished explainer can make wrong work look convincing, so it would use only the done report and its verified evidence, never the agent's own story. It is never proof or approval; backlog."
     },
     {
       "id": "phase-barrier-anti-shortcut-stage-gate-2026-10-03",
@@ -1385,7 +1607,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "phase-barrier: blocks source edits until a failing reproduction exists",
+      "whatItIs": "A stage-gate harness that intercepts a coding agent's tool calls so it cannot edit source until the current phase's checkable outputs exist, in order from requirement and spec through tests, implementation, fixes and delivery.",
+      "whyItMatters": "It would enforce our reproduce-before-fix rule and the intent, spec, plan order mechanically. Its docs' benchmark gains were not re-run here, and they report gated runs took about 1.8 times as long; not installed."
     },
     {
       "id": "agent-receipts-transcript-claim-gaming-audit-2026-10-03",
@@ -1403,7 +1628,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "agent-receipts: checks an agent's “done” claims against what really happened",
+      "whatItIs": "A dependency-free tool that reads one coding CLI's session logs, pulls out claims like “tests pass” or “committed”, and checks them against real exit codes, files and commits. It also flags gaming, such as cut assertions, masked failures or commits that skip checks.",
+      "whyItMatters": "It fits our done-report audits, where a real check, not the agent's word, decides done. Part of it is in the playbook under a Haiyuan-approved rule on checks that can fail; the tool only audits after the fact and is not installed or run."
     },
     {
       "id": "dibs-resource-lease-single-door-ship-2026-10-03",
@@ -1421,7 +1649,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "dibs: lets parallel agent sessions claim branches, ports and files",
+      "whatItIs": "A single program, with no background service, that coordinates parallel agent sessions on one machine. Sessions lease branches, ports or files, a clash is refused with the holder named, and one queued ship command is the only way onto the main branch.",
+      "whyItMatters": "It points at how our coding agents on the Mac could share one machine and push one at a time. Reference design only: no license was detected, so no code may be copied, and it is not installed or tested under load."
     },
     {
       "id": "claude-code-cache-keepalive-collapse-transcript-audit-2026-10-03",
@@ -1439,7 +1670,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Finding hidden prompt-cache collapses in a coding CLI's session logs",
+      "whatItIs": "Unofficial notes and log-audit recipes for one coding CLI's prompt cache. A turn that breaks the cache rebuilds the whole cached prefix at the higher write price, then the next turn recovers, so one snapshot hides the cost; the recipes show where the break happened.",
+      "whyItMatters": "It adds an after-the-fact way to catch cache waste in saved session logs, next to contextscope's request-level diffs. The notes are unofficial and may go stale as the tool changes; nothing was installed or run."
     },
     {
       "id": "relevo-mastermind-builder-worktree-handoff-2026-10-03",
@@ -1456,7 +1690,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "relevo: passes plans and reports between an architect agent and builders",
+      "whatItIs": "A tool that passes plans and reports between an architect agent and background builder agents. It starts each builder in its own copy of the repo, records each round's diff, runs checks after each round and spots builders whose output has stalled.",
+      "whyItMatters": "It lines up with the handoff contracts between the manager bot and our coding agents on the Mac. The card suggests borrowing its handoff, separate-copy and stall-detection ideas, not installing a heavy supervisor; not installed or run."
     },
     {
       "id": "contextscope-prefix-cache-break-diff-fail-on-2026-10-02",
@@ -1474,7 +1711,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "contextscope: shows which part of a request broke the prompt cache",
+      "whatItIs": "A local tool that compares raw model requests, finds where they stop sharing the same opening text, and names the block that broke the prompt cache, such as a changed system value or reordered tools. It can also fail an automated build check on warnings.",
+      "whyItMatters": "Unlike several other cache cards, it pins a cache miss on a specific block, which could help cut token waste. Its cost figures come from a simulation, not a measurement; not installed or run."
     },
     {
       "id": "boozelee-harness-task-contract-verify-pr-refuse-2026-10-02",
@@ -1492,7 +1732,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A harness that won't open a PR until every check and review passes",
+      "whatItIs": "An agent harness where each task starts with a contract: goal, acceptance criteria, allowed paths and risk. A verify step runs every check, a scope check and an independent review, and the PR command refuses unless the verdict is a pass.",
+      "whyItMatters": "Next to other completion-gate cards, its distinct piece is the task contract plus the PR refusal, and a skipped review counts as not passed. Reference only because of its license, so no code is copied; not installed or run."
     },
     {
       "id": "agent-quota-tracker-verified-poke-window-state-2026-10-02",
@@ -1510,7 +1753,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agent-quota-tracker: tracks each coding agent's usage window and reset time",
+      "whatItIs": "A local monitor that shows, for each coding agent, whether its 5-hour usage window is active, how much is used and when it resets. To start an idle window it sends a tiny prompt, then checks with the provider rather than trusting the prompt alone.",
+      "whyItMatters": "It adds a usage-window measure next to the quota-watchdog and pre-flight quota cards. It reads provider login keys, which should be passed through the environment and never printed; some parts are beta, and it is not installed or run."
     },
     {
       "id": "blackbox-evidence-class-completion-barrier-seal-2026-10-02",
@@ -1527,7 +1773,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "blackbox: makes an agent's findings match what its evidence supports",
+      "whatItIs": "A system-verification framework that runs a system in a controlled setup and labels each finding supported, refuted or unresolved, based on the evidence rather than the agent. It allows “nothing happened” or exact counts only after an observable end point, never a timer.",
+      "whyItMatters": "It adds real-system evidence with clear limits on what a finding covers, next to the replay and mock-model cards. It is alpha, needs a heavy container and tracing setup, and is not installed or run."
     },
     {
       "id": "tapehead-append-only-contiguous-tape-replay-2026-10-02",
@@ -1544,7 +1793,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "tapehead: an agent built on one log that is only ever added to",
+      "whatItIs": "An agent core design where one append-only log is the single source of truth and the message history is rebuilt by replaying it. Entries are numbered with no gaps, never edited, deleted or reordered, have one writer, and fixes are made by adding new entries.",
+      "whyItMatters": "It is the general case of the ledger rules behind several other cards, such as simply and claimcheck. Judged from its readme alone and with no license detected, it is a reference design only; not installed or run."
     },
     {
       "id": "gatehouse-completion-gates-oracle-reverify-2026-10-01",
@@ -1562,7 +1814,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "gatehouse: declared checks that decide when an agent's task is done",
+      "whatItIs": "A tool where each task outcome is paired with a command and the text its output must contain. A gate is met only when that check passes against its current definition, and a re-verify step re-runs every runnable gate, even ones already met.",
+      "whyItMatters": "It is a mechanical form of our rule that a real check, not the agent's word, decides done, and of our replay regression check. It proves only the checks you write and detects drift, not forgery; not installed or run."
     },
     {
       "id": "skillwharf-skill-lockfile-pin-hash-doctor-usage-2026-10-01",
@@ -1580,7 +1835,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "skillwharf: pins shared agent skills to exact versions and checks them",
+      "whatItIs": "A package manager for shared agent skill folders. It pins each skill to an exact commit and content hash, installs nothing if any skill fails its check, and reports broken links, drift and unused skills.",
+      "whyItMatters": "It covers the pinning and integrity half of installing skills on our coding agents, next to the catstack and cinch cards. Young and not installed or run; its count of which skills fire works from one coding CLI's logs only."
     },
     {
       "id": "sessionpipe-privacy-tiers-secrets-redaction-conformance-2026-10-01",
@@ -1598,7 +1856,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "sessionpipe: controls which agent session events may leave the machine",
+      "whatItIs": "An open protocol and client that hooks into several coding CLIs and keeps session events in a local outbox until you add a destination. Each destination gets one of four privacy levels, and a secrets filter that can't be turned off runs above the lowest level.",
+      "whyItMatters": "It could give us a written rule for what may leave a coding seat, for our activity feed written to a file only, plus real hook examples for each tool. Pre-release; not installed or run."
     },
     {
       "id": "harness-mocks-claude-mock-model-free-e2e-2026-10-01",
@@ -1616,7 +1877,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "harness-mocks: a stand-in coding CLI so harness tests run without a model",
+      "whatItIs": "A project whose mock stands in for one coding CLI's program, so end-to-end test suites run without calling a model. Its 19 suites cover hooks, session files, compaction, resume and the session lifecycle.",
+      "whyItMatters": "It could back our replay regression check and let us write Mac hooks against cited behavior instead of folklore. Release builds are Linux-only, token counts are not modeled, and the mock was not built or run here."
     },
     {
       "id": "dsh-stable-context-first-prefix-reorder-2026-10-01",
@@ -1634,7 +1898,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A plugin that puts fixed context first so more of the prompt is cached",
+      "whatItIs": "A local, unpublished plugin for the harness behind one of our scout seats. It reorders messages so context that doesn't depend on the question comes before the user's message, moving only two approved sources and never the system prompt.",
+      "whyItMatters": "A longer shared opening lets the prompt cache reuse more; the author measured reusable prefix rising from about 67.96% to 99.8% on local hardware, which may not carry over to our seat. Installing it would need a seat owner, a baseline and a log-only shadow trial first."
     },
     {
       "id": "proof-stop-hook-completion-claims-tamper-receipts-2026-09-30",
@@ -1652,7 +1919,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Proof: re-runs the real checks when an agent claims it is done",
+      "whatItIs": "A pair of hooks for one coding CLI: it snapshots the repo at session start, and when the agent claims “tests pass” or “all done”, it runs real checks, compares with the snapshot and flags tampering like skipped or deleted tests before the turn can end.",
+      "whyItMatters": "It is a heavier mechanical layer on our rule that a real check, not the agent's word, decides done, since, unlike claimcheck, it also re-runs the checks. Its tamper half was already written into our rules as prose; whether it fires in non-interactive runs is unverified."
     },
     {
       "id": "temper-harness-contract-typecheck-author-time-2026-09-30",
@@ -1670,7 +1940,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "temper: catches broken agent setup files while you write them",
+      "whatItIs": "A command-line checker for one coding CLI's setup folder of skills, rules, hooks and instruction files. It checks them against the vendor's schemas and a declared contract, so bad headers, ignored keys and dead hook paths fail early, not silently at run time.",
+      "whyItMatters": "It points at setup drift across our coding agents' skill folders. There is no ready-made Mac build yet, it checks only one CLI's folder and not our other seats, and it is still an early version."
     },
     {
       "id": "cadence-hooks-rust-binary-obsidian-vault-guards-2026-09-30",
@@ -1688,7 +1961,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "cadence-hooks: bundled agent hooks, including guards for vault notes",
+      "whatItIs": "A single native program that bundles 78 hooks for one coding CLI. Its vault part blocks deletes, other destructive commands and empty writes over an existing vault file, and checks liveness at session start.",
+      "whyItMatters": "It would turn the vault rules in our list of past mistakes into a machine check before each tool call. It covers one coding CLI only, not the other seats sharing the vault, and its speed is the author's claim, not measured here."
     },
     {
       "id": "context-guard-token-ceiling-handoff-checkpoints-2026-09-30",
@@ -1706,7 +1982,10 @@
         "Agy Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Context Guard: forces a handoff note before a chat's context grows too big",
+      "whatItIs": "Five small hooks for one coding CLI that measure a chat's live context, warn as re-reading costs grow, and past a ceiling force a structured handoff note by refusing to close the chat. The next chat reloads from a memory list.",
+      "whyItMatters": "Its handoff-checkpoint pattern could fit our token-saving and handoff-packet rules for long sessions, though most of our runs are one-shot jobs. The savings figures are the author's own, the author says it has only run on Windows, and they may not carry over."
     },
     {
       "id": "catstack-symlink-prune-install-freshness-ab-gate-2026-09-29",
@@ -1724,7 +2003,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "catstack: installs agent skills by link and removes stale ones",
+      "whatItIs": "A setup kit that links skills, hooks and rules into three coding CLIs, then removes any link into the kit that the run didn't create, so renamed or deleted skills don't linger. It also ships a paired A/B token test for skill and hook changes and an advisory check for outdated hooks.",
+      "whyItMatters": "It mirrors a gap in how we install skills on our coding agents, since we copy files without a record of what was installed, and fits the replay promotion gate we locked but have not built. No license reported, so patterns only."
     },
     {
       "id": "chargehand-open-questions-prompt-ci-evidence-resolver-2026-09-29",
@@ -1742,7 +2024,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "chargehand: unresolved claims in an agent's result become open questions",
+      "whatItIs": "An agent result format that checks every claim against files, diffs, session messages or inputs and moves unresolved claims to an open-questions list. It also runs paired tests on PRs that change prompts, and presets can require approval above a risk or cost estimate.",
+      "whyItMatters": "Our done report has no machine-readable field for unresolved claims, and this shows one. The card suggests borrowing its contracts rather than installing its early runtime."
     },
     {
       "id": "orglet-one-catchup-day-cost-cap-unknown-spend-2026-09-29",
@@ -1760,7 +2045,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "orglet: one catch-up for missed runs, and no guessing about failed spend",
+      "whatItIs": "A desktop app whose scheduler folds missed runs into one catch-up you can run or skip, can cap cost per day, and never assumes a failed request was free unless that is confirmed. Reports are accepted only if their evidence points at allowed, unchanged files.",
+      "whyItMatters": "The card says these schedule habits should be written into the manager bot's routines. Early software, and its license and desktop install keep this to patterns only; no install."
     },
     {
       "id": "wordcell-path-scoped-vault-context-revision-proofs-2026-09-29",
@@ -1778,7 +2066,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "wordcell: gives an agent only the vault notes for the file it is changing",
+      "whatItIs": "A tool that reads an existing notes vault in place and, for the file an agent is about to change, returns only the notes, plans and instructions scoped to that path. If its optional hosted ranking fails, it falls back to plain exact-search order.",
+      "whyItMatters": "It points at a missing link from our decision notes and list of past mistakes to the file being edited. It requires Bun and by default prints support notices that agents see; patterns only."
     },
     {
       "id": "cinch-skill-dialect-matrix-audit-manifest-2026-09-29",
@@ -1796,7 +2087,10 @@
         "DSH Lab",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "cinch: write a skill once and translate it for many coding agents",
+      "whatItIs": "A tool that translates one skill file into the formats of many agent harnesses, dropping keys a harness doesn't support. Each run writes an audit of files written, merged or skipped, leaves hand-made files alone and can show drift as diffs.",
+      "whyItMatters": "It complements catstack's install checks with format translation and a record of every file it wrote, and its format table serves as reference data. The table rows are the project's claims from vendor docs, not re-checked here."
     },
     {
       "id": "claimcheck-stop-hook-session-record-contradicts-claim-2026-09-28",
@@ -1813,7 +2107,10 @@
         "no-exit-while-waiting",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "claimcheck: blocks a “done” claim that the session record contradicts",
+      "whatItIs": "A hook that runs when an agent says it is done and refuses the claim if the session's own record disagrees about tests passing, a commit or a push. It uses no model or network, and new checks block only after measuring near-zero false alarms.",
+      "whyItMatters": "Now a playbook rule: a passed, pushed or done claim must match the session record, and a green run after skipped, deleted, focused or gutted tests is suspect. Written rule only; no hook is installed."
     },
     {
       "id": "ccdrift-claude-code-session-log-drift-alerts-2026-09-28",
@@ -1830,7 +2127,10 @@
         "monitoring",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "ccdrift: alerts when a coding agent's behavior quietly drifts",
+      "whatItIs": "A local monitor that reads one coding CLI's session logs and alerts on quiet changes: worse prompt-cache use, a small model on the main thread, changed effort levels, hooks that fail or quietly stop, and replies cut off at the token limit. It keeps no prompt or reply text.",
+      "whyItMatters": "It would warn when a coding seat drifts, while Agent Console measures cache use on demand. Free and needs no key; the coding CLI must keep its logs long enough for the first run to have history."
     },
     {
       "id": "finetooth-coverage-map-fingerprint-third-recurrence-2026-09-28",
@@ -1847,7 +2147,10 @@
         "patterns",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "finetooth: whole-repo review with a coverage map and repeat-bug guards",
+      "whatItIs": "A whole-repo review skill that maps every tracked file to a review block and fails if any file is left unowned. A block turns red again when its code changes, and a third finding with the same root cause can't close without a test or lint guard.",
+      "whyItMatters": "It offers three patterns for our two independent blind reviews without installing it: a stated file-coverage line, verdicts that reset on a new push, and a guard instead of another entry in our list of past mistakes after a third repeat."
     },
     {
       "id": "coding-agent-guardrails-byte-budget-declared-effective-2026-09-28",
@@ -1864,7 +2167,10 @@
         "repeat-lesson",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "coding-agent-guardrails: a size cap on always-on rules, plus load checks",
+      "whatItIs": "Harness patterns drawn from real failures: show the check ran on the right thing before claiming done, a git guard that denies or asks about risky commands, a 20,000-byte cap on always-loaded rules, and a check that declared rules actually load.",
+      "whyItMatters": "Now a playbook rule: our shared contract file and list of past mistakes may not grow past their size when the rule was set, so a new line means compressing or demoting another. The load check and git guard were not adopted."
     },
     {
       "id": "swarm-agent-coordination-merge-batch-paths-owned-2026-09-28",
@@ -1881,7 +2187,10 @@
         "ownership",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "swarm-agent-coordination: what broke when agents shared one repo",
+      "whatItIs": "Field evidence from agents building software together in one repo, plus a set of mechanical checks. In the author's data, 85 of 229 PRs had a coordination incident, and breaks where separately passing pieces meet far outnumbered text conflicts.",
+      "whyItMatters": "It could strengthen our parallel work on one repo: re-run checks on the combined code before merging, require declared file ownership to cover the whole diff, and keep a written register of shared resources."
     },
     {
       "id": "agent-console-local-cache-token-split-2026-09-27",
@@ -1898,7 +2207,10 @@
         "cache",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Agent Console: a local view of where each session's tokens go",
+      "whatItIs": "A local app that reads two coding CLIs' session logs and splits each session's tokens into cache reads, cache writes, output and uncached input, with models, list-price cost and burn rate. It runs fully locally, with no telemetry, update checks or crash reports.",
+      "whyItMatters": "It could measure the effect of the cachebeat idea and check whether changing the implementer's effort level really cuts uncached input. Our usage dashboard is still a stand-in built from the chat bots' activity and routine runs."
     },
     {
       "id": "stingray-stop-hook-half-done-promises-2026-09-27",
@@ -1915,7 +2227,10 @@
         "no-exit-while-waiting",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "stingray: catches agents that stop half-done or make unbacked wait promises",
+      "whatItIs": "A hook that runs when an agent ends its turn and catches three cases: it did nothing, it claimed an action its tool calls don't show, or it promised to watch a build with nothing set up to watch. It then nudges the agent to finish, poll or name the blocker.",
+      "whyItMatters": "It would mechanically enforce our rule against exiting while waiting, for coding sessions. Its judgments go to the decision-layer service, and without that service's key the checks do nothing."
     },
     {
       "id": "jev-opus-dynamic-effort-prompt-cache-2026-09-27",
@@ -1932,7 +2247,10 @@
         "routing",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Raise or lower a coding agent's effort per step and keep the prompt cache",
+      "whatItIs": "A wrapper around the implementer's coding CLI that re-picks the effort level each step, through the decision-layer service or local rules: up when checks fail, down once they pass. Effort goes inside each message, not the top-level settings, so the cached prompt prefix stays intact.",
+      "whyItMatters": "Our locked default runs the implementer at maximum effort, which burns tokens on trivial shell and git steps; this aims to cut that while keeping peak effort for failing checks. By default it caps effort at high."
     },
     {
       "id": "agent-limit-watchdog-quota-orderly-stop-2026-09-27",
@@ -1949,7 +2267,10 @@
         "handoffs",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Agent Limit Watchdog: an orderly stop before hitting usage limits",
+      "whatItIs": "A Mac watchdog for two coding CLIs' usage limits: it warns at 80%, starts a stop phase at 92%, keeps a weekly reserve and never buys paid credits on its own. Its orderly stop asks once for a checkpoint (a status file and an unpushed commit), then pauses.",
+      "whyItMatters": "It would hand off before a usage limit is hit, ahead of our reactive switch from the implementer to a fallback seat. The card prefers one CLI's built-in auto-continue, with the watchdog's night mode stepping in only where that fails."
     },
     {
       "id": "claude-code-ops-kit-self-audit-reproduce-2026-09-27",
@@ -1966,7 +2287,10 @@
         "reproduce-before-fix",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "An ops kit against silent agent failures: self-audit and reproduce first",
+      "whatItIs": "A kit of skills and helper agents against silent failures in long runs: a self-audit that checks “zero” or “stopped” claims aren't failed fetches or stale checkouts, a reproduce-first debugging routine, and a separate read-only reviewer that assumes the work is broken.",
+      "whyItMatters": "Now a playbook rule: a zero, none or stale claim needs a lookup that worked, or it counts as an access gap. Reproduce-first and the skeptical reviewer were already covered by our rules; nothing installed."
     },
     {
       "id": "sno-station-squad-memory-peer-review-rsi-2026-09-26",
@@ -1983,7 +2307,10 @@
         "routing",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Sno Station: one workstation where your coding agents work as a squad",
+      "whatItIs": "An open-source laptop setup that joins coding agents you already run into one squad: shared encrypted memory, agent-to-agent messages, cross-vendor peer review and a context-keeping switch at rate limits. Each night it proposes skill changes and waits for a human yes.",
+      "whyItMatters": "Now a playbook rule, inside the daily consolidation we already run: a lesson that repeats becomes a proposed skill change. The tool is not installed and the rule adds no new routine; its one-command install is not ready yet."
     },
     {
       "id": "model-citizen-stop-gate-ownership-journal-2026-09-26",
@@ -2000,7 +2327,10 @@
         "Mac CLI",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Model Citizen: write agent rules once and enforce them with hooks",
+      "whatItIs": "A control layer under coding agents you already run: write rules, skills and roles once, and it applies them to two coding CLIs and enforces them with hooks. It grades shell commands by risk and keeps a turn open while the repo's own checks are red.",
+      "whyItMatters": "It would turn three of our written-only rules into machine checks: a real check decides done, install drift can be undone from a journal of touched files, and the green/yellow/red risk lanes grade commands before they run."
     },
     {
       "id": "cachebeat-inactivity-prompt-cache-heartbeat-2026-09-26",
@@ -2017,7 +2347,10 @@
         "kill review",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "cachebeat: keeps an idle session's prompt cache warm with a quiet ping",
+      "whatItIs": "A tiny skill for one coding CLI that sends a silent heartbeat while a session sits idle, so the next message reads history from cache instead of paying for the whole transcript again. It stops itself after a deadline so an abandoned session can't keep billing.",
+      "whyItMatters": "Our seats sit idle by design and saving tokens is a locked priority; a long coding session past the cache time limit pays again for its history on the next small check-in. Its readme says one cold start costs as much as ten heartbeats."
     },
     {
       "id": "gate-inbox-tmux-blocked-on-you-board-2026-09-26",
@@ -2034,7 +2367,10 @@
         "routines",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Gate Inbox: a live board of agent sessions waiting on you",
+      "whatItIs": "A read-only terminal board that lists many coding-agent sessions with live status, so the one waiting on you is easy to spot. It reads each session's terminal pane and does not sit between you and the model.",
+      "whyItMatters": "Our decision queue is a file checked once at a set time; this would add a live view of who is blocked on Haiyuan right now. It sits next to our rule against exiting while waiting and the stall watchdog."
     },
     {
       "id": "crossagent-verdict-contract-agree-escalate-2026-09-26",
@@ -2051,7 +2387,10 @@
         "tmux",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "crossagent: one agent codes while a fresh peer reviews with a fixed verdict",
+      "whatItIs": "A tool server that pairs two coding agents in side-by-side terminal panes: one drives and the other reviews every plan and diff. Each review ends with a fixed, machine-readable verdict word, and the reviewer starts from a cleared conversation.",
+      "whyItMatters": "Now a playbook rule: each review ends with a verdict line (approve, request changes or escalate) for the PR's head commit, and a missing line never counts as approval. The tool server is not installed."
     },
     {
       "id": "simply-ledger-owned-done-settle-gate-2026-09-25",
@@ -2068,7 +2407,10 @@
         "tmux",
         "routing"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "simply: models judge, code decides when work is done",
+      "whatItIs": "A multi-agent harness where an auditor owns the work ledger and the checks, and agents cannot mark their own criteria as passed. Work can't settle until every criterion passes and a QA package exists, and briefs give the outcome and criteria, not step-by-step orders.",
+      "whyItMatters": "We adopted its core rule: done means a real check passed, such as tests, a file, a pushed commit or a page that loads, and self-reports and decision-layer completion checks are advisory only. We have not built our own settle-gate or QA-package tooling."
     },
     {
       "id": "vnx-orchestration-ndjson-receipts-worktrees-2026-09-25",
@@ -2085,7 +2427,10 @@
         "Mac CLI",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "vnx-orchestration: a receipt per agent job, each worker in its own copy",
+      "whatItIs": "A local controller that runs installed coding CLIs as workers, each in its own copy of the repo, through review gates. Every job adds a line to an append-only receipt log with verdict, model and cost, and a job isn't done without its PR.",
+      "whyItMatters": "Its patterns could fit our coding loop: one receipt line per job, review and merge, and a separate copy per lane so reviewers never touch the implementer's copy. The author says it is not a security sandbox, and isolation between parallel copies is not yet race-free."
     },
     {
       "id": "agent-evals-offline-replay-promotion-gate-2026-09-25",
@@ -2102,7 +2447,10 @@
         "tokens",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "agent-evals: record model calls once, then replay them offline as tests",
+      "whatItIs": "A test harness that records model calls once and replays them offline with no key or network, then gates on pass rate, high-percentile cost rather than the average, latency and the path the agent took. Its judge model is checked against human labels.",
+      "whyItMatters": "We added a light replay regression check inside the three-clean-runs rule, before promoting skills, prompts or a log-only decision-layer gate; live runs stay the bar. Its readme warns replay scored far higher than live, and we borrow the pattern, not the tool."
     },
     {
       "id": "rari-grok-bot-operating-system-2026-09-25",
@@ -2135,7 +2483,10 @@
         "shared computer ≠ isolation",
         "login handoff (never passwords in chat)",
         "5-run promotion minimum (kept Three-Run Proof)"
-      ]
+      ],
+      "plainTitle": "rari: structured handoffs, reproduce bugs first, and a stricter promotion gate",
+      "whatItIs": "An article that splits a chat-bot setup into model, harness, loop, graph and approval layers, and argues for handing over ownership, not transcripts.",
+      "whyItMatters": "We adopted three ideas: a structured handoff packet, a reproduction before the implementer starts on a bug, and a stricter promotion gate (three clean runs, a tested rollback, a complete receipt). The weekly kill review gains a Haiyuan spot-check."
     },
     {
       "id": "bounded-agent-runtime-limits-outside-loop-2026-09-24",
@@ -2152,7 +2503,10 @@
         "Mac CLI",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "bounded-agent-runtime: hard run limits enforced outside the model",
+      "whatItIs": "A runtime pattern where hard limits on steps, time, spend, tool calls and repeated loops are checked before each step, not left to the prompt. Risk belongs to each tool (read, write, external, irreversible), not to the agent's own judgment.",
+      "whyItMatters": "The playbook now cites it as a source beside our run limits and green/yellow/red risk lanes, which are already live as written policy. A wrapper that enforces them at run time has not been built."
     },
     {
       "id": "agent-runway-preflight-quota-2026-09-24",
@@ -2169,7 +2523,10 @@
         "routing",
         "smoke"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agent-runway: checks remaining quota before an agent job launches",
+      "whatItIs": "A command-line tool, skill and tool server that reads how much quota is used and when it resets across several coding CLIs, and answers proceed, defer or unknown.",
+      "whyItMatters": "It could run before each Field Brief launch and route straight to the fallback seat when quota is nearly used up, instead of waiting out a stall-watchdog timeout. A low-risk, green-lane smoke-test candidate only."
     },
     {
       "id": "capo-quota-checkpoint-failover-2026-09-24",
@@ -2186,7 +2543,10 @@
         "retry",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "CAPO: save a checkpoint at a usage limit and resume on the other CLI",
+      "whatItIs": "A tool that notices when one of two coding CLIs hits its usage limit, saves a plain checkpoint of repo status and uncommitted changes, and relaunches the session on the other CLI. If both are capped, it waits for the earliest reset.",
+      "whyItMatters": "The playbook cites it as a source beside our quota failover, where a capped implementer already falls back to another seat. The automatic checkpoint and relaunch were not built."
     },
     {
       "id": "ai-coding-gateway-tool-output-trim-2026-09-24",
@@ -2203,7 +2563,10 @@
         "EM",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "ai-coding-gateway: trims noisy tool output before the model reads it",
+      "whatItIs": "Hooks that run before and after each tool call in one coding CLI and strip colors, progress bars, passing-test lists and build logs before the model reads them. It also adds an allow and deny list for commands.",
+      "whyItMatters": "Adapting just its trimming pattern could cut context bloat and early compaction of the chat history on our coding agents' long test runs, a direct way to save tokens. The card suggests skipping its dashboard."
     },
     {
       "id": "company-in-a-box-jev-gates-2026-09-23",
@@ -2220,7 +2583,10 @@
         "CoS",
         "shadow"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Company-in-a-Box: decision-layer checks for research and completion",
+      "whatItIs": "A social post describing a decision layer between a manager and its workers, with four tools: route work to a worker, check research, review completion and guard actions.",
+      "whyItMatters": "Our decision layer already had routing and guarding; we added a research check for Field Brief citations and a completion check before done, both shadow only and never blocking, plus a live worker list. Promotion waits for three clean runs."
     },
     {
       "id": "seanswarm-dual-read-failclosed-2026-09-23",
@@ -2237,7 +2603,10 @@
         "handoffs",
         "verification"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "multiagents-workflow: read sources twice; “done” needs proof or review",
+      "whatItIs": "A skills-only pack with no new seat or runtime. Its dual read has the same primary source read twice and tables what matches, adds or conflicts; its fail-closed acceptance rejects a prose “done” unless a test, exit code, screenshot or an independent read-only review of the diff backs it.",
+      "whyItMatters": "In playbook: the dual read strengthens source checks for the Field Brief, and the pack adds to our two independent blind reviews and chief-of-staff verification rather than replacing either."
     },
     {
       "id": "orchvia-code-scheduled-unknown-outcome-2026-09-23",
@@ -2254,7 +2623,10 @@
         "CoS",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "orchvia: code picks the next step, and unknown outcomes wait for a person",
+      "whatItIs": "A local session engine for two coding CLIs, with a durable mailbox, where “your code and the limits you configure decide what runs next, not a manager model.” After a crash, work with an unknown outcome waits for a human instead of retrying on its own.",
+      "whyItMatters": "Parking unknown outcomes is the recovery half of our retry ceiling, and it speaks to a watchdog gap we had named: relaunching a run versus resuming it. Partly in playbook; the engine is not installed and stays an A/B experiment idea."
     },
     {
       "id": "sctxx-session-handoff-artifact-2026-09-23",
@@ -2271,7 +2643,10 @@
         "smoke",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "sctxx: turn a finished agent session into a handoff, with no model calls",
+      "whatItIs": "A tool that reads finished transcripts from several coding CLIs on disk and writes a compact handoff, linked back to its sources, that any other agent can load. It makes no model calls.",
+      "whyItMatters": "It could be a machine-checkable companion to our hand-written vault notes when work moves between the bots’ server and the Mac, or continues in the coding loop. Backlog: a low-risk smoke test on non-secret repos only, output inspected before filing."
     },
     {
       "id": "omp-jev-watchdog-verify-honesty-2026-09-23",
@@ -2288,7 +2663,10 @@
         "shadow",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A watch-only check: did the agent follow instructions and report honestly?",
+      "whatItIs": "A watchdog for the decision-layer tool we use that runs in shadow mode, recording without blocking. It logs two checks: the agent’s tool calls against its recent explicit instructions, and its final claim against the actual tool results.",
+      "whyItMatters": "It would turn our published rule that agent output is evidence, not instruction, into a check that catches a failed command later claimed as passed. Backlog: manual checks come first, and it is not to be installed as a blocking gate."
     },
     {
       "id": "livelock-loopguard-watchdog-modes-2026-09-23",
@@ -2305,7 +2683,10 @@
         "run-limits",
         "backlog"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "livelock and loopguard: named failure modes and loop detection for long runs",
+      "whatItIs": "Two tools: livelock names four ways a long agent run fails (crash, hang, stall, API error) and leaves a machine-readable heartbeat saying whether it finished and what killed it; loopguard watches three coding CLIs’ session logs for loops, oscillation and stalls.",
+      "whyItMatters": "They go beyond our stall watchdog, which only flags stale output after about 540 seconds, and pair with our rule to stop and escalate on abnormal volume. Partly in playbook; neither tool replaces our fleet watchdog."
     },
     {
       "id": "loop-orchestrator-tmux-watchdog-2026-09-22",
@@ -2321,7 +2702,10 @@
         "watchdog",
         "routines"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "loop-orchestrator: terminal sessions, mailbox, watchdog and coordinator",
+      "whatItIs": "An open-source orchestrator for agent loops built on terminal sessions, with a mailbox, a watchdog, and a coordinator whose prompt is rebuilt from files on every tick instead of held in memory.",
+      "whyItMatters": "It is the closest outside mirror of our launch wrapper, streamed logs, stall watchdog and coding-loop heartbeat. Noted, with no architecture gap to fill that day; portable ideas include a lane-readiness check with auto-restart and a versioned, add-only contract."
     },
     {
       "id": "bb-spec-blind-implementer-2026-09-22",
@@ -2337,7 +2721,10 @@
         "blind",
         "handoffs"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "bb-spec: agents kept blind to each other, handing off only through files",
+      "whatItIs": "A workflow that keeps agents blind to each other: the implementer never sees the spec, only the tests, and every stage hands off a file on disk instead of relying on chat memory.",
+      "whyItMatters": "It could harden our two independent blind reviews and the intent, spec and plan steps of our coding loop. Noted only, with no new seat; it complements, and does not duplicate, a model-council tool we skipped."
     },
     {
       "id": "intent-review-stage-2026-09-22",
@@ -2353,7 +2740,10 @@
         "intent",
         "review"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Intent review: a third check of the final change against the original ask",
+      "whatItIs": "An extra review stage: a third reviewer checks the final diff against the user’s original request, quoted word for word, without seeing the plan. It targets work that passed its plan and tests but is not what the user asked.",
+      "whyItMatters": "This failure can happen in our coding loop of intent, spec, plan, PR and two blind reviews. Noted only: a cheap process step that needs no new seat or infrastructure."
     },
     {
       "id": "agent-chaperone-jev-shadow-2026-09-21",
@@ -2370,7 +2760,10 @@
         "backlog",
         "smoke"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Agent Chaperone: try decision checks in watch-only mode on agent tools",
+      "whatItIs": "A drop-in wrapper for tool servers that runs our decision layer in shadow mode, watching without enforcing, on the tools our Mac coding agents use.",
+      "whyItMatters": "It would let us test the decision layer on our agents’ tool calls without changing servers or adding seats. Smoke test only, not on the install path, to be paired with the Archestra calibration card."
     },
     {
       "id": "foremerge-intent-changeset-2026-09-21",
@@ -2387,7 +2780,10 @@
         "git",
         "handoffs"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Foremerge: catch clashes between parallel agents before merging",
+      "whatItIs": "A local-first tool at the git layer where parallel agents declare their intent and change sets, so design clashes on shared interfaces surface before merge.",
+      "whyItMatters": "It targets a risk in our coding loop: parallel worktrees drifting apart on shared interfaces. Noted only: the tool is not installed, and the only takeaway is a light one-line target note in vault handoffs."
     },
     {
       "id": "preflight-secret-redaction-2026-09-21",
@@ -2403,7 +2799,10 @@
         "backlog",
         "cost-proxy"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Preflight: strip secrets from prompts before they reach a model",
+      "whatItIs": "A local reverse proxy that redacts credentials from outgoing prompts and attachments before they are sent to a model.",
+      "whyItMatters": "It could keep keys out of what our agents send to models. Backlog only, not to be installed, and paired with the existing backlog idea of a cost-tracking proxy."
     },
     {
       "id": "archestra-jev-100-call-calibration-2026-09-21",
@@ -2419,7 +2818,10 @@
         "IFC",
         "policy"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Archestra: why a decision check must beat always guessing the common case",
+      "whatItIs": "A field benchmark on agent calls: 79% were harmless local status checks, so a naive check at about 75% accuracy can do worse than calling every call harmless. A second lesson: keep input authority separate from output trust in policy rules.",
+      "whyItMatters": "Now a playbook rule, approved by Haiyuan: a decision-layer gate must beat a constant that always picks the majority answer before it moves from shadow to active. Kept as calibration only; nothing was installed."
     },
     {
       "id": "portable-dsh-multi-agent-plugin-2026-09-21",
@@ -2435,7 +2837,10 @@
         "backlog",
         "scoped"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A cross-provider review plugin for one of our existing coding seats",
+      "whatItIs": "A portable multi-agent plugin that runs reviews across model providers inside one existing coding seat, with the host enforcing a verdict of verified or not converged.",
+      "whyItMatters": "Watch list and backlog only: it stays scoped to that one seat, is not to be added as a new coding seat, and our two blind reviews keep their current two reviewer seats."
     },
     {
       "id": "spacex-guide-proof-loop-2026-09-20",
@@ -2450,7 +2855,10 @@
         "EM",
         "harness"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Closed proof loop: work counts as done only with checkable proof",
+      "whatItIs": "An idea from the bot platform’s engineering guide and a community guide: agents must return proof that can be checked, such as green CI, a live URL or a before-and-after screenshot, and work goes back until the proof matches.",
+      "whyItMatters": "In playbook: written into the manager bot’s handoff contract and the coding loop’s contract, so a soft “done” is not enough."
     },
     {
       "id": "spacex-guide-ops-nudge-2026-09-20",
@@ -2465,7 +2873,10 @@
         "rooms",
         "routines"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Weekday ops nudge: the manager bot posts reminders and asks for blockers",
+      "whatItIs": "A weekday routine from an engineer’s guide: at 08:00 PT, Monday to Friday, the manager bot posts playbook bullets and asks about blockers in the Field Brief and coding-loop rooms.",
+      "whyItMatters": "In playbook as a standing weekday routine, styled on a one-to-one check-in, so complex workflows do not drift."
     },
     {
       "id": "spacex-guide-pr-board-2026-09-20",
@@ -2480,7 +2891,10 @@
         "routines",
         "EM"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "PR board sweep: scan open PRs every 12 hours for anything stuck",
+      "whatItIs": "A routine from an engineer’s guide: at 09:00 and 21:00 PT, scan open PRs for CI problems, merge conflicts or stalls, and send them to a Mac coding agent to unblock, with proof.",
+      "whyItMatters": "In playbook as a standing routine. Haiyuan moved it from every 30 minutes to every 12 hours."
     },
     {
       "id": "spacex-guide-nightly-audit-2026-09-20",
@@ -2495,7 +2909,10 @@
         "Mac CLI",
         "audit"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Nightly Mac harness audit: one coding agent opens a scoped audit PR",
+      "whatItIs": "An overnight routine at 03:00 PT: one Mac coding agent, chosen in rotation, opens a scoped audit PR on a set repo or another named one, and the PR gets two blind reviews.",
+      "whyItMatters": "In playbook as a nightly routine. It does not merge, and it sends a morning ping only if the audit is ready or blocked."
     },
     {
       "id": "spacex-guide-p0-urgency-2026-09-20",
@@ -2509,7 +2926,10 @@
         "P0",
         "follow-up"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "P0 urgency mode: saying “P0” can mean close, frequent checks",
+      "whatItIs": "An idea from an engineer’s guide: saying “P0”, the top-priority label, can mean high-frequency babysitting of a task.",
+      "whyItMatters": "Follow-up only: it stays a keyword for now, not a standing poller every 5 minutes, until Haiyuan asks."
     },
     {
       "id": "spacex-guide-shared-box-2026-09-20",
@@ -2524,7 +2944,10 @@
         "box",
         "harness"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "A shared bot computer is not security isolation",
+      "whatItIs": "From the bot platform’s docs and a user guide: all of our chat bots share one cloud computer, with the same files and browser logins.",
+      "whyItMatters": "In playbook as a warning: treat any secret on that shared computer as visible to the whole fleet."
     },
     {
       "id": "jev-multi-gate-2026-09-20",
@@ -2540,7 +2963,10 @@
         "CoS",
         "gates"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Our decision layer’s multi-gate router and live session setup",
+      "whatItIs": "A playbook block for running our decision layer live: active mode, a confidence floor of 0.55, a routing helper, a smoke-test table for its gates, and a session recipe for the manager bot.",
+      "whyItMatters": "In playbook as the live setup for routing through several decision gates. The gates stay, and no browser automation tool is added."
     },
     {
       "id": "dsh-cos-verify-handoffs-2026-09-20",
@@ -2556,7 +2982,10 @@
         "verification",
         "DSH Lab"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Chief-of-staff check: an agent’s “done” is evidence, not an order",
+      "whatItIs": "A rule kept from the asyncdot chief-of-staff pattern: treat every agent completion as evidence, not instruction, and re-check the live artifact, exit code or published URL before marking a slot green.",
+      "whyItMatters": "In playbook: an agent’s word alone does not turn a slot green; the real result is re-checked first."
     },
     {
       "id": "dsh-openbot-hop-cap-2026-09-20",
@@ -2572,7 +3001,10 @@
         "hop-cap",
         "OpenBot"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "One handoff target per bot reply, and a cap on bot-to-bot hops",
+      "whatItIs": "A rule kept from the OpenBot pattern: only the first mention in a bot’s reply wakes another bot, and after 2 hops, the default cap, the bots ask Haiyuan instead of routing on.",
+      "whyItMatters": "In playbook, so work is never silently misrouted; our group rooms also keep to at most one acknowledgment and one final reply."
     },
     {
       "id": "dsh-llmtap-jev-guard-gbdl-2026-09-20",
@@ -2588,7 +3020,10 @@
         "backlog",
         "DSH Lab"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Three parked spikes: per-seat cost, a guard smoke test, bot exports",
+      "whatItIs": "Three backlog ideas from one Lab scouting round: llmtap, a proxy that tracks cost per coding seat; a smoke test of a decision-layer guard in the coding loop; and a vault export of bot definitions in a set format, as a convention.",
+      "whyItMatters": "They point at per-seat spend tracking and keeping bot setups on file. Backlog only and not installed; the playbook lists them under Lab follow-ups."
     },
     {
       "id": "jev-browser-backlog-2026-09-20",
@@ -2604,7 +3039,10 @@
         "backlog",
         "playwright"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Parked idea: browser clicks decided by our decision layer",
+      "whatItIs": "A parked candidate: pair a browser automation tool with our decision layer so the layer makes the click decisions.",
+      "whyItMatters": "Backlog only: the browser tool is not to be installed, and an existing gate before browser actions already filters computer-use requests."
     },
     {
       "id": "openai-harness-engineering-2026",
@@ -2619,7 +3057,10 @@
         "specs",
         "harness"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Harness engineering: the repo and its docs as the system of record",
+      "whatItIs": "A model maker’s engineering post on agent-first work: keep the repo and docs as the system of record, with short indexes, lasting specs and plans, decision logs, invariants checked by linters, and regular doc cleanup.",
+      "whyItMatters": "In playbook: these ideas map onto our coding loop of intent, spec and plan with two blind reviews, and onto the decision notes in our vault."
     },
     {
       "id": "anthropic-multi-agent-research-system-2025",
@@ -2634,7 +3075,10 @@
         "CoS",
         "collect"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "“How we built our multi-agent research system”: lead agent plus collectors",
+      "whatItIs": "A model maker’s engineering post on its research agents: a lead agent plans, fans out to collector agents, saves their artifacts, then synthesizes the results and checks citations.",
+      "whyItMatters": "In playbook as a direct template for our Field Brief (collect, write, publish) and for the effort budgets the manager bot sets as chief of staff."
     },
     {
       "id": "claude-code-agent-teams-docs",
@@ -2649,7 +3093,10 @@
         "rooms",
         "Mac CLI"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Docs on running a team of coding-agent sessions under a lead",
+      "whatItIs": "Product docs for one coding CLI on running its sessions as a team: a lead and teammates, a shared task list, messaging, split terminal panes, and hooks that run when a session is idle or complete.",
+      "whyItMatters": "In playbook as concrete patterns for our group rooms and for running our fleet of coding agents on the Mac."
     },
     {
       "id": "watchdog-agent-control-plane-2026",
@@ -2665,7 +3112,10 @@
         "ops",
         "follow-up"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Watchdog: a local control layer for operating agent loops",
+      "whatItIs": "A local control plane for operators of agent loops, meaning one place to observe and control them. In our Mac test, its one-shot observe mode worked, but its doctor command still crashed.",
+      "whyItMatters": "Kept as an optional follow-up for observing one of our coding seats; it should not replace our stall watchdog across the fleet."
     },
     {
       "id": "receipt-pr-agent-cost-ledger-2026",
@@ -2681,7 +3131,10 @@
         "EM",
         "follow-up"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "receipt: itemized coding-agent costs shown on PRs",
+      "whatItIs": "An open-source tool that itemizes what an AI coding agent cost for the work behind a PR. In our Mac trial on one repo, it reported $172.17 across 2614 calls.",
+      "whyItMatters": "Kept as a follow-up for the coding loop, preferring its per-branch view; fleet CI use and a proxy for another coding CLI are still deferred, and one of our models had no price in it."
     },
     {
       "id": "claude-forge-adversarial-blind-review-2026",
@@ -2696,7 +3149,10 @@
         "dual-LGTM",
         "review"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "A blind second reviewer, from an adversarial review loop",
+      "whatItIs": "An open-source project whose adversarial review loop uses a blind second reviewer.",
+      "whyItMatters": "In playbook: our two blind reviews now come from two separate reviewer seats, each started independently, and the implementer is not one of the reviewers."
     },
     {
       "id": "anthropic-multi-agent-coordination-patterns-2026",
@@ -2711,7 +3167,10 @@
         "routing",
         "Manage Bot"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Multi-agent coordination patterns: avoid silent misroutes",
+      "whatItIs": "A model maker’s blog post that names the ways orchestrator and router agents fail, above all the silent misroute, where work is quietly sent to the wrong place.",
+      "whyItMatters": "In playbook: when a route is unclear, our bots ask Haiyuan instead of silently handing the work to another agent."
     },
     {
       "id": "2026-09-15-cos-rooms",
@@ -2727,7 +3186,10 @@
         "handoffs",
         "manage"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Chief-of-staff intake and visible group rooms for handoffs",
+      "whatItIs": "Requests go through the manager bot by default, and the Field Brief and coding-loop group rooms are used when the handoff itself must be visible. Handoffs are written with a goal, owner, artifact path and return shape.",
+      "whyItMatters": "In playbook: written handoff contracts cut silent drop-offs between the manager bot and the specialist bots."
     },
     {
       "id": "2026-09-15-routine-fire-proxy",
@@ -2742,7 +3204,10 @@
         "usage",
         "proxy"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Routine fire proxy: estimate weekly scheduled runs on the usage dashboard",
+      "whatItIs": "An estimate on our usage dashboard of how often scheduled routines fire each week, counted from the active routine lists of the collection bot, the bot that coordinates PRs and the manager bot.",
+      "whyItMatters": "In playbook as a stopgap until the vendor ships per-bot usage meters. It lets us pause overlapping routines before weekly usage spikes, and it is labeled a proxy, not dollars or tokens."
     },
     {
       "id": "2026-09-15-box-mac-vault-sync",
@@ -2758,7 +3223,10 @@
         "mac",
         "sync"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Stage vault notes safely when the bots' server can't see the Mac",
+      "whatItIs": "The Mac's copy of the vault is the source of truth. When the bots' shared server can't reach the Mac's files, notes are staged on the server, marked as staged, and copied over once the Mac is connected again.",
+      "whyItMatters": "It keeps one source of truth for the vault while the bots' server is cut off from the Mac's files. It also records that a shared bot computer is not trust isolation."
     },
     {
       "id": "2026-09-15-field-brief-miss-watch",
@@ -2773,7 +3241,10 @@
         "miss-watch",
         "field-brief"
       ],
-      "appliedToPlaybook": true
+      "appliedToPlaybook": true,
+      "plainTitle": "Field Brief miss-watch: the publishing bot catches up a missed brief",
+      "whatItIs": "If the deep brief due at minute 34 is missing, the collection bot runs an automatic catch-up at minute 44. A later room ping from the manager bot only adds visibility; publishing stays with the collection bot.",
+      "whyItMatters": "In playbook as a pattern: one bot owns publishing and a miss-watch backs it up, instead of two bots that both publish."
     },
     {
       "id": "uncle-bob-agent-code-quality-loop-mutation-crap-gherkin-2026-10-11",
@@ -2792,7 +3263,10 @@
         "nightly",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Uncle Bob code-quality loop for agents: small steps, gates, hardening",
+      "whatItIs": "A five-stage loop for coding agents from an image Haiyuan shared; the name was not checked and the author is not identified. Stages: short instructions, small steps, automated gates, mutation-testing and change-risk hardening, and Given / When / Then acceptance.",
+      "whyItMatters": "Mutation testing already runs here report-only on one of our libraries, never as a merge gate; change-risk scores and Given / When / Then acceptance are design notes only, with nothing run, and any change needs Haiyuan."
     },
     {
       "id": "scalemas-bounded-sharing-during-collection-2026-10-15",
@@ -2810,7 +3284,10 @@
         "tokens",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "ScaleMAS: identical agents share results through one store per task",
+      "whatItIs": "A research paper: identical agents without roles share one add-only store per task, citing what they built on and pulling a capped set of messages ranked partly by citations. On one benchmark the authors report accuracy rising with more agents, partly because a group scores if any agent is right.",
+      "whyItMatters": "Backlog: a proposed test, not yet run, of our three Field Brief collector seats sharing results this way at equal token budgets. Its agents ran with no human gate or reviewer, so the results don’t justify replacing ours; any change needs Haiyuan."
     },
     {
       "id": "deeper-not-bigger-depth-check-2026-10-15",
@@ -2826,7 +3303,10 @@
         "review",
         "receipts"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Felix Rieseberg: ask for a deeper version of a task, not a bigger one",
+      "whatItIs": "A post naming four kinds of ambition with models: speed, altitude, depth and range. Its depth prompt asks what a top expert would do unasked, the rawest sources, their methods and tools, and what outside check would show the result is right.",
+      "whyItMatters": "It became an optional depth-check step in our vault template for research and draft briefs, not a playbook rule, and its outside check points to our blind reviews and done reports. Nothing is measured; the post reports no results, only that it often helps the author."
     },
     {
       "id": "lastlight-pr-gate-2026-10-15",
@@ -2844,7 +3324,10 @@
         "verification",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A push gate that needs a fresh review at the exact commit being pushed",
+      "whatItIs": "A plugin for one coding CLI that blocks pushing code or opening a PR unless a fresh session that did not write the code reviewed that exact commit, in a sandboxed throwaway clone. The author says it is not tamper-proof, but it stops a stale review vouching for new code.",
+      "whyItMatters": "Per our scouting notes, our rule that every blind review ends with a verdict on the current commit is prose discipline; here the same rule is a check that can fail. Reference only, not installed; a live push gate needs Haiyuan."
     },
     {
       "id": "driftproof-2026-10-15",
@@ -2862,7 +3345,10 @@
         "promotion gate",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Driftproof: does a skill still help after the model underneath changes?",
+      "whatItIs": "An open-source tool that runs a skill’s own test tasks with and without the skill, judges each answer several times, and issues a receipt tied to the model version: clearly helps, clearly hurts, no clear difference, or too few answers.",
+      "whyItMatters": "Per our scouting notes, our skills are shared across six seats on one-time verdicts nobody re-checks when a model changes. Reference only, not installed or run; any metered run is spending that needs Haiyuan."
     },
     {
       "id": "keel-2026-10-15",
@@ -2880,7 +3366,10 @@
         "receipts",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "keel: verifiers try to disprove serious findings; deeper review costs more",
+      "whatItIs": "A workflow plugin for one coding CLI that plans, builds and independently verifies a change at a priced depth; separate verifiers try to refute serious findings, and anything unchecked is labeled “not verified”. The author says it makes review cleaner, not cheaper.",
+      "whyItMatters": "Per our scouting notes, our blind reviews name rejection criteria up front but never price a false alarm or mark unchecked items in the fix list. Reference only, not installed; its results are the author’s, from one test set of 8 changes."
     },
     {
       "id": "rollcage-guard-2026-10-15",
@@ -2897,7 +3386,10 @@
         "git",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "rollcage-guard: one set of secret-guard rules for four coding-agent tools",
+      "whatItIs": "A local tool that installs one rules file as a check before each tool call in four coding-agent tools. It blocks reads of secret files and environment dumps, asks before risky commands, and scans commits and pushes for keys.",
+      "whyItMatters": "Per our scouting notes, our ban on leaking secrets is enforced only as per-seat prose across six seats; this is one rules file for several tools. Reference only, not installed; it fails open on an internal error and is a guardrail, not a sandbox."
     },
     {
       "id": "pair-mailbox-2026-10-15",
@@ -2914,7 +3406,10 @@
         "tmux",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "pair-mailbox: one writer, a read-only critic, turns end on a mail check",
+      "whatItIs": "A protocol that pairs two coding agents: only one may write, enforced by its tool server per its docs, while a read-only critic proposes hash-sealed patches the writer verifies before applying. Each turn ends with a time-limited mailbox read, so no agent idles with unread mail.",
+      "whyItMatters": "It would put our written rules for handoffs and for keeping implementer and reviewer apart into code. Reference only, not installed; only its semi mode with a human okay could fit, as the default reaches a finished PR with no human word."
     },
     {
       "id": "whystuck-2026-10-18",
@@ -2931,7 +3426,10 @@
         "mutation-testing",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "whystuck: names why a quiet command stalled and prints a no-prompt fix",
+      "whatItIs": "A small watchdog you run a command under: when output goes quiet, it inspects the live processes, classifies the stall, such as a pager, editor, yes/no or password prompt, lock or stalled connection attempt, and prints the evidence and a non-interactive fix.",
+      "whyItMatters": "Per our scouting notes, our launch watchdog knows a seat went quiet but not why, usually a pager, editor or prompt a headless seat will never answer. Reference only, not installed; the author has not tested it on a real Mac, where our seats run."
     },
     {
       "id": "watchdog-kit-2026-10-18",
@@ -2949,7 +3447,10 @@
         "code-decides-done",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "watchdog-kit: change-only alerts for scheduled jobs, escalated once if ignored",
+      "whatItIs": "A small monitor for one Mac’s scheduled jobs: it alerts when a job’s state is new, changed or recovered, stays quiet while a known problem persists, and escalates once after 7 days by default so an ignored problem cannot fade out.",
+      "whyItMatters": "Per our scouting notes, it is the alert-fatigue half of our miss-watch that we never wrote down; it also reports a failed scan as an error, never as “nothing changed”. Reference only, not installed or run; it observes and classifies, with no fixes."
     },
     {
       "id": "plan-validation-2026-10-18",
@@ -2967,7 +3468,10 @@
         "evidence",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "plan-validation: try a plan’s scope in a throwaway copy before coding",
+      "whatItIs": "Skills that rehearse a plan before coding: they review and revise it, try the selected scope in a throwaway copy of the repo with approved checks, get an independent review, and check that each requirement has a task and a test, and each task an approved requirement.",
+      "whyItMatters": "Per our scouting notes, our coding loop reviews plans by reading them, so a plan that points at a missing file is found hours into the work. Reference only, not installed; it is a pilot release, and rehearsal can duplicate a lot of implementation work."
     },
     {
       "id": "downshift-2026-10-18",
@@ -2985,7 +3489,10 @@
         "shadow",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "downshift: picks subagent models by fixed rules, with a built-in control group",
+      "whatItIs": "A beta tool that sets the model and effort level for the subagents a coding agent starts, using fixed rules with no model in the loop, and holds back when in doubt. About 1 in 10 subagents stay unrouted as a control group, so its reports compare cost per completed task.",
+      "whyItMatters": "Per our collection notes, our max-effort defaults pay top-tier prices even for routine delegated work, and earlier routing ideas had no control group, so their savings could not be checked. The proposal, not approved, borrows its control-group measurement, not live routing; not installed."
     },
     {
       "id": "dsh-landscape-2026-10-18",
@@ -3002,7 +3509,10 @@
         "evidence",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A read-only check of what is already covered before any install or build",
+      "whatItIs": "A read-only check for the coding-agent tool one of our seats runs: describe a change in plain words and get one decision, such as use, install, extend or build, with a coverage verdict, risks and do-not-build limits. It gives advice, changes nothing, and says what it could not verify.",
+      "whyItMatters": "Our collection notes count that seat as our most actively extended one, with no check for existing coverage before building, and our handoff packets lack do-not-build lists. The author tested on Windows against one harness version, so our Mac setup is unverified; reference only, not installed."
     },
     {
       "id": "everyhook-2026-10-19",
@@ -3020,7 +3530,10 @@
         "evidence",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "everyhook: write an agent hook once and translate it for each coding agent",
+      "whatItIs": "A small tool that lets you write a hook (a small script the agent runs at set points) once and translates it for five coding agents whose hook rules differ, one of them known from docs only. Its bench shows what each agent would do with the hook's answer before any install.",
+      "whyItMatters": "We copy the same guards by hand onto each of our six coding seats on the Mac, so a guard fixed on one seat can be silently missing on another. The proposal, not approved, is a bench-only test for two seats; installing it would edit seat settings and needs Haiyuan."
     },
     {
       "id": "agent-role-contracts-2026-10-19",
@@ -3038,7 +3551,10 @@
         "CoS",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agent-role-contracts: catches self-review and stale handoffs before work runs",
+      "whatItIs": "An offline checker that reads each task's declared role, permissions and scope, and before anything runs rejects a write outside its declared authority, an implementer reviewing its own work, or a task changed after review. A pass means the declarations agree, not that work may run.",
+      "whyItMatters": "Our coordinating chat rooms and coding loop keep implementer and reviewer apart and hold task scope by prompts and human reading, which drifts when a handoff goes stale. The proposal, not approved, is an offline trial on one coding flow; not installed."
     },
     {
       "id": "pinwash-2026-10-19",
@@ -3056,7 +3572,10 @@
         "review",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "pinwash: checks whether an agent weakened the checks that judge it",
+      "whatItIs": "A local checker that compares a repo before and after an agent session and asks one question: did the change weaken hooks, permissions or required checks so the agent could more easily claim done? It enforces nothing, and a timeout or unreadable result is never a pass.",
+      "whyItMatters": "Our agents can edit the very hooks and checks that judge them, and our tamper scan is a written rule with no hook installed. The proposal, not approved, is a report-only trial on one working copy; the tool is alpha, not yet validated on Macs, and not installed."
     },
     {
       "id": "fael-2026-10-19",
@@ -3074,7 +3593,10 @@
         "ledger",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "fael: notes tied to code files, shown when an agent next touches that file",
+      "whatItIs": "A memory tool for coding agents that files each note, decision or handoff against the code files it concerns and shows it when an agent next touches one of them. Notes retire once the code absorbs them, and it reports what was handed over and what was acted on.",
+      "whyItMatters": "Our handoffs are written to tasks, while this ties memory to files, where the next seat actually looks. Not installed; a one-repo trial is proposed, not approved, and its notes retire on their own, while we delete lasting lessons only with Haiyuan's approval."
     },
     {
       "id": "dsh-handoff-bus-2026-10-19",
@@ -3091,7 +3613,10 @@
         "ledger",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A message bus between an agent's main chat and its side chats",
+      "whatItIs": "A small plugin for the coding-agent tool one of our seats runs: a main conversation and side conversations you open send each other instructions and reports, so nobody switches windows to relay. Messages go to a named line, so replacing a side conversation keeps the address.",
+      "whyItMatters": "Per our collection notes, that seat's handoffs still need window-switching relays; the bus offers stable names and short pointers instead. The author tested only a Windows build, it stays off in headless runs, and whether ours qualify is unverified; not installed."
     },
     {
       "id": "pocock-pre-commit-file-size-check-2026-10-20",
@@ -3108,7 +3633,10 @@
         "tokens",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Matt Pocock: a pre-commit check that blocks agent files over 5,000 tokens",
+      "whatItIs": "A social post sharing a prompt that asks an agent to build a check that runs before each commit and blocks files over 5,000 tokens, estimated as bytes divided by 4. It checks only staged files, skips files agents don't write, such as lockfiles, and explains how to split a file.",
+      "whyItMatters": "It would keep each agent-written file small enough for a blind reviewer to read whole. A report-only trial idea, not installed or scheduled; the limit and the estimate are the post's own and untried here, and any install needs Haiyuan."
     },
     {
       "id": "meta-thin-orchestrator-rule-table-router-2026-10-20",
@@ -3125,7 +3653,10 @@
         "orchestration",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "The Thin Orchestrator: fixed rules route work, a model handles the rest",
+      "whatItIs": "A large company's engineering post describes a router that sends requests to 14 specialist agents through fixed steps, with model reasoning used only inside the specialist. Its rule: choosing who handles a request is a routing decision, not a reasoning task.",
+      "whyItMatters": "The idea puts a fixed rule table in front of our decision layer, so cases a row covers get an answer with no model call and only the rest go to the decision layer. Trial idea, not installed: no table exists, its coverage is unknown, and adoption needs Haiyuan."
     },
     {
       "id": "meta-thin-orchestrator-standard-agent-card-2026-10-20",
@@ -3142,7 +3673,10 @@
         "handoffs",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "The Thin Orchestrator: one standard card layout for every specialist agent",
+      "whatItIs": "From a large company's engineering post: every specialist agent follows one structure, listing the knowledge to load, what to gather before a handoff, its workflow steps and fixes for common errors, so adding an agent is templated work.",
+      "whyItMatters": "Our agents' vault cards start with the same five-field role card, but the rest is free-form. Not adopted: as a trial pending review, two seats' cards were rewritten in this layout with no facts added; nothing else changes, and any rollout needs Haiyuan."
     },
     {
       "id": "meta-thin-orchestrator-pre-handoff-checks-2026-10-20",
@@ -3159,7 +3693,10 @@
         "guardrails",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "The Thin Orchestrator: check for duplicates and warnings before each handoff",
+      "whatItIs": "From a large company's engineering post: before handing work to a specialist agent, one fixed step checks whether the target already exists, to avoid duplicates, and another checks for active warnings or required reviewers.",
+      "whyItMatters": "Our manager-to-specialist handoffs and new coding jobs carry a structured packet, but its completeness check runs only in shadow mode and never blocks. Trial idea only, with no contract or playbook changes; what counts as duplicate work still needs defining, and adoption needs Haiyuan."
     },
     {
       "id": "meta-thin-orchestrator-workflow-templates-2026-10-20",
@@ -3176,7 +3713,10 @@
         "Field Brief",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "The Thin Orchestrator: named, reusable running orders for specialist agents",
+      "whatItIs": "From a large company's engineering post: workflow templates fix the order in which specialist agents run, and three of its templates reuse the same pool of 14 agents in different orders. A brand-new use case needed a new template and no new agent code.",
+      "whyItMatters": "We already run set orders, like the Field Brief's collect and publish steps and the coding job's implement, review and fix rounds, but they sit in separate notes. Naming each once is a trial idea only; nothing changes, and adoption needs Haiyuan."
     },
     {
       "id": "pstack-rule-enforcer-table-fix-ranking-2026-10-20",
@@ -3193,7 +3733,10 @@
         "guardrails",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Pair each rule with what enforces it, and rank fixes by how well they hold",
+      "whatItIs": "A public agent-workflow guide says a mistake agents keep repeating is fixed in the repo, ranked by how well the fix holds: make it impossible, block it with a check, catch it with a test, and last, write a rule. A table pairs each rule with what enforces it.",
+      "whyItMatters": "Our shared contract file states its rules as text. A trial table, pending review, pairs its 73 rules with what enforces them and, by our reading, finds 34 held by policy alone; no rules or checks change, and adoption needs Haiyuan."
     },
     {
       "id": "pstack-decision-log-morning-audit-2026-10-20",
@@ -3210,7 +3753,10 @@
         "review",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A decision log for overnight runs, audited next morning by another model family",
+      "whatItIs": "A public agent-workflow guide says what makes an unattended run safe is a checkable finish condition, an isolated workspace and a log row per decision with its reason and evidence. Next morning, a reviewer from a different model family reads the log and points at what needs attention.",
+      "whyItMatters": "A saved stream from our long runs records each tool call but no row per decision with its reason, and the morning view is the done report and the seat's own note. Trial idea only, with nothing changed; log rows are still the agent's own account, and adoption needs Haiyuan."
     },
     {
       "id": "pstack-blind-ab-skill-evals-2026-10-20",
@@ -3227,7 +3773,10 @@
         "promotion gate",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Test skill and prompt changes blind, with one judge scoring both versions",
+      "whatItIs": "A public agent-workflow guide tests a skill change like an experiment: old and new versions run the same ordinary-looking task without knowing they are tested, one judge scores both under neutral labels, and file reading is graded from the files each actually read, not its claims.",
+      "whyItMatters": "Before we promote a skill or prompt change, a replay check shows that nothing broke, not that the change is good. A blind test could judge that; trial idea only, with no harness or skill changes, and any run spends model quota and needs Haiyuan."
     },
     {
       "id": "pstack-prove-gate-fails-on-broken-copy-2026-10-20",
@@ -3244,7 +3793,10 @@
         "watchdog",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Prove a gate or watchdog fails on a broken copy before trusting it",
+      "whatItIs": "A public agent-workflow guide says “a check you've never seen fail proves nothing”, so its formal-verification skill shows each new check failing on a deliberately broken version of the code before handing it over, and again after changes.",
+      "whyItMatters": "Our written rule asks this of new checks; the idea extends it to standing gates and the stall watchdog, tested on copies. Reading one gate shows a run without streamed logs is never failed by it; trial idea only, no live changes, and adoption needs Haiyuan."
     },
     {
       "id": "pstack-pause-checkpoint-resume-note-2026-10-20",
@@ -3261,7 +3813,10 @@
         "worktrees",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Pause safely: commit a checkpoint and write a resume note before a run stops",
+      "whatItIs": "A public agent-workflow guide's pause routine: when told to pause, the agent finishes or backs out of the current step, commits a work-in-progress checkpoint and writes a resume note, and a fresh chat picks up from that note, checking inherited claims against the goal.",
+      "whyItMatters": "Our runs stop for reasons nobody types, like Mac drops and used-up quotas, and resumes rest on the stall watchdog, a vault note and ad hoc logs. A trial template and skill note exist as documents only, not wired in; wiring or adoption needs Haiyuan."
     },
     {
       "id": "pstack-seven-question-number-check-2026-10-20",
@@ -3278,7 +3833,10 @@
         "usage",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Seven questions to answer before reporting a number",
+      "whatItIs": "A checklist from a public agent-workflow guide: before trusting a before-and-after number, ask what limits it, whether each side ran tuned like production, whether it repeats, and whether the work really ran inside the timed part.",
+      "whyItMatters": "Our receipts, cards and notes quote our own costs, durations and counts, and past corrections caught numbers that measured the wrong thing. Trial idea only: no template or skill changes, and any adoption needs Haiyuan."
     },
     {
       "id": "agent-sync-2026-10-20",
@@ -3296,7 +3854,10 @@
         "hooks",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agent-sync: expiring task leases so two coding agents don't collide",
+      "whatItIs": "A coordination tool for several coding agents on one repo: an agent takes a time-limited lease on a task, and who holds it is decided only by an atomic step, a file create on one machine or a pushed git ref. Each lease states which guarantee it gives.",
+      "whyItMatters": "Several seats and bots work in one vault and often one checkout, and the author found twelve simultaneous appends to one document all reported success but left three lines, so shared notes can't decide who holds a task. Proposed trial only; not installed."
     },
     {
       "id": "pctl-2026-10-20",
@@ -3314,7 +3875,10 @@
         "worktrees",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "pctl: reports what happened to a message typed into an agent's session",
+      "whatItIs": "A control tool for coding-agent sessions in terminal panes: it lists, reads, prompts and restarts them, and after sending a message it reports what happened, such as reached, queued or typed but unconfirmed. It never pretends a keystroke landed.",
+      "whyItMatters": "Per our collection notes, our launch wrapper and stall watchdog type into panes and assume it worked. The proposal, not approved, is to log such delivery outcomes; pctl needs a newer terminal-session program than this Mac has, and any install needs Haiyuan."
     },
     {
       "id": "session-counter-2026-10-20",
@@ -3332,7 +3896,10 @@
         "routines",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "session-counter: counts give-ups, watchdog kills and lost agents in local logs",
+      "whatItIs": "A small tool that reads the session logs one coding CLI already writes and counts four kinds of failure: failed requests, retries that gave up, watchdog kills, and agents lost or never reported back. It outputs counts only, never log text.",
+      "whyItMatters": "Our usage dashboard counts scheduled fires, not whether a run lost work, and the tool's count of runs still marked completed despite a lost agent could measure false greens. The proposal, not approved, is a read-only trial on one seat's logs; not installed."
     },
     {
       "id": "remote-agent-worker-2026-10-20",
@@ -3350,7 +3917,10 @@
         "security",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Run an agent's work on another computer and pull back only the final files",
+      "whatItIs": "A plugin for the coding-agent tool one of our seats runs that makes another computer a remote worker: the task runs and persists there, a disconnect does not stop it, and only final files come back, on an explicit pull. Finished tasks do not rerun after reconnecting.",
+      "whyItMatters": "Runs get missed while the Mac is offline, and the handoff tools on our Lab cards move state, but none moves the work to a machine that stays up. A trial is proposed, not approved; the author tested an older version than ours, and installing a plugin with remote write and kill powers needs Haiyuan."
     },
     {
       "id": "vault-memory-2026-10-20",
@@ -3368,7 +3938,10 @@
         "repeat-lesson",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "vault-memory: note search that ranks stale notes down and flags contradictions",
+      "whatItIs": "A local tool that indexes a notes vault so any agent can search it and get the exact paragraph, with no network or model. Replaced, expired or unverified notes rank lower, two current notes on the same fact are flagged as a contradiction, and it reports whether memory is helping.",
+      "whyItMatters": "The vault is our main lasting memory, yet each source pack still checks for duplicates by hand. The proposal, not approved, is a read-only trial on a copy, since the tool writes its index inside the vault; not installed, and its panel must never be published."
     },
     {
       "id": "agent-orchestra-2026-10-21",
@@ -3386,7 +3959,10 @@
         "evidence",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agent-orchestra: a task is done only when an independent verifier passes it",
+      "whatItIs": "A coordination protocol for multi-agent work built on one rule: agents can work, but they cannot declare success. An independent verifier, never the implementer, must pass a task with a recorded witness, and after 3 failed rounds only a recorded human override can unblock it.",
+      "whyItMatters": "It puts into code three of Haiyuan's standing rules that our coding loop keeps as written policy: a real check decides done, blind review, and a cap of three fix rounds. Proposed scratch-repo trial only, not installed; the author's benchmark uses scripted agents."
     },
     {
       "id": "agent-handoff-mcp-2026-10-21",
@@ -3404,7 +3980,10 @@
         "security",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A shared inbox where agent handoffs move from queued to accepted to completed",
+      "whatItIs": "A local tool server that gives several agents a shared inbox: each handoff is a record that moves from queued to accepted to completed, with an append-only history. It does not run agents or follow the references it stores, and senders can cancel only while queued.",
+      "whyItMatters": "Our bots and coding seats hand work across separate contexts, and today a receiver can drop a task or miss an acknowledgment. The proposal, not approved, is a two-seat test between local sessions; the author's claims are untested here, and it is not installed."
     },
     {
       "id": "conspectus-2026-10-21",
@@ -3422,7 +4001,10 @@
         "evidence",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "conspectus: a read-only map linking agent sessions, terminal panes and repos",
+      "whatItIs": "A pre-release tool that maps agent work on one machine, linking sessions, terminal panes, repos, branches and pull requests by evidence, each link with a confidence score. Read-only by default, it never types into a live agent's pane and keeps unclear links visible.",
+      "whyItMatters": "Per the collection notes, our coding agents run several long sessions in terminal panes on the Mac, and telling which pane holds which conversation, branch or task takes a manual search. A read-only trial is only proposed; not installed or run."
     },
     {
       "id": "command-silence-watchdog-2026-10-21",
@@ -3439,7 +4021,10 @@
         "monitoring",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A command watchdog that warns on 90 seconds of silence, not on run time",
+      "whatItIs": "An add-on for a coding agent we don't run that warns when a command stops printing output; per its docs, that agent's command tool has no default timeout, so a live but broken process never signals failure. By default it only watches; killing needs an explicit opt-in.",
+      "whyItMatters": "Our stall watchdog already triggers on silence, a run log quiet past about 540 seconds. The proposed additions, none approved, are watching each command's own output, telling a wait for a person from a hang, and testing a 90-second limit; not installed."
     },
     {
       "id": "trace-2026-10-21",
@@ -3457,7 +4042,10 @@
         "run-limits",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "trace: checks whole sequences of agent tool calls and signs an audit log",
+      "whatItIs": "A CPU-only guardrail that wraps an agent's tool calls and checks rules over whole sequences, since each step of a multi-step attack can look harmless on its own. It also writes a signed audit log that someone else can verify offline.",
+      "whyItMatters": "Per the collection notes, rules such as no secrets in notes and Haiyuan's approval before outside actions are checked today by after-the-fact reviews or prompt instructions. An offline trial on recorded tool calls is only proposed; not installed or run."
     },
     {
       "id": "deadweight-2026-10-22",
@@ -3475,7 +4063,10 @@
         "install",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "deadweight: finds the parts of an agent's setup that it silently ignores",
+      "whatItIs": "A checker for coding-agent setup files that finds what the agent silently ignores, such as permission rules that never match, skills that never load and hooks (small scripts run at set points) that never fire. It can freeze today's counts and fail if they rise.",
+      "whyItMatters": "Per the collection notes, one seat's copy of a shared skill was malformed, so that seat could not load it by name and nothing warned, the kind of silent failure this targets. A weekly read-only check on a copy of the vault is only proposed; not installed or run."
     },
     {
       "id": "tripwires-2026-10-22",
@@ -3493,7 +4084,10 @@
         "kill review",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "tripwires: guard rules that carry their incident, a test and a weekly verdict",
+      "whatItIs": "A guard that checks commands before a coding agent runs them. Each rule carries the incident behind it, the fix to use instead, a test built from the real command, and a weekly report on whether the rule helps or hurts.",
+      "whyItMatters": "Per the collection notes, our list of past mistakes and our hook rules are conclusions with no tests attached, and our Monday review judges routines, not rules. Taking its rule record and weekly report is only proposed; not installed or run."
     },
     {
       "id": "agent-memory-2026-10-22",
@@ -3511,7 +4105,10 @@
         "handoffs",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agent-memory: a warn-only checker for agent notes that bloat or go stale",
+      "whatItIs": "Plain-file project memory for coding agents, with a checker that warns, never blocks, when handoff notes grow too big or old, links break or dated facts go stale. A hook that forced memory writes made agents append something every turn, and it was later removed.",
+      "whyItMatters": "Per the collection notes, the vault grows by appending, with a new pack each day and waiting-on lines left after the wait ends. Porting only the checker to a vault copy is proposed, not installed; its forced-write lesson warns against tightening our rule of a note after every task."
     },
     {
       "id": "mac-dev-janitor-2026-10-22",
@@ -3529,7 +4126,10 @@
         "routines",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "mac-dev-janitor: stops runaway commands on a Mac and tells the agent why",
+      "whatItIs": "A Mac watchdog that kills a coding agent's runaway command, its whole process group, when it hogs memory or CPU, and leaves the agent a note to run a smaller command instead of retrying. It also kills long-orphaned dev tools and runs a daily cleanup.",
+      "whyItMatters": "Per the collection notes, our watchdogs judge the run log, not the machine, and its rule that a kill without a note just causes a retry could carry over. A one-week dry run is only proposed; it is a new script with no stated test suite, not installed."
     },
     {
       "id": "skill-trigger-bench-2026-10-23",
@@ -3547,7 +4147,10 @@
         "Mac CLI",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "skill-trigger-bench: tests whether an agent ever sees and picks a skill",
+      "whatItIs": "Two checks for skills an agent never uses: an offline lint, including whether all skill descriptions fit the space the agent lists them in, and a paid test of how often a skill is picked when it should and shouldn't be.",
+      "whyItMatters": "Per the collection notes, we install shared skills in several places with no description budget or trigger check, and one seat's malformed copy could not load by name. In the author's run, roughly 13 of 43 skills may never be shown; a trial on copies is only proposed, not installed."
     },
     {
       "id": "lcc-2026-10-23",
@@ -3565,7 +4168,10 @@
         "Mac CLI",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "lcc: trims an agent's context without summarizing, and explains each cut",
+      "whatItIs": "A context compactor, local by default, that shrinks a coding agent's context without summarizing: kept text stays exact, removed tool outputs are stashed and can be recalled, and a report gives the reason for every kept or dropped block.",
+      "whyItMatters": "Per the collection notes, our long runs and packs lose detail when cut, with no record of what was dropped and no way back. A counts-only trial on one stored transcript is proposed, not approved; its reported gains are the author's own, and it is not installed."
     },
     {
       "id": "skillrouter-2026-10-24",
@@ -3583,7 +4189,10 @@
         "Mac CLI",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "skillrouter: keep a few core skills loaded and look up the rest when needed",
+      "whatItIs": "A pre-release router that splits an agent's skills in two: a small core of often-used skills stays loaded in the prompt, and the rest stay on disk, searched and read on demand through two local tools, to keep the prompt from bloating.",
+      "whyItMatters": "Per the collection notes, every shared skill is preloaded in each seat, so adding skills risks overflowing the listing space and hiding some. A trial in a scratch project is only proposed; the extra search adds latency, and it is not installed."
     },
     {
       "id": "yardgoat-2026-10-24",
@@ -3601,7 +4210,10 @@
         "Mac CLI",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "yardgoat: a locked check decides done, and blocked tasks park their question",
+      "whatItIs": "A task coordinator for different coding CLIs whose docs claim one owner per task, no duplicate dispatch, and a pass only when a check command, locked when the task is submitted, succeeds. A blocked worker writes down its question and the task waits for a human answer.",
+      "whyItMatters": "Our rule is that a real check, not the agent's word, decides when work is done, and today that rule is enforced by hand. Locking checks in advance and parking blocked tasks are only proposed; it is pre-alpha per the collection notes and not installed."
     },
     {
       "id": "agents-kit-2026-10-24",
@@ -3619,7 +4231,10 @@
         "Mac CLI",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agents-kit: one shared, versioned rules block in every repo's instruction file",
+      "whatItIs": "A command-line tool that splits each repo's agent instruction file into a shared, versioned block of common rules and a project-specific part. It reports drift across repos, fails a check when the shared block drifts, and updates it without touching local rules.",
+      "whyItMatters": "Our installer links or copies the shared contract file whole, which per the collection notes risks overwriting local rules or silent drift. A trial is only proposed, and its first step would edit the live contract, which has no bytes to spare; not installed."
     },
     {
       "id": "git-warden-2026-10-24",
@@ -3637,7 +4252,10 @@
         "EM",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "git-warden: a gate in front of the remote that checks agent pushes first",
+      "whatItIs": "A push guard between coding agents and the git remote that checks each push, including a secret scan, before it lands. Pushes that pass go through, fixable ones come back with exact reasons, and hard blocks wait for a human.",
+      "whyItMatters": "Per the collection notes, checks on the agent's own machine can be skipped, but the agent cannot bypass a gate in front of the remote. Its colors are not our risk lanes, and our implementer pushes before review; a trial on a test repo is only proposed, not installed."
     },
     {
       "id": "continuity-2026-10-25",
@@ -3655,7 +4273,10 @@
         "hooks",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "continuity: flags a handoff note that the session's own work made stale",
+      "whatItIs": "A handoff tool for two coding CLIs that records the current commit, next step and files touched without ending the session. Per its docs, it blocks a stop when the session's own work made the handoff stale, and it reports duplicate rules and oversized instruction files.",
+      "whyItMatters": "Per the collection notes, our handoff packet has no check that it still matches the working files, and interrupted runs needed manual state checks before resuming. Adding the commit and touched files to our packet is only proposed; not installed."
     },
     {
       "id": "agent-ops-kit-2026-10-25",
@@ -3673,7 +4294,10 @@
         "Mac CLI",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agent-ops-kit: a scheduled run may skip only when a check says “idle”",
+      "whatItIs": "Four small pieces for unattended scheduled jobs, including heartbeat alerts and a wrapper with a lock and a time limit. Its precheck lets a run skip only on an explicit “idle”; an error or a broken check counts as work.",
+      "whyItMatters": "It would make our rule that a failed lookup is a gap, never a quiet hour, part of how each run proceeds. It is only proposed: skipping runs would change our rule that fixed schedules always run, and nothing is installed."
     },
     {
       "id": "dsh-skill-pack-security-2026-10-25",
@@ -3691,7 +4315,10 @@
         "Mac CLI",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "A safety scan for plugins and skills before install, with its misses named",
+      "whatItIs": "A pre-install scan for one open-source agent tool that checks a plugin or skill package's license, commit pins, install scripts, data-leak domains and encoded payloads, then rates it pass, warn or fail. It blocks only if the caller wires that verdict in.",
+      "whyItMatters": "Per the collection notes, third-party plugins and skills run with a seat's file access, and nothing scans them before install. The author's own benchmark names three missed samples; a throwaway-profile trial is only proposed, not installed."
     },
     {
       "id": "agnix-2026-10-26",
@@ -3709,7 +4336,10 @@
         "Mac CLI",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "agnix: a checker for agent setup files such as skills and hook settings",
+      "whatItIs": "A linter for agent setup files, including skill headers, standing instructions, hook settings and tool-server settings. It keeps checking apart from rewriting, with a report mode, a fix preview and a rule explainer; the author's headline rule count is unverified.",
+      "whyItMatters": "Per the collection notes, a schema mistake can silently hide a skill; we already have a report-only skill lint, so the new part is selected schema rules, tried on scratch copies with a broken test skill. That trial is only proposed; not installed."
     },
     {
       "id": "dsh-ctx-budget-2026-10-26",
@@ -3727,7 +4357,10 @@
         "routines",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "Estimate an agent's up-front context and check paths in its instructions",
+      "whatItIs": "An auditor for one open-source agent tool that estimates the fixed context an agent loads, such as rules, memory, skills and tools, and checks that paths named in its instructions exist. It is read-only by default, and its token counts are estimates.",
+      "whyItMatters": "We already cap the size of the two files every agent reads before a task, so the new part is a per-seat estimate of each request's fixed context. A collector's spot check found a naive path check gives false alarms; a read-only trial is only proposed, not installed."
     },
     {
       "id": "memcap-2026-10-28",
@@ -3745,7 +4378,10 @@
         "hooks",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "memcap: heavy commands wait their turn for memory; light ones never queue",
+      "whatItIs": "A shared memory budget for all sessions of two coding CLIs on one Mac: builds and test runs queue until memory allows, while reads and searches never queue. A background watchdog retires leftover dev servers and idle simulators, and says when it is probably not running.",
+      "whyItMatters": "Per the collection notes, several seats run builds and tests on our Mac at once, and our Mac floor covers free disk, not memory per command. A week in observe mode is only proposed; it is a process-killing service and is not installed."
     },
     {
       "id": "docgraph-2026-10-28",
@@ -3763,7 +4399,10 @@
         "Mac CLI",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "docgraph: flags docs nobody links to, docs with no place, and untracked docs",
+      "whatItIs": "A checker for a repo's agent-facing docs that keeps two separate maps, links and declared structure, and flags docs nothing links to, docs with no place in the structure, untracked docs and broken links. A hook can also flag docs a code change left stale.",
+      "whyItMatters": "Per the collection notes, its new parts for our vault are checking where each note sits in the structure and noticing when a value named in a doc changes. A report-only trial on a copy is only proposed; its default rules would flood the vault, and it is not installed."
     },
     {
       "id": "custodiet-2026-10-28",
@@ -3781,7 +4420,10 @@
         "routines",
         "backlog"
       ],
-      "appliedToPlaybook": false
+      "appliedToPlaybook": false,
+      "plainTitle": "custodiet: a rule may block an agent only with a signed source and tests",
+      "whatItIs": "A gate for one coding CLI that judges each finished turn by its record of tool calls, not by what the agent said. Each blocking rule needs a human-signed source, examples both ways, and tests that catch deliberately broken copies of the rule.",
+      "whyItMatters": "Our policy already asks that a new check be seen failing on a broken input, but not signed sources checked at load, mutation tests per rule or a false-alarm log. Taking those is only proposed; its text rules match Chinese only, so the shipped rules are largely inert here."
     }
   ]
 }
