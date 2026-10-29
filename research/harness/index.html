@@ -154,11 +154,12 @@
     .cl-week[open] > summary::before { transform: rotate(45deg); }
     .cl-week > summary:hover .cl-name { color: var(--accent-dark); }
     .cl-week > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .cl-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin-bottom: 6px; }
+    .cl-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 0; }
     .cl-name { font-family: var(--serif); font-size: 1.15rem; font-weight: 600; }
     .cl-count { font-size: 0.86rem; color: var(--ink-soft); }
-    .cl-line { display: block; padding: 2px 0 2px 4.4em; text-indent: -4.4em; font-size: 0.92rem; line-height: 1.45; }
-    .cl-line time { display: inline-block; width: 4.4em; text-indent: 0; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+    .cl-lines { list-style: none; margin: 0; padding: 0 16px 12px 40px; }
+    .cl-lines li { margin: 0; padding: 2px 0 2px 4.4em; text-indent: -4.4em; font-size: 0.92rem; line-height: 1.45; }
+    .cl-lines time { display: inline-block; width: 4.4em; text-indent: 0; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
     .cl-entries { list-style: none; margin: 0; padding: 2px 16px 10px 40px; border-top: 1px solid var(--line); }
     .cl-entries li { display: grid; grid-template-columns: 6.6em minmax(0, 1fr); gap: 2px 14px; margin: 0; padding: 11px 0; border-bottom: 1px dashed var(--line); font-size: 0.92rem; line-height: 1.5; }
     .cl-entries li:last-child { border-bottom: 0; }
@@ -182,7 +183,10 @@
       .arr { top: auto; right: auto; bottom: -29px; left: 18px; transform: rotate(90deg); }
       .n-review .arr { display: none; }
       .loop-arr { top: -36px; left: 4px; width: 34px; height: 30px; }
-      .lanes { grid-template-columns: minmax(0, 1fr); }
+      .lanes { grid-template-columns: auto minmax(0, 1fr); }
+      .lane-axis { grid-column: 1; grid-row: 1 / span 3; padding: 0 0 0 12px; writing-mode: vertical-rl; }
+      .lane-axis::before { right: auto; bottom: 0; width: 6px; height: auto; background: linear-gradient(180deg, #0f766e, #d39b24 50%, #b42318); }
+      .lane { grid-column: 2; }
     }
     @media (max-width: 600px) {
       .band { padding: 14px 14px 16px; }
@@ -191,8 +195,9 @@
       .cl-week::before { left: -22px; }
       .cl-week > summary { padding: 12px 12px 12px 32px; }
       .cl-week > summary::before { left: 12px; }
-      .cl-line { padding-left: 3.9em; text-indent: -3.9em; }
-      .cl-line time { width: 3.9em; }
+      .cl-lines { padding: 0 12px 12px 32px; }
+      .cl-lines li { padding-left: 3.9em; text-indent: -3.9em; }
+      .cl-lines time { width: 3.9em; }
       .cl-entries { padding: 2px 14px 10px 16px; }
       .cl-entries li { grid-template-columns: minmax(0, 1fr); }
       .cl-older { padding-left: 16px; }
@@ -201,8 +206,8 @@
       tr { padding: 10px 0 12px; border-bottom: 1px solid var(--line); }
       td { padding: 3px 0; border: 0; }
       td:first-child { font-weight: 600; }
-      #controls-inventory td:first-child { font-weight: 400; }
-      td[data-label]:not(:first-child)::before { content: attr(data-label); display: block; font-size: 0.76rem; font-weight: 600; color: var(--ink-soft); }
+      #controls-inventory td:first-child, #pipeline td:first-child { font-weight: 400; }
+      td[data-label]:not(:first-child)::before, #pipeline td[data-label]:first-child::before { content: attr(data-label); display: block; font-size: 0.76rem; font-weight: 600; color: var(--ink-soft); }
     }
     @media (prefers-reduced-motion: no-preference) {
       .cl-week > summary::before { transition: transform 0.15s ease; }
@@ -283,7 +288,7 @@
         <p class="band-head"><span class="band-name">Haiyuan</span> <span class="band-role">Owner and the human gate</span></p>
         <p>Sets direction and accepts intent and spec on consequential work. Merges, payments, unsolicited publishes and deleting an agent always need Haiyuan.</p>
       </div>
-      <p class="hop"><svg viewBox="0 0 16 24" aria-hidden="true" focusable="false"><path d="M8 2v18M3 15l5 6 5-6"/></svg><span>Asks go to Agent Manage Bot first; only judgment calls come back to Haiyuan.</span></p>
+      <p class="hop"><svg viewBox="0 0 16 24" aria-hidden="true"><path d="M8 2v18M3 15l5 6 5-6"/></svg><span>Asks go to Agent Manage Bot first; only judgment calls come back to Haiyuan.</span></p>
       <div class="band band-a">
         <p class="band-head"><span class="band-name">Layer A: Grok bots</span> <span class="band-role">Always on. They schedule routines, route work, publish hub pages and babysit the Mac workers.</span></p>
         <ul class="seats">
@@ -294,14 +299,14 @@
           <li class="seat"><b>Jev</b><span>Typed decision layer: answers Choice, Score and Noul questions so an expensive fan-out runs only when the route is clear. The bots and CLIs still do the work.</span><span class="never">Never writes prose or code, and never authorizes merge, pay or send.</span></li>
         </ul>
       </div>
-      <p class="hop"><svg viewBox="0 0 16 24" aria-hidden="true" focusable="false"><path d="M8 2v18M3 15l5 6 5-6"/></svg><span>Long jobs launch on the Mac through <code>grok-tmux-run</code>, with streaming logs and a watchdog.</span></p>
+      <p class="hop"><svg viewBox="0 0 16 24" aria-hidden="true"><path d="M8 2v18M3 15l5 6 5-6"/></svg><span>Long jobs launch on the Mac through <code>grok-tmux-run</code>, with streaming logs and a watchdog.</span></p>
       <div class="band band-b">
         <p class="band-head"><span class="band-name">Layer B: Mac CLIs</span> <span class="band-role">Command-line agents on Haiyuan’s Mac. They do the long work: collecting, writing, coding and reviewing.</span></p>
         <ul class="seats">
           <li class="seat"><b>Opus 5.5</b><span>Default implementer: builds from the accepted <code>plan.md</code>, runs the tests and opens the PR. Off the Field Brief since 2026-10-13.</span></li>
           <li class="seat"><b>Astra</b><span>Blind reviewer: alone on code Opus implemented, paired with Fable on docs, drafts and other seats’ code. Last-resort Field Brief writer.</span></li>
           <li class="seat"><b>Fable</b><span>Second blind reviewer on docs, drafts and other seats’ code.</span><span class="never">Never reviews a PR it implemented.</span></li>
-          <li class="seat"><b>Sol 6.1</b><span>Stand-in since 2026-10-20: implements when Opus is limited and takes Fable’s docs review seat when Fable is limited.</span><span class="never">Never replaces Astra on code Opus implemented.</span></li>
+          <li class="seat"><b>Sol 6.1</b><span>Stand-in since 2026-10-20: implements when Opus is limited, and replaces Fable as the second blind docs reviewer when Fable is limited.</span><span class="never">Never replaces Astra on code Opus implemented, and never reviews what it implemented.</span></li>
           <li class="seat"><b>Muse</b><span>Writes the deep Field Brief every 12 hours and collects sources every third hour. Optional implementer.</span></li>
           <li class="seat"><b>Agy and DSH</b><span>Hourly source collectors, taking turns with Muse by hour. DSH is also the second default small model.</span></li>
           <li class="seat"><b>Kimi</b><span>Field Brief writer when Muse can’t, and the fallback for small jobs.</span></li>
@@ -309,7 +314,7 @@
           <li class="seat"><b>Qwen Code (trial)</b><span>Three nightly audits, 10-25 to 10-27, each reviewed blind by Astra and never merged. Kept only if its PRs pass Astra about as often as DSH’s do.</span></li>
         </ul>
       </div>
-      <p class="hop"><svg viewBox="0 0 16 24" aria-hidden="true" focusable="false"><path d="M8 2v18M3 15l5 6 5-6"/></svg><span>Every agent, bot or CLI, reads the vault before a task and files a note after. Code and hub pages go to GitHub.</span></p>
+      <p class="hop"><svg viewBox="0 0 16 24" aria-hidden="true"><path d="M8 2v18M3 15l5 6 5-6"/></svg><span>Every agent, bot or CLI, reads the vault before a task and files a note after. Code and hub pages go to GitHub.</span></p>
       <div class="band band-rec">
         <p class="band-head"><span class="band-name">Shared record: vault and GitHub</span> <span class="band-role">Where the team’s memory and proof live.</span></p>
         <ul class="seats seats-2">
@@ -334,11 +339,11 @@
     <figure class="loop">
       <figcaption>Code: from plan to merge (<a href="#em-loop">§5</a>)</figcaption>
       <ol class="loop-grid">
-        <li class="node n-plan"><b>Plan</b><span><code>intent.md</code>, <code>spec.md</code> and <code>plan.md</code> are committed. Haiyuan accepts intent and spec when the change is consequential.</span><svg class="arr" viewBox="0 0 22 12" aria-hidden="true" focusable="false"><path d="M1 6h19M15 1l5 5-5 5"/></svg></li>
-        <li class="node n-impl"><b>Implement</b><span>Opus 5.5 builds from the accepted plan, runs the tests and opens the PR.</span><svg class="arr" viewBox="0 0 22 12" aria-hidden="true" focusable="false"><path d="M1 6h19M15 1l5 5-5 5"/></svg></li>
-        <li class="node n-review"><b>Blind review</b><span>Astra alone on code Opus implemented; Astra and Fable on docs, drafts and other seats’ code. Each tries to disprove the change and ends with a <code>VERDICT</code> line on the head SHA.</span><svg class="arr" viewBox="0 0 22 12" aria-hidden="true" focusable="false"><path d="M1 6h19M15 1l5 5-5 5"/></svg></li>
-        <li class="node n-fix"><svg class="loop-arr" viewBox="0 0 40 34" aria-hidden="true" focusable="false"><path d="M12 2v28M7 25l5 6 5-6M28 32V4M23 9l5-6 5 6"/></svg><b>Fix round</b><span>A P0 or P1 the change introduced blocks approval. The fix lands on the same branch, and the re-review reads only the new diff.</span><span class="cap">At most 3 fix rounds, then escalate to Haiyuan.</span></li>
-        <li class="node n-merge"><svg class="arr-in" viewBox="0 0 22 12" aria-hidden="true" focusable="false"><path d="M1 6h19M15 1l5 5-5 5"/></svg><b>Haiyuan merges</b><span>Approval means agent-complete, not shipped. The merge happens only on Haiyuan’s ask, or under a standing order for that repo.</span></li>
+        <li class="node n-plan"><b>Plan</b><span><code>intent.md</code>, <code>spec.md</code> and <code>plan.md</code> are committed. Haiyuan accepts intent and spec when the change is consequential.</span><svg class="arr" viewBox="0 0 22 12" aria-hidden="true"><path d="M1 6h19M15 1l5 5-5 5"/></svg></li>
+        <li class="node n-impl"><b>Implement</b><span>Opus 5.5 builds from the accepted plan, runs the tests and opens the PR.</span><svg class="arr" viewBox="0 0 22 12" aria-hidden="true"><path d="M1 6h19M15 1l5 5-5 5"/></svg></li>
+        <li class="node n-review"><b>Blind review</b><span>Astra alone on code Opus implemented; Astra and Fable on docs, drafts and other seats’ code. Each tries to disprove the change and ends with a <code>VERDICT</code> line on the head SHA.</span><svg class="arr" viewBox="0 0 22 12" aria-hidden="true"><path d="M1 6h19M15 1l5 5-5 5"/></svg></li>
+        <li class="node n-fix"><svg class="loop-arr" viewBox="0 0 40 34" aria-hidden="true"><path d="M12 2v28M7 25l5 6 5-6M28 32V4M23 9l5-6 5 6"/></svg><b>Fix round</b><span>A P0 or P1 the change introduced blocks approval. The fix lands on the same branch, and the re-review reads only the new diff.</span><span class="cap">At most 3 fix rounds, then escalate to Haiyuan.</span></li>
+        <li class="node n-merge"><svg class="arr-in" viewBox="0 0 22 12" aria-hidden="true"><path d="M1 6h19M15 1l5 5-5 5"/></svg><b>Haiyuan merges</b><span>Approval means agent-complete, not shipped. The merge happens only on Haiyuan’s ask, or under a standing order for that repo.</span></li>
       </ol>
     </figure>
 
@@ -399,7 +404,7 @@
         <ul>
           <li><a href="#gyr-authority">RED actions</a> always go to Haiyuan: send or publish, spend or pay, merge, delete non-junk, permissions, production, accepting terms. If it can’t be undone in under a minute, park it and ask.</li>
           <li>An approval covers the item as approved; re-check the item and current authority right before the action runs (<a href="#approval-recheck">approval re-check</a>).</li>
-          <li>Everything waiting on Haiyuan goes in one <a href="#decision-queue">decision queue</a>: irreversible or judgment calls only, re-raised once after 3 days.</li>
+          <li>Everything waiting on Haiyuan goes in one <a href="#decision-queue">decision queue</a>: irreversible or judgment calls only, re-raised once after 3 days. Emergencies still go to chat.</li>
           <li>A category Haiyuan approves more than about 90% of the time is proposed for policy instead of a prompt (<a href="#approval-rate">approval rate</a>).</li>
           <li>Stopping a bot needs Haiyuan, then proof that every layer stopped: the bot, its routines, its delegated jobs, its kick-ledger rows and its Jev gates (<a href="#emergency-stop">emergency stop</a>).</li>
           <li>Ambiguous asks go back to Haiyuan, never to a specialist by silent hand-off (<a href="#grok-patterns">chief of staff</a>).</li>
@@ -422,7 +427,7 @@
         <h3>Review</h3>
         <ul>
           <li>Reviewers start only once a PR exists, and each sees only the PR plus intent, spec and plan, never the other review (<a href="#em-loop">§5</a>).</li>
-          <li>Code Opus implemented gets Astra alone; docs, drafts and other seats’ code get Astra and Fable, with Sol 6.1 in Fable’s seat when Fable is limited. An implementer never reviews its own work (<a href="#reviewer-rule">reviewer seats</a>).</li>
+          <li>Code Opus implemented gets Astra alone; docs, drafts and other seats’ code get Astra and Fable. When Fable is limited, Sol 6.1 replaces Fable as the second blind docs reviewer. An implementer never reviews its own work (<a href="#reviewer-rule">reviewer seats</a>).</li>
           <li>Reviewers try to disprove the change against 2–3 rejection criteria named before reading the diff (<a href="#disproof-review">disproof review</a>).</li>
           <li>Each review ends with one <code>VERDICT</code> line on the head SHA; without it the review is UNPARSED, never an LGTM (<a href="#review-verdict-line">verdict line</a>).</li>
           <li>Only a P0 or P1 the change introduced blocks; Pre-existing findings go to a follow-up list (<a href="#review-convergence">finding tags</a>).</li>
@@ -442,7 +447,7 @@
           <li>Reuse the session id for a PR or slice; don’t cold-start follow-ups (<a href="#launch">§8</a>).</li>
           <li>A stale run resumes only after the old agent is gone; the ownership guard enforces this since 2026-10-20 (<a href="#watchdog-resume-safety">resume safety</a>).</li>
           <li>After any Mac trouble, both spawn-ok probes must exit 0 before a launch, relaunch or resume (<a href="#spawn-ok">spawn-ok</a>).</li>
-          <li>Long launches hold while the Mac has less than 15 GB free (<a href="#launch">disk floor</a>).</li>
+          <li>Long launches hold while the Mac has less than 15 GB free. Standing disk OKs let Manage clear the Go build cache and thin local Time Machine snapshots; anything else that frees disk still needs Haiyuan’s OK (<a href="#launch">disk floor</a>).</li>
           <li>Default run limits: 50 items, 2 retries, $0 spend, 0 external actions; abnormal volume means stop and escalate (<a href="#run-limits">run limits</a>).</li>
           <li>Transient errors retry at most twice; an unknown outcome is parked for Haiyuan or the EM, never retried blind (<a href="#retry-ceiling">retry ceiling</a>).</li>
           <li>A resumed routine checks live state before each write and never publishes twice (<a href="#idempotent-resume">idempotent resume</a>).</li>
@@ -484,7 +489,7 @@
         <ul>
           <li>Haiyuan asks Manage first; Manage routes the work and pulls Haiyuan in only for judgment calls (<a href="#grok-patterns">chief of staff</a>).</li>
           <li>Every Manage handoff carries the artifact path and a handoff packet: pass ownership, not transcripts (<a href="#handoff-packet">handoff packet</a>).</li>
-          <li>In group rooms only the first @mention wakes a bot, and after two hops (the default cap) the ask goes back to Haiyuan (<a href="#grok-patterns">group rooms</a>).</li>
+          <li>In group rooms only the first @mention wakes a bot, and after two hops (the default cap; one hop in the Field Brief room after a miss ticket) the ask goes back to Haiyuan (<a href="#grok-patterns">group rooms</a>).</li>
           <li>Coding kicks go straight to Github Bot and get a kick-ledger row; its heartbeat reads the ledger first (<a href="#coding-em-kicks">kick ledger</a>).</li>
           <li>A bug job needs a repro artifact before the implementer starts, and the first commit is the failing test (<a href="#coding-em-kicks">reproduce before fix</a>).</li>
           <li>Commit <code>intent.md</code>, <code>spec.md</code> and <code>plan.md</code> before implementing anything bigger than a one-line fix (<a href="#em-loop">§5</a>).</li>
@@ -1278,39 +1283,39 @@ ask → Manage Bot
   </section>
   <section id="changelog" class="changelog">
     <h2>Changelog</h2>
-    <p class="ov-sub">What changed on this page, newest first, one group per week (weeks start on Monday). Each line in a week’s heading is a one-line summary; open the week to read every entry in full, as originally logged. The § numbers link to the sections an entry touched.</p>
+    <p class="ov-sub">What changed on this page, newest first, one group per week (weeks start on Monday). Open a week for a one-line summary of each change, then every entry in full as originally logged; the § numbers link to the sections an entry touched. To log a change, add its summary line and its full entry at the top of the current week, then update that week’s entry count.</p>
     <div class="cl-weeks">
       <details class="cl-week" id="changelog-2026-10-26" open>
-        <summary>
-          <span class="cl-head"><span class="cl-name">Oct 26 – Nov 1, 2026</span> <span class="cl-count">2 entries</span></span>
-          <span class="cl-line"><time datetime="2026-10-28">Oct 28</time>Charter test 6: a new bot or seat must say why the work can’t be a skill or routine on an existing seat</span>
-          <span class="cl-line"><time datetime="2026-10-28">Oct 28</time>Runs skipped while the Mac is offline are owed until one catch-up run pays them back</span>
-        </summary>
+        <summary><span class="cl-head"><span class="cl-name">Oct 26 – Nov 1, 2026</span> <span class="cl-count">2 entries</span></span></summary>
+        <ul class="cl-lines">
+          <li><time datetime="2026-10-28">Oct 28</time>Charter test 6: a new bot or seat must say why the work can’t be a skill or routine on an existing seat</li>
+          <li><time datetime="2026-10-28">Oct 28</time>Runs skipped while the Mac is offline are owed until one catch-up run pays them back</li>
+        </ul>
         <ol class="cl-entries">
           <li><time datetime="2026-10-28">2026-10-28</time><p>charter test 6 (Haiyuan 06:49 PT): a new bot or seat is created only if its creation note says why the work cannot be a skill or routine on an existing seat, in one Why separate: line naming one of seven allowed reasons; five tests become six, role cards unchanged (<a href="#extend">§17</a>)</p></li>
           <li><time datetime="2026-10-28">2026-10-28</time><p>skipped runs need payback once the Mac is online (Haiyuan 01:18 PT): a run skipped while the Mac was offline, down or exec-wedged is owed, and one catch-up run for the whole window pays it back once spawn-ok passes; the Monday kill review flags an owed skip with no payback; replaces the 10-18 rule that outage runs count as skip (<a href="#launch">§8</a>, <a href="#grok-patterns">§12</a>, <a href="#spacex-keeps">§16</a>, <a href="#controls-inventory">controls inventory</a>)</p></li>
         </ol>
       </details>
       <details class="cl-week" id="changelog-2026-10-19">
-        <summary>
-          <span class="cl-head"><span class="cl-name">Oct 19 – 25, 2026</span> <span class="cl-count">16 entries</span></span>
-          <span class="cl-line"><time datetime="2026-10-25">Oct 25</time>Skill lint adopted: report-only, rerun in the Monday sync</span>
-          <span class="cl-line"><time datetime="2026-10-25">Oct 25</time>Opus 5.5 and Fable usage-limited until Tue 10-27 3 PM PT; Sol 6.1 covers</span>
-          <span class="cl-line"><time datetime="2026-10-24">Oct 24</time>Default small models: GLM-5.3 first, DeepSeek v4.1 Flash second, Kimi the small-job fallback; advisory only</span>
-          <span class="cl-line"><time datetime="2026-10-24">Oct 24</time>Weekly update for 10-18 to 10-24: harness eval design, resumed Lab curate, idempotent resume, Lab at 206 cards</span>
-          <span class="cl-line"><time datetime="2026-10-24">Oct 24</time>Seat and routine sync: Kimi K3.1 Pro, Qwen Code trial, Astra writes the brief to 10-25, routine changes, disk OKs</span>
-          <span class="cl-line"><time datetime="2026-10-20">Oct 20</time>Sol 6.1 seat added as stand-in; ownership guard installed; controls inventory and reading-path pages published</span>
-          <span class="cl-line"><time datetime="2026-10-20">Oct 20</time>Review rules tightened: original-base Pre-existing, carried-forward findings, final acceptance check, depth tiers</span>
-          <span class="cl-line"><time datetime="2026-10-20">Oct 20</time>Review fix rounds capped at three, then escalate to Haiyuan</span>
-          <span class="cl-line"><time datetime="2026-10-20">Oct 20</time>GitHub reviews posted only for a P0/P1 the change introduced</span>
-          <span class="cl-line"><time datetime="2026-10-20">Oct 20</time>Converging re-reviews, finding tags and evidence for blockers approved</span>
-          <span class="cl-line"><time datetime="2026-10-20">Oct 20</time>Harness Lab reaches 176 cards</span>
-          <span class="cl-line"><time datetime="2026-10-19">Oct 19</time>DSH pinned to the 0.2.1 line with DeepSeek v4.1 Flash; its model-gate mode parked for good</span>
-          <span class="cl-line"><time datetime="2026-10-19">Oct 19</time>Two report-only Mac checks installed: freshness (tool 7) and model default (tool 8)</span>
-          <span class="cl-line"><time datetime="2026-10-19">Oct 19</time>Reviews posted only for a P0/P1; recurring same-class P2s may be accepted (#10 precedent)</span>
-          <span class="cl-line"><time datetime="2026-10-19">Oct 19</time>Long launches hold below 15 GB free; a failed spawn-ok probe was a skip (now owed)</span>
-          <span class="cl-line"><time datetime="2026-10-19">Oct 19</time>Harness Lab reaches 175 cards</span>
-        </summary>
+        <summary><span class="cl-head"><span class="cl-name">Oct 19 – 25, 2026</span> <span class="cl-count">16 entries</span></span></summary>
+        <ul class="cl-lines">
+          <li><time datetime="2026-10-25">Oct 25</time>Skill lint adopted: report-only, rerun in the Monday sync</li>
+          <li><time datetime="2026-10-25">Oct 25</time>Opus 5.5 and Fable usage-limited until Tue 10-27 3 PM PT; Sol 6.1 covers</li>
+          <li><time datetime="2026-10-24">Oct 24</time>Default small models: GLM-5.3 first, DeepSeek v4.1 Flash second, Kimi the small-job fallback; advisory only</li>
+          <li><time datetime="2026-10-24">Oct 24</time>Weekly update for 10-18 to 10-24: harness eval design, resumed Lab curate, idempotent resume, Lab at 206 cards</li>
+          <li><time datetime="2026-10-24">Oct 24</time>Seat and routine sync: Kimi K3.1 Pro, Qwen Code trial, Astra writes the brief to 10-25, routine changes, disk OKs</li>
+          <li><time datetime="2026-10-20">Oct 20</time>Sol 6.1 seat added as stand-in; ownership guard installed; controls inventory and reading-path pages published</li>
+          <li><time datetime="2026-10-20">Oct 20</time>Review rules tightened: original-base Pre-existing, carried-forward findings, final acceptance check, depth tiers</li>
+          <li><time datetime="2026-10-20">Oct 20</time>Review fix rounds capped at three, then escalate to Haiyuan</li>
+          <li><time datetime="2026-10-20">Oct 20</time>GitHub reviews posted only for a P0/P1 the change introduced</li>
+          <li><time datetime="2026-10-20">Oct 20</time>Converging re-reviews, finding tags and evidence for blockers approved</li>
+          <li><time datetime="2026-10-20">Oct 20</time>Harness Lab reaches 176 cards</li>
+          <li><time datetime="2026-10-19">Oct 19</time>DSH pinned to the 0.2.1 line with DeepSeek v4.1 Flash; its model-gate mode parked for good</li>
+          <li><time datetime="2026-10-19">Oct 19</time>Two report-only Mac checks installed: freshness (tool 7) and model default (tool 8)</li>
+          <li><time datetime="2026-10-19">Oct 19</time>Reviews posted only for a P0/P1; recurring same-class P2s may be accepted (#10 precedent)</li>
+          <li><time datetime="2026-10-19">Oct 19</time>Long launches hold below 15 GB free; a failed spawn-ok probe was a skip (now owed)</li>
+          <li><time datetime="2026-10-19">Oct 19</time>Harness Lab reaches 175 cards</li>
+        </ul>
         <ol class="cl-entries">
           <li><time datetime="2026-10-25">2026-10-25</time><p>skill lint adopted (report-only, Monday sync; <a href="#skills">§9</a>)</p></li>
           <li><time datetime="2026-10-25">2026-10-25</time><p>Opus 5.5 + Fable limited until Tue 10-27 3 PM PT, Sol 6.1 covers (<a href="#em-loop">§5</a>)</p></li>
@@ -1331,12 +1336,12 @@ ask → Manage Bot
         </ol>
       </details>
       <details class="cl-week" id="changelog-2026-10-12">
-        <summary>
-          <span class="cl-head"><span class="cl-name">Oct 12 – 18, 2026</span> <span class="cl-count">3 entries</span></span>
-          <span class="cl-line"><time datetime="2026-10-18">Oct 18</time>Spawn-ok probe after Mac trouble, one catch-up Lab pack after missed days, outages recorded once</span>
-          <span class="cl-line"><time datetime="2026-10-18">Oct 18</time>Two Mac run lessons from 10-15: an Agy collect idle on a background task, and an exec wedge</span>
-          <span class="cl-line"><time datetime="2026-10-15">Oct 15</time>Memory loop rule 2: summary lines use the exact names a later search would look for</span>
-        </summary>
+        <summary><span class="cl-head"><span class="cl-name">Oct 12 – 18, 2026</span> <span class="cl-count">3 entries</span></span></summary>
+        <ul class="cl-lines">
+          <li><time datetime="2026-10-18">Oct 18</time>Spawn-ok probe after Mac trouble, one catch-up Lab pack after missed days, outages recorded once</li>
+          <li><time datetime="2026-10-18">Oct 18</time>Two Mac run lessons from 10-15: an Agy collect idle on a background task, and an exec wedge</li>
+          <li><time datetime="2026-10-15">Oct 15</time>Memory loop rule 2: summary lines use the exact names a later search would look for</li>
+        </ul>
         <ol class="cl-entries">
           <li><time datetime="2026-10-18">2026-10-18</time><p>approved by Haiyuan 11:46 PT: spawn-ok probe before any launch after Mac trouble (<a href="#launch">§8</a>), one catch-up Lab pack after missed days (<a href="#grok-patterns">§12</a>), runs an outage prevented count as skip (superseded 2026-10-28: now owed until paid back) and the outage is recorded once (<a href="#spacex-keeps">§16</a>)</p></li>
           <li><time datetime="2026-10-18">2026-10-18</time><p>two Mac run lessons from 10-15: an Agy collect idle on a background task, and an exec wedge in which some new programs hung at start (<a href="#launch">§8</a>)</p></li>
@@ -1344,7 +1349,7 @@ ask → Manage Bot
         </ol>
       </details>
       <div class="cl-week cl-older">
-        <p class="cl-head"><span class="cl-name">Sep 27 – Oct 13, 2026</span></p>
+        <p class="cl-head"><span class="cl-name">Older entries</span> <span class="cl-count">in git history</span></p>
         <p class="cl-older-text">earlier entries (2026-09-27 to 10-13): <a href="https://github.com/caohy1988/caohy1988.github.io/commits/main/research/harness/index.html">this page’s git history</a></p>
       </div>
     </div>
