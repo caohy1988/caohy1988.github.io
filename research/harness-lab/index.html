@@ -38,6 +38,14 @@
     .callout strong { color: var(--ink); }
     .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
     /* Status colours: one set per badge, chip dot and card stripe (2026-10-28 redesign) */
+    /* Checked harness statuses (2026-11-02 re-badge): taken from each card's status field */
+    .st-inharness { --st: #0f766e; --st-bg: #e7f3f0; --st-line: #b9dbd4; --st-ink: #0b5d57; }
+    .st-partly { --st: #5fae9f; --st-bg: #f1f8f6; --st-line: #b9dbd4; --st-ink: #0b5d57; }
+    .st-trialnow { --st: #d39b24; --st-bg: #fbf2db; --st-line: #ecd49a; --st-ink: #7a5200; }
+    .st-reportonly { --st: #7c5cc4; --st-bg: #f0ebfa; --st-line: #d3c7ef; --st-ink: #4b2e83; }
+    .st-parked { --st: #b4697a; --st-bg: #f8eef0; --st-line: #e6c7cf; --st-ink: #7a2e40; }
+    .st-notadopted { --st: #98a2b3; --st-bg: #eef0f3; --st-line: #d0d5dd; --st-ink: #3f4a5a; }
+    /* Earlier statuses, read from older card data when a card has no status field */
     .st-playbook { --st: #0f766e; --st-bg: #e7f3f0; --st-line: #b9dbd4; --st-ink: #0b5d57; }
     .st-partial { --st: #5fae9f; --st-bg: #f1f8f6; --st-line: #b9dbd4; --st-ink: #0b5d57; }
     .st-trial { --st: #d39b24; --st-bg: #fbf2db; --st-line: #ecd49a; --st-ink: #7a5200; }
@@ -65,6 +73,7 @@
     .legend dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; align-items: baseline; margin: 10px 0 0; padding: 12px 14px; max-width: 860px; background: var(--cream); border: 1px solid var(--line); border-radius: 12px; }
     .legend dt { margin: 0; }
     .legend dd { margin: 0; color: var(--ink-soft); }
+    .legend .legend-note { max-width: 860px; margin: 8px 0 0; color: var(--ink-soft); font-size: 0.86rem; }
     .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start; padding-bottom: 36px; }
     .list > .empty { grid-column: 1 / -1; }
     .card { min-width: 0; overflow-wrap: break-word; background: var(--cream); border: 1px solid var(--line); border-top: 4px solid var(--st, var(--line)); border-radius: 14px; padding: 14px 18px 0; box-shadow: 0 1px 0 rgba(16,24,40,0.03); scroll-margin-top: 16px; }
@@ -95,6 +104,8 @@
     .tech-body ul { margin: 0 0 6px; padding-left: 1.1rem; }
     .tech-body li { margin: 3px 0; }
     .tech-body .orig-title { color: var(--ink); font-weight: 500; }
+    .where .tech-body { padding-top: 2px; }
+    .where .where-flag { color: var(--ink-faint); font-size: 0.84rem; }
     .tags { display: flex; flex-wrap: wrap; gap: 6px; }
     .tag { display: inline-block; font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; background: var(--paper-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; color: var(--ink-soft); }
     .tag.applied { background: #d1fae5; border-color: #a7f3d0; color: #065f46; }
@@ -182,6 +193,7 @@
       <details class="legend">
         <summary>What the status badges mean</summary>
         <dl id="legend"></dl>
+        <p class="legend-note">Each badge says how much of the card is really in our harness, checked against the harness playbook, our vault's decision notes and the tools installed on the Mac, not taken from the card's own wording. Open “Where it lives in the harness” on a card for the evidence.</p>
       </details>
     </div>
   </section>
@@ -205,9 +217,25 @@
 (function () {
   "use strict";
   // Each card shows a status badge, a plain-language title, "What it is", "Why it matters for us",
-  // the date and the source link; the curated text (title, why, source, tags, keeps) sits under
-  // "Technical notes". plainTitle / whatItIs / whyItMatters are optional: a card without them
-  // falls back to its title and short excerpts of its why text, so older-schema cards still render.
+  // the date and the source link; "Where it lives in the harness" (the card's statusNote) and the
+  // curated text (title, why, source, tags, keeps) open on a click. plainTitle / whatItIs /
+  // whyItMatters are optional: a card without them falls back to its title and short excerpts of
+  // its why text, so older-schema cards still render.
+  // The badge comes from the card's status field, a status checked against the harness itself
+  // (2026-11-02 re-badge); a card without one falls back to the earlier reading below.
+  var CHECKED = {
+    "in-harness": { key: "inharness", label: "In harness", tip: "Adopted and live in our harness: an installed tool or hook, a routine, or a standing rule in the playbook or the fleet contract." },
+    "partial": { key: "partly", label: "Partly in harness", tip: "A piece of it is adopted and live; the rest is not." },
+    "trial": { key: "trialnow", label: "Trial", tip: "Running now as a shadow, smoke or trial run; not adopted yet." },
+    "report-only": { key: "reportonly", label: "Report-only", tip: "Live as a check that reports what it finds but never blocks or changes anything." },
+    "parked": { key: "parked", label: "Parked", tip: "Deliberately set aside: a review skipped, parked or retired it, or an approved step waits on a named blocker." },
+    "not-adopted": { key: "notadopted", label: "Not adopted", tip: "Still only an idea: not decided yet, or kept as backlog or an unstarted trial with no named blocker; nothing of it is in the harness." }
+  };
+  var CHECKED_ORDER = ["in-harness", "partial", "trial", "report-only", "parked", "not-adopted"];
+  function checkedOf(e) {
+    var s = e && e.status;
+    return typeof s === "string" && Object.prototype.hasOwnProperty.call(CHECKED, s) ? CHECKED[s] : null;
+  }
   var STATUS = {
     playbook: { label: "In playbook", tip: "Adopted: part of our harness playbook." },
     partial: { label: "Partly in playbook", tip: "Some of it is in the playbook; the rest is still in the backlog." },
@@ -218,7 +246,9 @@
     backlog: { label: "Backlog", tip: "Kept for later; not in the playbook." },
     noted: { label: "Noted", tip: "Kept as a note with no status tag; not in the playbook." }
   };
-  var ORDER = ["playbook", "partial", "trial", "shadow", "smoke", "followup", "backlog", "noted"];
+  CHECKED_ORDER.forEach(function (k) { STATUS[CHECKED[k].key] = { label: CHECKED[k].label, tip: CHECKED[k].tip }; });
+  var ORDER = CHECKED_ORDER.map(function (k) { return CHECKED[k].key; })
+    .concat(["playbook", "partial", "trial", "shadow", "smoke", "followup", "backlog", "noted"]);
   var STATUS_TAGS = ["backlog", "shadow", "smoke", "follow-up"];
 
   function esc(s) {
@@ -245,10 +275,12 @@
       return String(b.date || "").localeCompare(String(a.date || "")) || String(b.id || "").localeCompare(String(a.id || ""));
     });
   }
-  // Status comes from existing data only: appliedToPlaybook (partly, when the card keeps its
-  // backlog tag), else the card's own "Status: … trial" sentence, else the last status tag
-  // (the curate convention puts it last), else "noted".
+  // A checked status field wins. Without one, status comes from the older data: appliedToPlaybook
+  // (partly, when the card keeps its backlog tag), else the card's own "Status: … trial" sentence,
+  // else the last status tag (the curate convention puts it last), else "noted".
   function statusOf(e) {
+    var c = checkedOf(e);
+    if (c) return c.key;
     var tags = list(e.tags);
     if (e.appliedToPlaybook === true) return tags.indexOf("backlog") >= 0 ? "partial" : "playbook";
     if (/Status: [^.;]*\btrial\b/.test(String(e.why || ""))) return "trial";
@@ -300,6 +332,19 @@
     return excerpt(stop > 0 ? rest.slice(0, stop) : rest, 260);
   }
   function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+  // statusNote ends with its evidence in parentheses: "… (#anchor; Vault/path.md; ~/bin/tool)."
+  // Playbook anchors become links to the harness playbook; vault paths and tools stay plain text.
+  function noteHtml(note) {
+    var s = String(note == null ? "" : note), m = /^([\s\S]*\S) \(([^()]*)\)\.$/.exec(s);
+    if (!m) return esc(s);
+    var ptrs = m[2].split("; ").map(function (p) {
+      if (/^#[A-Za-z0-9][A-Za-z0-9_-]*$/.test(p)) {
+        return '<a class="anchor" href="/research/harness/' + esc(p) + '">' + esc(p) + "</a>";
+      }
+      return '<span class="anchor">' + esc(p) + "</span>";
+    });
+    return esc(m[1]) + " (" + ptrs.join("; ") + ").";
+  }
   function para(cls, label, text, auto) {
     return '<p class="' + cls + (auto ? " auto" : "") + '"><strong>' + label + "</strong> " + esc(text) +
       (auto ? ' <span class="auto-note" title="Taken from the full card text; no plain-language summary yet.">(excerpt)</span>' : "") + "</p>";
@@ -314,7 +359,16 @@
     var link = function (inner) { return href ? '<a href="' + esc(href) + '" rel="noopener noreferrer">' + inner + "</a>" : inner; };
     var date = str(e.date), dateText = str(e.displayDate) || date;
     var tags = list(e.tags).map(function (t) { return '<span class="tag">' + esc(t) + "</span>"; }).join("");
-    if (e.appliedToPlaybook) tags += '<span class="tag applied">in playbook</span>';
+    var checked = checkedOf(e), statusNote = str(e.statusNote);
+    // With a checked status the old "in playbook" pill would contradict the badge, so the old flag
+    // is shown as plain text under "Where it lives in the harness" instead.
+    if (e.appliedToPlaybook && !checked) tags += '<span class="tag applied">in playbook</span>';
+    var where = checked && statusNote
+      ? '<details class="tech where"><summary>Where it lives in the harness</summary><div class="tech-body">' +
+        '<p class="where-note">' + noteHtml(statusNote) + "</p>" +
+        (e.appliedToPlaybook === true ? '<p class="where-flag">Earlier flag on this card: in playbook.</p>' : "") +
+        "</div></details>"
+      : "";
     var items = function (v) { return "<ul>" + list(v).map(function (x) { return "<li>" + linkify(typeof x === "string" ? x : JSON.stringify(x)) + "</li>"; }).join("") + "</ul>"; };
     var notes = (str(e.plainTitle) && title ? '<span class="k">Original title</span><p class="orig-title">' + esc(title) + "</p>" : "") +
       (str(e.why) ? '<span class="k">Full card text</span><p class="why">' + linkify(e.why) + "</p>" : "") +
@@ -330,6 +384,7 @@
       (what ? para("what", "What it is.", what, whatAuto) : "") +
       (matters ? para("matters", "Why it matters for us.", matters, mattersAuto) : "") +
       '<p class="source"><span>Source</span>' + (href ? link(esc(shortUrl(href))) : "<span>no link given</span>") + "</p>" +
+      where +
       '<details class="tech"><summary>Technical notes</summary><div class="tech-body">' + notes + "</div></details>" +
       "</article>";
   }
