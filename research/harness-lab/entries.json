@@ -310,7 +310,7 @@
       "whatItIs": "A read-only shell script that inspects how a scheduled agent is launched, from the system scheduler to the session script, against 30 checks for silent stops such as a stale lock or a laptop asleep through its window, printing evidence for each problem.",
       "whyItMatters": "Our stall watchdog acts on a stale log, but a job that never starts produces no output; this audits the launch chain before the window. Zero findings means only that these checks found nothing, not that the chain is fine; reference only.",
       "status": "parked",
-      "statusNote": "Set aside in the 10-13 Lab triage as an audit-script install; its rule that unknown never counts as guarded is already in our check-can-fail rule (Hunt/agent-manage/2026-10-13-lab-fold-triage.md)."
+      "statusNote": "Parked again 2026-11-02 after its report-only trial: it refused every target in our real launch chain (exit 2), since it reads only local scheduler entries and scripts that declare their own log, lock, wakeup and prompt files; on a scratch chain it found both planted faults (Maps/Decisions/2026-11-02-lab-top10-trials-adopted.md)."
     },
     {
       "id": "starlane-mapcheck-vault-audit-read-only-agents-tick-caps-circuit-breaker-2026-10-12",
@@ -673,8 +673,8 @@
       "plainTitle": "verified-ops-starter: check that a scheduled job's work really landed",
       "whatItIs": "A small kit that replaces a scheduled job's self-report with evidence: it checks the output is fresh, flags a job that exits cleanly but left its output unchanged, and uses exit codes where a dead checker or one that measured nothing can't look clean.",
       "whyItMatters": "The part now in our playbook is the rule that a check must be able to fail, which its self-test puts in runnable form by breaking each check on purpose first. The kit itself is not installed.",
-      "status": "partial",
-      "statusNote": "Its rule that each check is first broken on purpose, and that measuring nothing is never a pass, is adopted; the freshness and wrap kit is not installed (#check-can-fail)."
+      "status": "trial",
+      "statusNote": "Back on trial 2026-11-02: its report-only trial flagged 0 of 4 stale bots because none had a receipt line; the fixed check flags a bot with no receipt line as stale, unless its dashboard rows name another evidence channel (then it is a gap), and its rerun on the frozen inputs flagged exactly those 4; not installed (#check-can-fail; Maps/Decisions/2026-11-02-lab-top10-trials-adopted.md)."
     },
     {
       "id": "vigil-claim-vs-check-missed-window-catchup-degraded-2026-10-09",
@@ -696,8 +696,8 @@
       "plainTitle": "Vigil: check a scheduled job's claims against outside evidence",
       "whatItIs": "A verification layer that watches a scheduled job from outside and keeps what the job claims apart from evidence you declare. It reports a window where nothing even tried to run as missed, can re-run it, and flags identical output a set number of runs in a row.",
       "whyItMatters": "Our Field Brief miss-watch applies the same missed-window idea to one routine, and its demo bug, a dead source that looks like a quiet day, is what our rule on negative claims records as a gap. Reference only, not installed.",
-      "status": "parked",
-      "statusNote": "Set aside in the 10-13 Lab triage: the Field Brief miss-watch already reports a missed window, and its repeat-output check needs tuning first (Hunt/agent-manage/2026-10-13-lab-fold-triage.md)."
+      "status": "in-harness",
+      "statusNote": "Adopted 2026-11-02 by Haiyuan as standard practice after its report-only trial passed: a job's claims are checked window by window against outside receipt lines, and a due window without an ok line, or an empty or unreadable receipts copy, fails the claim; policy text, the trial script is not installed (#claim-vs-receipts)."
     },
     {
       "id": "brindle-check-exit-0-done-status-line-not-trusted-usage-pause-resume-2026-10-08",
@@ -4163,8 +4163,8 @@
       "plainTitle": "Prove a gate or watchdog fails on a broken copy before trusting it",
       "whatItIs": "A public agent-workflow guide says “a check you've never seen fail proves nothing”, so its formal-verification skill shows each new check failing on a deliberately broken version of the code before handing it over, and again after changes.",
       "whyItMatters": "Our written rule asks this of new checks; the idea extends it to standing gates and the stall watchdog, tested on copies. Reading one gate shows a run without streamed logs is never failed by it; trial idea only, no live changes, and adoption needs Haiyuan.",
-      "status": "partial",
-      "statusNote": "Adopted as a proof-record rule: a changed gate without its broken-input evidence is not verified; re-proving every standing gate on a broken copy was not adopted (#check-can-fail)."
+      "status": "in-harness",
+      "statusNote": "Adopted 2026-11-02 by Haiyuan as standard practice after its report-only trial passed with one gap: before a gate is trusted it runs on a planted broken copy and a healthy control, expectations written first, and must fail on the broken copy; policy text (#gate-broken-copy)."
     },
     {
       "id": "pstack-pause-checkpoint-resume-note-2026-10-20",
@@ -5344,8 +5344,8 @@
       "plainTitle": "antibody: scan past sessions for known mistakes, then block or warn on repeats",
       "whatItIs": "A command guard for coding agents, built from its author's own incident log. It scans past sessions for commands matching its 13 detectors; before a command runs, 10 detectors block a match and show the incident and a safer command, 3 only warn, and any error in the guard lets the command run.",
       "whyItMatters": "Per the collection notes, our mistakes recur because our list of them is prose; our playbook names no installed coding-CLI hook that blocks shell commands. A read-only scan, then two or three detectors, is only proposed, not installed; only one tool was tested on real data; any change needs Haiyuan.",
-      "status": "not-adopted",
-      "statusNote": "A Lab proposal from the 2026-11-01 pack: no command guard is installed, and repeated mistakes still go through the manual repeat-lesson rule (#repeat-lesson)."
+      "status": "parked",
+      "statusNote": "Parked 2026-11-02 after its report-only trial stopped at step 0: the heartbeat records readable locally hold chat turns, not executed commands, so no scan was built or run and the 11-02 incident stays unconfirmed (Maps/Decisions/2026-11-02-lab-top10-trials-adopted.md)."
     },
     {
       "id": "covenant-2026-11-01",
