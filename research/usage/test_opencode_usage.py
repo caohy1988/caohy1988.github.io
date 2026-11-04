@@ -382,7 +382,7 @@ assert "Default small seat · alternate + fallback" in dsh_card and "DEFAULT SMA
 assert "model <strong>deepseek/deepseek-v4.1-flash-1017</strong>" in dsh_card, dsh_card
 oc_card = html.split('<section class="card" id="opencode">', 1)[1].split("</section>", 1)[0]
 assert "Default small seat · first choice" in oc_card and "148,592" in oc_card, oc_card
-assert "DSH (default small), OpenCode · GLM-5.3 (default small), Qwen Code (trial)" in html
+assert "DSH (default small), OpenCode · GLM-5.3 (default small), Qwen Code (backup only), Cursor CLI (reviewer seat, no quota bars)" in html
 assert_private("snapshot.json opencode", snap["opencode"])
 assert_private("index.html opencode card", oc_card)
 assert_private("snapshot.json", snap_text, paths=False)

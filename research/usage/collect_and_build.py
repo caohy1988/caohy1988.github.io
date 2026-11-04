@@ -4528,7 +4528,7 @@ def render_html(snap: dict) -> str:
     <header class="hero">
       <p class="kicker">Mac CLIs · Grok activity</p>
       <h1>Agent model usage</h1>
-      <p class="lede">At-a-glance quotas for the Opus 5.5 seat, Codex/Astra, Kimi, Agy, Muse Spark, DSH (default small), OpenCode · GLM-5.3 (default small), Qwen Code (trial), OpenRouter spend (shared-key totals: DSH, Qwen Code and OpenCode GLM-5.3), Grok activity share, plus a routine fires/week proxy (not dollars).</p>
+      <p class="lede">At-a-glance quotas for the Opus 5.5 seat, Codex/Astra, Kimi, Agy, Muse Spark, DSH (default small), OpenCode · GLM-5.3 (default small), Qwen Code (backup only), Cursor CLI (reviewer seat, no quota bars), OpenRouter spend (shared-key totals: DSH, Qwen Code and OpenCode GLM-5.3), Grok activity share, plus a routine fires/week proxy (not dollars).</p>
       <div class="meta">
         <span>Last refreshed <strong>{esc(refreshed)}</strong></span>
         <span>Timezone <strong>America/Los_Angeles</strong></span>
@@ -4595,6 +4595,32 @@ def render_html(snap: dict) -> str:
         <h2>Qwen Code</h2>
         <p class="sub">qwen --version · OpenRouter Qwen3.8-Max</p>
         {qwen_body}
+      </section>
+
+      <section class="card" id="cursor">
+        <h2>Cursor CLI</h2>
+        <p class="sub">cursor-agent status · Haiyuan's Cursor CLI usage</p>
+
+      <p class="pill">CLI <strong>2026.10.22-27dcf5f</strong> · auth <strong>login</strong> · seat setup: no API key (Haiyuan's decision) · model <strong>Auto</strong></p>
+      <div class="metric">
+        <div class="metric-label">Cursor CLI status</div>
+        <div class="status-chip ok">LOGGED IN</div>
+        <div class="metric-reset">logged in as raincoatrun@gmail.com (checked 2026-11-02 ~23:33 PT) · runs on Haiyuan's Cursor CLI usage (no plan bars)</div>
+      </div>
+
+      <div class="metric">
+        <div class="metric-label">Full reviewer seat (2026-10-31) · active since 2026-11-02</div>
+        <div class="status-chip ok">ACTIVE REVIEWER</div>
+        <div class="metric-reset">smoke review passed 2026-11-02: found the planted bug (High) and a pre-existing one (Low) in 20.6 s, edited nothing</div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="bots">
+          <thead><tr><th>Seat</th><th>Detail</th></tr></thead>
+          <tbody><tr><td>Launch</td><td><code>grok-tmux-run &lt;session&gt; -- cursor-agent -p --output-format stream-json --mode plan --trust "&lt;review prompt&gt;"</code></td></tr><tr><td>Plan-mode caveat</td><td>The findings arrive in the <code>createPlanToolCall</code> event's <code>args.plan</code>; the final <code>result</code> text is only a one-line preface, so a reviewer launch must read the plan / assistant text, not just <code>result</code>.</td></tr><tr><td>Model</td><td>Auto: Cursor's auto router; the concrete model is not disclosed.</td></tr></tbody>
+        </table>
+      </div>
+      <p class="muted">Status as checked 2026-11-02 ~23:33 PT (<code>cursor-agent status</code> and a smoke review). This dashboard does not collect Cursor CLI usage yet, so the card has no quota bars.</p>
       </section>
 
       <section class="card" id="openrouter">
