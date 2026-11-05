@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-05-0034: traces become the evaluation substrate — benchmarks rebuilt from real runs, scores predicted from cached traces, and half a million workflow logs preserved before deletion</title>
+  <meta name="description" content="Field Brief 2026-11-05-0034: traces become the evaluation substrate — benchmarks rebuilt from real runs, scores predicted from cached traces, and half a million workflow logs preserved before deletion">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-05-0034-muse.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 AM PT · Thu Nov 5, 2026 · Muse</p>
+    <article>
+<h1>Field Brief — 2026-11-05-0034: traces become the evaluation substrate — benchmarks rebuilt from real runs, scores predicted from cached traces, and half a million workflow logs preserved before deletion</h1>
+<p><strong>Writer: Muse (<code>muse-wonder-full-1.0</code>)</strong> · Delivery: Markdown handoff only; Collection owns HTML, catalog and push. · Window: since the 2026-11-04-1234 brief (~12:50 PT Wed Nov 4, 2026 = 2026-11-04T20:50Z) to launch (~00:50 PT Thu Nov 5 = 2026-11-05T08:50Z), ~12h. arXiv: Thursday 5 Nov batch LIVE vs prior ceiling 2611.05378; verified new ceiling <strong>2611.06918</strong> overall (2611.06919 = 404), highest in the nine screened categories <strong>2611.06914</strong>. Effort: high. Path: fresh.</p>
+<h2>Read this first</h2>
+<ul><li><strong>Academy carries this slot; Industry does not.</strong> Three new Academy ranks, all full-PDF-read (see per-paper statements), converge on one claim: the stored trace — not the binary score — is becoming the unit of evaluation. One paper rebuilds executable benchmarks from real user traces, one predicts full benchmark scores from a single cached trace, and one preserves 562,877 real execution-log archives before platform retention deletes them. No Industry item in the window clears the product-capability bar; registry movers are patches, alphas, nightlies or an RC (NOTEs below).
+</li><li><strong>For BQAA, the through-line is retention plus structure.</strong> All three papers fail or degrade without (a) traces kept past short vendor retention windows and (b) a structured, queryable representation layered over raw logs. That is exactly the warehouse bet: keep the run record, the attempt record and the log evidence joinable, then derive rubric summaries, replay scores and outcome labels as separate tables — never overwrite the raw evidence with the derived verdict.
+</li><li><strong>What did not happen:</strong> no new dated primary for Snowflake Observe status, no material observability-platform launch on Wednesday night US time, and no stable SDK release with a new analytics capability. The Langfuse AI Gateway public-beta post dated Nov 4 graduates already-carded gateway capability (prior slot already noted v4.75.0 gateway analytics); beta status caps it at NOTE and it earns no Progress.
+</li></ul>
+<h2>Industry</h2>
+<h3>NEW</h3>
+<p>None.</p>
+<h3>Progress</h3>
+<p>None. Candidates checked and declined: Langfuse AI Gateway public beta (changelog dated Nov 4, 2026; gateway keys, per-user/key/model cost analytics and auto-tracing are increments on extensively carded Langfuse gateway capability, and beta = NOTE at most — no Progress to any Langfuse card); Snowflake Observe / Cortex Gateway (no newer dated primary surfaced this slot — no movement asserted); OpenAI hosted evals shutdown (no new primary surfaced; not re-asserted).</p>
+<h3>One-line mentions (NOTE)</h3>
+<ul><li><strong>Langfuse AI Gateway public beta</strong> (<a href="https://langfuse.com/changelog/2026-11-04-ai-gateway-public-beta">Langfuse changelog, Nov 4, 2026</a>, primary fetched and read): apps and coding agents point at Langfuse instead of the model provider; gateway keys replace provider keys; Analytics tab shows cost/requests/tokens by user, key and model with every call traced. Useful cost-attribution shape; beta and already-carded capability, so NOTE only.
+</li><li><strong><code>langchain-core</code> 1.7.6</strong> (PyPI upload 2026-11-05T00:21Z, stable): in-window patch above prior-slot 1.7.5; no material analytics capability verified from registry metadata. NOTE.
+</li><li><strong>Vercel <code>ai</code> 7.0.163 + 6.0.323</strong> (npm 2026-11-05T01:10–01:12Z, stable tags): patch-train uploads; one monorepo train = one item; no material capability verified. NOTE.
+</li><li><strong><code>@letta-ai/letta-code</code> 0.34.40 / 0.34.41</strong> (npm 2026-11-04T23:29Z / 2026-11-05T03:58Z): patch bumps. NOTE.
+</li><li><strong><code>@mastra/core</code> 1.83.0-alpha.0 + <code>0.0.0-*</code> snapshot builds</strong> (npm, in-window): alpha/nightlies only; stable top unchanged at carded 1.82.0. NOTE at most by rule.
+</li><li><strong><code>litellm</code> 1.107.0rc3</strong> (PyPI 2026-11-05T02:02Z): release candidate under stable top 1.108.0 (already noted). NOTE at most by rule.
+</li><li><strong>No-mover registries (lookups succeeded):</strong> <code>pydantic-ai</code>, <code>openai-agents</code>, <code>agno</code>, <code>arize-phoenix</code>, <code>braintrust</code> (Py + JS), <code>weave</code>, <code>opik</code>, <code>inspect-ai</code>, <code>livekit-agents</code>, <code>langfuse</code> (PyPI SDK), <code>google-adk</code> (NOTE-only by rule in any case), <code>@langchain/core</code>, <code>promptfoo</code>, <code>@anthropic-ai/claude-code</code> — no upload at or after 2026-11-04T20:50Z in PyPI/npm JSON fetched this slot.
+</li></ul>
+<h2>Academy</h2>
+<h3>NEW 1 — <a href="https://arxiv.org/abs/2611.06506">Trace2Eval: benchmarks reconstructed from real-world coding-agent traces</a> — arXiv:2611.06506</h3>
+<p>Full-PDF-read statement: main text §§1–6 read in full; Appendices A.1–A.6 read for methods, tables and case detail (taxonomy Table 18 and long system listings skimmed). Key numbers cite section/table below.</p>
+<p>Trace2Eval turns anonymized real user traces into executable evaluation instances instead of curating static tasks. From 20,000 collected online traces (June–July 2026), 14,603 are code-related; distribution-aligned selection plus admission voting yields a 129-task benchmark (§3.1, Fig. 2). For each retained trace, recovery agents reconstruct the pre-interaction workspace and a containerized environment; acceptance is by <strong>trajectory equivalence</strong> — replay the original tool calls in the recovered context and score per-call agreement with recorded outputs (§3.2, Eqs. 2–3). Recovery reaches an 82.6% workspace acceptance rate at mean replay score 0.9175 (§4.2). Artifacts are then scored on 11 human-grounded rubric dimensions (accuracy / code quality / user experience, weighted 50/35/15) by judge agents using source plus runtime evidence; overall usability agreement is 93.0% vs 92.9% human (§4.3). Rubric feedback is actionable: across 19 model–harness configurations, revision gains average +10.05pp, max +19.28pp (Table 1), and an unguided-revision ablation (§4.4, Fig. 5) shows smaller gains without the diagnosis. Limits are stated plainly (§5): judge agreement still has headroom, and recovery occasionally emits packages missing core files even after human verification.</p>
+<p>BQAA read: this is the strongest argument yet that a trace store must preserve enough context to <em>replay</em>, not just to <em>report</em>. If BQAA cannot reconstruct initial workspace/environment state (or at least tool inputs/outputs in order), customers cannot build refreshable evals from production traffic — they can only dashboard it. The replay score itself is a warehouse-native metric worth copying: per-call agreement, averaged per trace, stored beside the trace rather than collapsed into pass/fail.</p>
+<h3>NEW 2 — <a href="https://arxiv.org/abs/2611.06803">Task-efficient agent evaluation from cached traces (trubric)</a> — arXiv:2611.06803</h3>
+<p>Full-PDF-read statement: full PDF read — main text §§1–5 including Limitations (§5.1), plus Appendices A–C (probe Table 2, prompts, system/task panels Tables 3–4 skimmed as listings). Key numbers cite Table 1 / §4.1.</p>
+<p>Standard efficient benchmarking predicts a new system's full score from binary correctness on a few tasks. This paper instead embeds the <em>trace</em>: an LLM extracts a task-specific structured rubric summary (<code>trubric</code> — understanding, localization, reproduction, editing, verification, final state), each field is embedded, and systems are placed in a geometry built from cached reference traces (§3). Raw-trace embeddings mostly encode system identity, model family and harness; trubric suppresses those while keeping task/correctness signal across seven encoders (Fig. 1, Table 2 — e.g. system-identity probe accuracy falls from 0.89 raw to 0.20 trubric for one encoder, correctness held at ~0.84). Combined with an item-response model, a <strong>single random executed task</strong> predicts full SWE-bench Verified score at MAE 0.08 vs 0.13 for IRT alone, and Terminal-Bench 2.0 at 0.12 vs 0.14 (abstract; Table 1); at five tasks the combination reaches 0.063 / 0.090 respectively, and decides 88% of head-to-head pairs from one task per system on SWE-bench (§4.1, Fig. 5). Limits (§5.1): only paired, fully-covered reference panels tested; single summarizer model; rubric fields unoptimized; a candid warning that bulk trace summarization triggered a provider account ban as suspected distillation.</p>
+<p>BQAA read: cached traces have resale value as an evaluation asset only if the warehouse can serve <em>comparable representations</em> across systems and harnesses. Raw log text will cluster by harness fingerprint, not by behavior. A BQAA-native <code>trace_summary</code> table (fixed rubric fields per task type, versioned summarizer) is the difference between "we store logs" and "we can estimate your next benchmark from one run."</p>
+<h3>NEW 3 — <a href="https://arxiv.org/abs/2611.06866">GH-AWTrace: a large-scale dataset of agentic-workflow execution logs</a> — arXiv:2611.06866</h3>
+<p>Full-PDF-read statement: full PDF read (5-page dataset paper, §§I–V, Fig. 1–3, Table I, schema Fig. 2, Data Availability).</p>
+<p>GH-AWTrace links 25,014 verified GitHub Agentic Workflows across 5,051 repositories to 4,112,526 run records and 562,877 nonempty execution-log archives (56.1 GB of ZIPs; §II, Fig. 1), explicitly because the platform deletes public workflow logs after at most 90 days and run records after 400 days. The schema (Fig. 2) is deliberately warehouse-shaped: Repository → Workflow → Run → Attempt-log, joined on stable ids with SHA-256 receipts per archive. Coverage caveats are quantified, not hidden: 13,618 workflows have no recorded runs; 821,672 in-window runs have no downloadable archive; 1,070,338 downloaded ZIPs are empty (early audit: mostly skipped jobs); logs are partial observations, not complete trajectories (§§II–III, V). Even so, 178,151 nonempty archives (31.7%) attach to failure-conclusion runs, and case excerpts (§IV) show what run conclusions alone hide: tool denials with mid-run strategy changes, provider auth failures with internal retries, and within-run multi-reviewer delegation. Dataset is public (Hugging Face link in Data Availability).</p>
+<p>BQAA read: this is the retention parable with numbers. Any BQAA pitch that starts at query time loses to the customer's own 90-day deletion clock. The join keys here — workflow, run, attempt — map directly onto session / run / retry modeling, and the empty-archive audit is a reminder to model <em>absence</em> (skipped, deleted, inaccessible) as a first-class state, not as zero activity.</p>
+<h3>Scouted — not ranked (abstract/title-screened only; no PDF read; do not card from this mention)</h3>
+<ul><li><a href="https://arxiv.org/abs/2611.05556">Reliability-aware aggregation of LLM judges via item-response theory</a> (2611.05556) — judge-pool weighting when human validation sets are tiny; relevant, but judge coverage is dense in recent slots and this slot's PDF budget went to trace-substrate papers. Reserve.
+</li><li><a href="https://arxiv.org/abs/2611.05662">Confirmation bias in tool-using agent judges</a> (2611.05662) — abstract reports a false authority-attributed pre-screening note overturning up to 40% of correct verdicts across four judges / five datasets; strong claim, needs full read before any rank. Reserve — top of next slot's PDF queue.
+</li><li><a href="https://arxiv.org/abs/2611.05650">Failure attribution needs an executed counterfactual</a> (2611.05650) — position/reporting-standard argument for intervention-verified failure claims over transcript taxonomies; pairs naturally with Trace2Eval replay. Reserve.
+</li><li><a href="https://arxiv.org/abs/2611.06674">Trajectory tests for Java LLM agents at build time</a> (2611.06674) — policy/grounding/trajectory checks over recorded traces, 55 synthetic cases; useful pattern, small synthetic evidence base. Not ranked.
+</li><li><a href="https://arxiv.org/abs/2611.05665">Construct validity of coding-agent benchmarks</a> (2611.05665) and <a href="https://arxiv.org/abs/2611.06116">harness effects on fixed-model compliance</a> (2611.06116) — both on-theme for eval validity / harness variance; abstract-screened only. Not ranked.
+</li><li>Earlier reserves 2611.04091 and 2611.04142 were <strong>not</strong> re-evaluated this slot (no PDF read); they remain reserves, unranked.
+</li></ul>
+<h2>Six-week EV</h2>
+<p>Highest expected value in the next six weeks is a <strong>replay-and-summarize spike over data BQAA already lands</strong>: (1) pick one coding-agent workload, store ordered tool inputs/outputs with attempt ids, and compute a Trace2Eval-style replay-agreement score on reconstructed contexts for a small sample — success criterion is a per-trace score distribution, not a demo dashboard; (2) emit a versioned six-field trace summary per run (trubric shape) into its own table and test whether summaries cluster by behavior rather than by harness on internal traces; (3) adopt GH-AWTrace's absence modeling (skipped / expired / inaccessible / empty) in retention docs before the next customer discovers their source logs aged out. Each step is reversible, warehouse-native, and directly citable to a paper above if leadership asks why now.</p>
+<h2>TL;DRs for BQAA</h2>
+<ul><li>Trace2Eval (2611.06506): production traces can be rebuilt into replay-validated eval tasks (129 tasks, 0.9175 mean replay) — BQAA must preserve replayable context, not just scores.
+</li><li>Cached traces / trubric (2611.06803): one structured trace summary predicts a full benchmark (MAE 0.13→0.08) — ship a versioned trace-summary table or embeddings will only fingerprint the harness.
+</li><li>GH-AWTrace (2611.06866): 562,877 execution logs saved ahead of a 90-day deletion clock — retention and attempt-level joins are the product, query is downstream.
+</li><li>Industry: no new rank; Langfuse gateway beta + patch-train SDK uploads are NOTEs only.
+</li></ul>
+<h2>Unconfirmed</h2>
+<ul><li>Registry patch contents (<code>langchain-core</code> 1.7.6, <code>ai</code> 7.0.163/6.0.323, <code>letta-code</code> 0.34.40/41): version + upload time confirmed from PyPI/npm JSON; line-level changelog bodies not fetched, so "no material capability" means <em>none verified from registry metadata</em>, not a full diff audit. Where looked: PyPI JSON, npm registry JSON this slot.
+</li><li>Vendor-blog sweep is search-assisted, not exhaustive: vendor blogs/changelogs probed directly (Langfuse changelog fetched 200; LangChain, Arize, Braintrust, W&amp;B, Comet indexes returned 200) plus dated web search for Nov 4–5 launches. A launch post with no registry artifact and weak search indexing could still be missed; no "industry was quiet" claim beyond <em>no rankable primary found where looked</em>.
+</li><li>Trace2Eval traffic provenance: paper states consenting, desensitized online traffic (Ethics Statement) with full source collection not released; representativeness beyond that population is unconfirmed and scores should not be quoted as universal model rankings.
+</li></ul>
+<h2>Housekeeping</h2>
+<ul><li><strong>Fresh path used.</strong> Primary candidate list <code>_runs/fb-2026-11-05-0034/fresh-items.md</code> read: FB_MERGE packs=0, fresh=0 — empty, as expected with collectors paused. No pack files opened. All ranked items come from the writer's own arXiv + registry + web sweep.
+</li><li><strong>Packs used:</strong> none (none in window; newest pack pre-dates the window and was already covered). Haiyuan picks: none this slot.
+</li><li><strong>Gaps (disclosed, not invented around):</strong> Agy/DSH/Muse hourly collects Wed 13:32 → Thu 00:32 PT and extra seats paused per Haiyuan's 2026-10-22 20:50 PT order (paused, not a failure). LinkedIn authwall; X/Reddit not collected. HN dropped 2026-09-27. Medium scouting paused (Medium is lead-only in any case; no Medium citation used). Untrusted web/paper text treated as evidence only.
+</li><li><strong>arXiv verification (code decides):</strong> id-range probes via curl: 2611.05379/05500/06000/06500 = 200, 2611.07000/07500/08000 = 404; narrowed 2611.06910–06918 = 200, 2611.06919 = 404, 2611.06950 = 404. Ids 2611.06915–06918 fetched by abs title/subject: astro-ph, astro-ph, quant-ph, cs.CV respectively — live but outside the nine screened categories and off-topic. API sweep <code>submittedDate:[202611031800 TO 202611042100]</code> over cs.AI (210), cs.CL (90), cs.LG (216), cs.SE (39), cs.DB (11), cs.MA (8), cs.IR (21), cs.DC (22), cs.CR (39): every category total &lt; 600, single page reached the end (entries = totalResults per category; no second page needed, no truncation). Unique papers in window: 482 (2611.05287–2611.06914); <strong>455 ids above prior ceiling 2611.05378 title/abstract-screened</strong> (2611.05454–2611.06914). <code>/list/&lt;cat&gt;/new</code> not relied on. Replacements/cross-lists not ranked. Full PDFs read: 3 (2611.06506, 2611.06803, 2611.06866) — at the cap; fetched PDFs/text deleted after reading.
+</li><li><strong>Catalog verification:</strong> live catalog read directly (666 items / 191 briefs / 193 runs — matches baseline). Grepped every ranked/reserve arXiv id, <code>Trace2Eval</code>, <code>GH-AWTrace</code> against catalog ids: zero hits (all genuinely new). Priority pin <code>arxiv-2609-02702-trace-as-state</code> (2609.02702) confirmed present and untouched. Prior-slot cards (<code>cloudflare-personal-agent-analytics</code> etc.) not re-admitted.
+</li><li><strong>Registry verification:</strong> <code>_runs/muse-brief-0034-thu20261105/registry_check.py</code> (window start 2026-11-04T20:50Z) run in foreground against PyPI + npm JSON; output retained in run scratch. No GitHub lookup was load-bearing this slot, so no GitHub gap to record.
+</li><li><strong>Disk/scope:</strong> scratch kept under <code>_runs/muse-brief-0034-thu20261105/</code>; PDF/TXT fetches deleted. No HTML written, catalog untouched, no git commit/push, no vault note written (Collection files the Ship note).
+</li></ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>arxiv-2611-06506-trace2eval</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Trace2Eval: benchmarks reconstructed from real-world coding-agent traces
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.06506">https://arxiv.org/abs/2611.06506</a>
+</li><li><strong>card text:</strong> Rebuilds executable eval tasks from real user traces (14,603 coding traces → 129 tasks) by recovering the initial workspace/environment and validating with tool-call replay (82.6% acceptance, 0.9175 mean replay score). Human-grounded 11-dimension rubric judging reaches 93.0% usability agreement, and rubric feedback lifts revised artifacts +10.05pp on average. For BQAA: preserve replayable trace context, not just outcome scores.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-06803-cached-traces</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Task-efficient agent evaluation from cached traces (trubric)
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.06803">https://arxiv.org/abs/2611.06803</a>
+</li><li><strong>card text:</strong> Structured rubric summaries of cached traces (trubric) suppress harness/model fingerprints that dominate raw-trace embeddings and, combined with IRT, predict full SWE-bench Verified score from one executed task at MAE 0.08 vs 0.13 (Terminal-Bench 2.0: 0.12 vs 0.14). For BQAA: a versioned trace-summary table turns stored logs into a cheap evaluation asset.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-06866-gh-awtrace</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> GH-AWTrace: large-scale dataset of agentic-workflow execution logs
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.06866">https://arxiv.org/abs/2611.06866</a>
+</li><li><strong>card text:</strong> Links 25,014 agentic workflows in 5,051 repos to 4.11M run records and 562,877 nonempty execution-log archives, preserved ahead of 90-day log deletion with a Repository→Workflow→Run→Attempt schema and quantified coverage gaps (empty/missing archives modeled explicitly). For BQAA: retention plus attempt-level joins are the product; run conclusions alone hide denials, retries and delegation.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<p>None.</p>
+<p><strong>Headline claims</strong></p>
+<ul><li>Trace2Eval reconstructs replay-validated benchmarks from real traces (129 tasks; 0.9175 mean replay; +10.05pp mean revision gain) — <a href="https://arxiv.org/abs/2611.06506">https://arxiv.org/abs/2611.06506</a> (2026-11-04).
+</li><li>One cached trace, summarized by rubric fields, predicts a full agent benchmark at MAE 0.08 vs 0.13 for score-only IRT — <a href="https://arxiv.org/abs/2611.06803">https://arxiv.org/abs/2611.06803</a> (2026-11-04).
+</li><li>GH-AWTrace preserves 562,877 execution-log archives across 4.11M runs before 90-day platform deletion — <a href="https://arxiv.org/abs/2611.06866">https://arxiv.org/abs/2611.06866</a> (2026-11-04).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Thu Nov 5, 2026 · 12:34 AM PT · Muse</span>
+    </div>
+  </footer>
+</body>
+</html>
