@@ -1,0 +1,2159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Static preview of the BigQuery Agent Analytics (efficiency trial) Grafana dashboard, rendered from its JSON with synthetic data.">
+<link rel="icon" href="data:,">
+<title>BigQuery Agent Analytics (efficiency trial) · Grafana dashboard preview with synthetic data</title>
+<style>
+:root {
+  color-scheme: dark;
+  --canvas: #111217;
+  --panel: #181b1f;
+  --secondary: #22252b;
+  --input: #111217;
+  --border-weak: rgba(204, 204, 220, 0.12);
+  --border-med: rgba(204, 204, 220, 0.2);
+  --border-strong: rgba(204, 204, 220, 0.32);
+  --text: #ccccdc;
+  --text-2: rgba(204, 204, 220, 0.68);
+  --text-3: rgba(204, 204, 220, 0.52);
+  --link: #6e9fff;
+  --primary: #3d71d9;
+  --hover: rgba(204, 204, 220, 0.16);
+  --hover-weak: rgba(204, 204, 220, 0.08);
+  --pr: #ffc58a;
+  --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Roboto Mono", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--canvas); color: var(--text); font: 14px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; color: inherit; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { font-family: var(--mono); font-size: 0.92em; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.ic { display: block; flex: none; }
+
+/* demo banner */
+.demo-banner { display: flex; gap: 10px; align-items: baseline; padding: 8px 16px; background: #2a2312; border-bottom: 1px solid #5c4a1c; color: #f3dfa6; font-size: 13px; }
+.demo-banner p { margin: 0; }
+.demo-banner .icon { color: #ff9830; font-weight: 700; }
+.demo-banner a { color: #ffd98a; text-decoration: underline; text-underline-offset: 2px; }
+
+/* top nav */
+.topnav { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 16px; background: var(--panel); border-bottom: 1px solid var(--border-weak); }
+.brand svg { display: block; }
+.crumbs { display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--text-2); }
+.crumbs h1 { margin: 0; font-size: 14px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crumbs .sep { color: var(--text-3); }
+.topnav-spacer { flex: 1 1 auto; }
+.preview-badge { flex: none; font-size: 12px; color: var(--text-2); border: 1px solid var(--border-med); border-radius: 12px; padding: 1px 10px; }
+
+/* PR strip */
+.pr-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 16px 0; padding: 8px 12px; background: rgba(255, 152, 48, 0.07); border: 1px solid rgba(255, 152, 48, 0.35); border-radius: 2px; font-size: 13px; }
+.pr-strip p { margin: 0; flex: 1 1 520px; color: var(--text); }
+.pr-strip em { font-style: normal; color: #fff; }
+.pr-strip #pr-jobs { color: var(--pr); }
+.pr-link { font-size: 13px; white-space: nowrap; }
+
+/* controls */
+.controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; padding: 12px 16px; }
+.vars, .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.var { display: flex; align-items: stretch; height: 32px; }
+.var-label { display: flex; align-items: center; padding: 0 8px; background: var(--secondary); border: 1px solid var(--border-med); border-right: none; border-radius: 2px 0 0 2px; font-weight: 500; white-space: nowrap; }
+.var-btn { display: flex; align-items: center; gap: 6px; min-width: 72px; max-width: 280px; padding: 0 8px; background: var(--input); border: 1px solid var(--border-med); border-radius: 0 2px 2px 0; cursor: pointer; white-space: nowrap; }
+.var-btn .var-val { overflow: hidden; text-overflow: ellipsis; }
+.var-btn:hover:not([disabled]) { border-color: var(--border-strong); }
+.var-btn[disabled] { cursor: default; color: var(--text-2); }
+.tb-btn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; background: var(--secondary); border: 1px solid var(--border-med); border-radius: 2px; cursor: pointer; white-space: nowrap; }
+.tb-btn:hover { background: #2a2d33; border-color: var(--border-strong); }
+.tb-btn.small { height: 26px; font-size: 12px; }
+.tb-btn.subtle { background: none; color: var(--text-2); }
+.tb-btn.icon-only { padding: 0 8px; }
+.tb-btn[aria-pressed="true"] { background: rgba(61, 113, 217, 0.22); border-color: var(--primary); color: #fff; }
+.tb-group { display: inline-flex; }
+.tb-group .tb-btn { border-radius: 0; }
+.tb-group .tb-btn:first-child { border-radius: 2px 0 0 2px; }
+.tb-group .tb-btn:last-child { border-radius: 0 2px 2px 0; }
+.tb-group .tb-btn + .tb-btn { margin-left: -1px; }
+
+/* menus */
+.menu { z-index: 60; min-width: 200px; max-width: min(440px, calc(100vw - 16px)); background: var(--secondary); border: 1px solid var(--border-med); border-radius: 2px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); padding: 4px 0; font-size: 14px; }
+.menu-title { padding: 4px 12px 6px; font-size: 12px; color: var(--text-2); }
+.menu-search { display: block; margin: 4px 8px 6px; width: calc(100% - 16px); height: 30px; padding: 0 8px; background: var(--input); border: 1px solid var(--border-med); border-radius: 2px; }
+.menu-list { max-height: 320px; overflow: auto; }
+.opt { display: flex; align-items: center; gap: 8px; width: 100%; padding: 5px 12px; background: none; border: 0; text-align: left; cursor: pointer; white-space: nowrap; }
+.opt:hover, .opt:focus-visible { background: var(--hover-weak); }
+.opt .opt-label { overflow: hidden; text-overflow: ellipsis; }
+.opt .check { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border: 1px solid var(--border-strong); border-radius: 2px; font-size: 11px; line-height: 1; }
+.opt[aria-selected="true"] .check { background: var(--primary); border-color: var(--primary); color: #fff; }
+.opt .tick-mark { flex: none; width: 16px; font-weight: 700; color: var(--link); }
+.menu-empty { padding: 6px 12px; color: var(--text-2); }
+.menu-note { padding: 6px 12px 4px; margin-top: 4px; color: var(--text-2); font-size: 12px; border-top: 1px solid var(--border-weak); }
+.menu-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 2px 8px 4px; }
+.btn-small { height: 26px; padding: 0 10px; font-size: 12px; background: var(--secondary); border: 1px solid var(--border-med); border-radius: 2px; cursor: pointer; }
+.btn-small.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.const-menu { padding: 4px 0 0; }
+.const-row { display: flex; justify-content: space-between; gap: 16px; padding: 3px 12px; font-size: 13px; }
+.const-row code { color: var(--text-2); }
+.const-val { font-family: var(--mono); font-size: 12px; }
+
+/* dashboard grid */
+.grid { position: relative; margin: 0 16px 24px; }
+.panel { position: absolute; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--border-weak); border-radius: 2px; overflow: hidden; }
+.panel[hidden], .dash-row[hidden] { display: none; }
+.panel.linked { border-color: var(--link); box-shadow: 0 0 0 1px var(--link); }
+.panel.flash { animation: flash 1.6s ease-out 1; }
+@keyframes flash { 0% { box-shadow: 0 0 0 3px var(--link); } 100% { box-shadow: 0 0 0 0 rgba(110, 159, 255, 0); } }
+.panel-header { flex: none; display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 4px 0 8px; }
+.panel-title { margin: 0; min-width: 0; flex: 0 1 auto; font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.panel-info { flex: none; width: 16px; height: 16px; padding: 0; border: 1px solid var(--text-3); border-radius: 50%; background: none; color: var(--text-2); font: 600 10px/14px var(--font); cursor: help; }
+.panel-info:hover, .panel-info:focus-visible { color: var(--text); border-color: var(--text-2); }
+.panel-spacer { flex: 1 1 auto; }
+.panel-type { flex: none; font: 11px/16px var(--mono); color: var(--text-3); padding: 0 6px; border: 1px solid var(--border-weak); border-radius: 8px; }
+.panel-btn { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 22px; padding: 0; background: none; border: 1px solid transparent; border-radius: 2px; color: var(--text-3); cursor: pointer; }
+.panel-btn:hover { border-color: var(--border-med); color: var(--text); }
+.panel-btn[aria-pressed="true"] { color: #fff; background: rgba(61, 113, 217, 0.25); border-color: var(--primary); }
+.chip { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 18px; padding: 0 7px; border-radius: 9px; border: 1px solid var(--border-med); color: var(--text-2); cursor: default; }
+.chip-pr { border-color: rgba(255, 152, 48, 0.6); background: rgba(255, 152, 48, 0.12); color: var(--pr); }
+.chip-pr b { font-weight: 700; color: #ffb366; margin-right: 4px; }
+.panel-body { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding: 0 8px 8px; }
+.panel-error { margin: auto; padding: 8px; color: #ff7383; font-size: 13px; text-align: center; }
+.no-data { margin: auto; padding: 8px; color: var(--text-2); text-align: center; }
+.no-data.small { font-size: 12px; margin: 8px; }
+
+/* rows */
+.dash-row { position: absolute; display: flex; align-items: center; gap: 8px; height: 30px; }
+.row-toggle { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 0; background: none; border: 0; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; }
+.row-title { overflow: hidden; text-overflow: ellipsis; }
+.row-toggle .chev { transition: transform 0.15s; }
+.dash-row.collapsed .row-toggle .chev { transform: rotate(-90deg); }
+.row-count { display: none; color: var(--text-2); font-size: 13px; white-space: nowrap; }
+.dash-row.collapsed .row-count { display: inline; }
+
+/* charts */
+.viz { position: relative; flex: 1 1 auto; min-height: 0; }
+.viz > svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.chart text { fill: var(--text-2); font-size: 12px; font-family: var(--font); }
+.chart .tick { font-variant-numeric: tabular-nums; }
+.chart .bar-val { fill: var(--text); }
+.chart .gridlines line { stroke: rgba(204, 204, 220, 0.08); stroke-width: 1; shape-rendering: crispEdges; }
+.chart .crosshair { stroke: rgba(204, 204, 220, 0.55); stroke-width: 1; pointer-events: none; }
+.chart .overlay { cursor: crosshair; outline: none; }
+.chart .overlay:focus-visible { stroke: var(--primary); stroke-width: 2; }
+.chart .band-hl { fill: rgba(204, 204, 220, 0.07); pointer-events: none; }
+.chart .hit { outline: none; }
+.chart .hit:focus-visible { stroke: var(--primary); stroke-width: 1.5; }
+.legend { flex: none; display: flex; flex-wrap: wrap; gap: 0 14px; padding-top: 4px; max-height: 46px; overflow: auto; }
+.legend-item { display: inline-flex; align-items: center; gap: 6px; padding: 0 2px; background: none; border: 0; cursor: pointer; font-size: 12px; line-height: 20px; color: var(--text); }
+.legend-item.off { color: var(--text-3); }
+.legend-item.off .legend-key { opacity: 0.3; }
+.legend-key { flex: none; display: inline-block; }
+.legend-key.line { width: 14px; height: 4px; border-radius: 2px; }
+.legend-key.rect { width: 12px; height: 12px; border-radius: 2px; }
+
+/* stat */
+.stat-box { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.stat-value { font-weight: 500; line-height: 1; white-space: nowrap; color: var(--text); }
+.stat-novalue { color: var(--text-2); font-size: 16px; }
+.stat-captions { flex: none; display: flex; flex-direction: column; align-items: center; font-size: 11px; line-height: 15px; color: var(--text-2); text-align: center; }
+.stat-caption { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.stat-caption.pr { color: var(--pr); }
+.status-icon { font-weight: 700; }
+
+/* tables */
+.tbl-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; margin: 0 -8px -8px; }
+.tbl { border-collapse: separate; border-spacing: 0; min-width: 100%; font-size: 13px; }
+.tbl th { position: sticky; top: 0; z-index: 1; background: var(--panel); text-align: left; font-weight: 500; height: 34px; padding: 0 4px 0 8px; border-bottom: 1px solid var(--border-weak); white-space: nowrap; }
+.tbl th.num { text-align: right; }
+.th-sort { padding: 0; background: none; border: 0; color: var(--link); cursor: pointer; font-weight: 500; white-space: nowrap; }
+.sort-ind { color: var(--link); }
+.th-filter { display: inline-flex; vertical-align: middle; margin-left: 4px; padding: 2px; background: none; border: 0; color: var(--text-3); cursor: pointer; }
+.th-filter:hover, .th-filter.active { color: var(--link); }
+.tbl td { height: 34px; padding: 0 8px; border-bottom: 1px solid var(--border-weak); white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+.tbl .num { text-align: right; font-variant-numeric: tabular-nums; }
+.tbl tbody tr:hover td { background: rgba(204, 204, 220, 0.04); }
+.tbl.raw td, .tbl.raw th { height: 28px; }
+.cell-link { color: var(--link); }
+
+/* SQL view */
+.panel-body.sql-body { padding: 0; }
+.sql-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 2px 8px 8px; }
+.sql-meta { font-size: 11px; color: var(--text-2); margin: 0 0 6px; }
+.sql-note { font-size: 12px; background: rgba(61, 113, 217, 0.12); border-left: 2px solid var(--primary); padding: 6px 8px; margin: 0 0 8px; }
+.sql-note.pr { background: rgba(255, 152, 48, 0.1); border-left-color: #ff9830; }
+pre.sql { margin: 0; font: 12px/1.55 var(--mono); white-space: pre; color: #d4d4d4; tab-size: 2; }
+.t-c { color: #6a9955; }
+.t-s { color: #ce9178; }
+.t-b { color: #9cdcfe; }
+.t-m { color: #c586c0; }
+.t-n { color: #b5cea8; }
+.t-k { color: #569cd6; }
+.sql-vars { margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border-weak); font-size: 11px; color: var(--text-2); word-break: break-word; }
+
+/* tooltips */
+.tooltip { position: fixed; z-index: 100; max-width: 420px; background: var(--secondary); border: 1px solid var(--border-med); border-radius: 2px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6); padding: 8px 10px; font-size: 12px; line-height: 1.45; pointer-events: none; }
+.tooltip[hidden] { display: none; }
+.tooltip-desc { max-width: 460px; }
+.desc-title { font-weight: 500; color: #fff; margin-bottom: 4px; }
+.desc p { margin: 0 0 6px; }
+.desc p:last-child { margin-bottom: 0; }
+.desc-pr { padding: 6px 8px; background: rgba(255, 152, 48, 0.12); border-left: 2px solid #ff9830; }
+.desc-pr strong { color: var(--pr); }
+.desc-note { color: var(--text-2); }
+.tt-head { color: var(--text-2); margin-bottom: 4px; }
+.tt-row { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; align-items: center; gap: 8px; line-height: 18px; }
+.tt-key { width: 12px; height: 3px; border-radius: 2px; }
+.tt-key.box { height: 10px; }
+.tt-name { color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tt-val { color: #fff; font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* footer */
+.foot { margin: 8px 16px 32px; padding-top: 12px; border-top: 1px solid var(--border-weak); color: var(--text-2); font-size: 12px; }
+.foot p { margin: 0 0 6px; max-width: 1100px; }
+
+@media (max-width: 768px) {
+  .topnav { padding: 8px 12px; flex-wrap: wrap; }
+  .preview-badge { display: none; }
+  .pr-strip { margin: 8px 8px 0; }
+  .controls { padding: 8px; }
+  .grid { margin: 0 8px 16px; }
+  .var-btn { max-width: 170px; }
+  .legend { max-height: 66px; }
+  .foot { margin: 8px 8px 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel.flash { animation: none; box-shadow: 0 0 0 2px var(--link); }
+  .row-toggle .chev { transition: none; }
+}
+@media (forced-colors: active) {
+  .panel, .tooltip, .menu { border: 1px solid CanvasText; }
+}
+
+</style>
+</head>
+<body>
+<div class="demo-banner" role="note">
+  <span class="icon" aria-hidden="true">&#9888;</span>
+  <p id="demo-banner-text">Demo preview with synthetic data — no BigQuery connection. Source: <a href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK" rel="noopener noreferrer">GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK</a> dashboards/grafana/bqaa-dashboard-efficiency-trial.json</p>
+</div>
+<header class="topnav">
+  <span class="brand" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24"><defs><linearGradient id="brand-g" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f05a28"/><stop offset="1" stop-color="#fbca0a"/></linearGradient></defs><rect x="1" y="1" width="22" height="22" rx="5" fill="url(#brand-g)"/><path d="M6.5 17v-4M10.5 17V8.5M14.5 17v-6M18.5 17V6.5" stroke="#111217" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+  <nav class="crumbs" aria-label="Breadcrumb"><span>Home</span><span class="sep" aria-hidden="true">&#8250;</span><span>Dashboards</span><span class="sep" aria-hidden="true">&#8250;</span><h1 id="dash-title">BigQuery Agent Analytics (efficiency trial)</h1></nav>
+  <span class="topnav-spacer"></span>
+  <span class="preview-badge">Static preview · synthetic data</span>
+</header>
+<section class="pr-strip" aria-label="What the efficiency trial changes">
+  <span class="chip chip-pr"><b>PR</b>#572</span>
+  <p><strong>One query for three stats.</strong> The <em>LLM calls</em> query also returns <code>estimated_cost_usd</code> and <code>total_tokens</code>; <em>Estimated cost</em> and <em>Total tokens</em> read that result through the <code>-- Dashboard --</code> data source (<span id="pr-jobs">one query instead of two</span>). The trial also interpolates filters as JSON arrays, reads both token-usage shapes, and limits the refresh picker to 5m, 15m, 30m and 1h.</p>
+  <button type="button" id="pr-show" class="tb-btn small">Show the shared query</button>
+  <a class="pr-link" href="https://github.com/GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/pull/572" rel="noopener noreferrer">PR #572 on GitHub</a>
+</section>
+<div class="controls">
+  <div class="vars" id="vars" role="group" aria-label="Dashboard variables"></div>
+  <div class="toolbar" id="toolbar" role="group" aria-label="Time range and refresh"></div>
+</div>
+<main id="grid" class="grid" aria-label="Dashboard panels"><noscript><p class="no-data">This preview renders the dashboard with JavaScript. Enable it to see the panels.</p></noscript></main>
+<footer class="foot">
+  <p id="foot-stats"></p>
+  <p>How this preview works: the page reads the dashboard JSON directly. Titles, descriptions, the gridPos layout, field config, overrides, thresholds, the <code>-- Dashboard --</code> data-source wiring and the data links all come from it. Panel SQL is shown but never executed. Each panel's query is mirrored by a small JavaScript function over a seeded synthetic <code>agent_events</code> table that your browser generates, so the page makes no network requests. Agents, users, model identifiers and errors are invented. Series colours are Grafana palette families re-stepped for colour-vision separation on the dark panel surface, and each event type keeps its colour across panels and filters.</p>
+  <p><a href="dashboard.json" download>dashboard.json</a> is an unchanged copy of the source file. Dashboard tags: bqaa, bigquery, agents, llm.</p>
+</footer>
+<script type="application/json" id="dashboard-json">{"title":"BigQuery Agent Analytics (efficiency trial)","uid":"bqaa-dashboard-efficiency-trial","description":"Efficiency trial of the BigQuery Agent Analytics dashboard; see \"Efficiency trial\" in dashboards/grafana/README.md. Panels query the raw agent_events table and the typed ViewManager views (adk_* by default). This file's panel SQL is embedded here and is not synced with dashboards/grafana/queries/*.sql: the LLM calls query also returns the estimated cost and total tokens, filters are interpolated as JSON arrays, and token sums read both usage shapes. tests/test_grafana_efficiency_trial.py checks these queries.","tags":["bqaa","bigquery","agents","llm"],"schemaVersion":39,"version":1,"editable":true,"graphTooltip":1,"time":{"from":"now-24h","to":"now"},"timepicker":{"refresh_intervals":["5m","15m","30m","1h"]},"refresh":"","timezone":"browser","fiscalYearStartMonth":0,"liveNow":false,"annotations":{"list":[{"builtIn":1,"type":"dashboard","name":"Annotations \u0026 Alerts","datasource":{"type":"grafana","uid":"-- Grafana --"},"enable":true,"hide":true,"iconColor":"rgba(0, 211, 255, 1)"}]},"templating":{"list":[{"type":"datasource","name":"datasource","label":"BigQuery datasource","description":"The Grafana BigQuery data source to query.","query":"grafana-bigquery-datasource","current":{},"options":[],"refresh":1,"hide":0,"skipUrlSync":false},{"type":"constant","name":"project","label":"GCP project","description":"Google Cloud project containing the BQAA dataset. Locked to a constant so viewers cannot repoint panels at arbitrary projects.","query":"my-project","current":{"selected":false,"text":"my-project","value":"my-project"},"options":[{"selected":true,"text":"my-project","value":"my-project"}],"hide":2,"skipUrlSync":true},{"type":"constant","name":"dataset","label":"BigQuery dataset","description":"Dataset holding agent_events and the ViewManager views. Locked to a constant so viewers cannot explore arbitrary datasets.","query":"agent_analytics","current":{"selected":false,"text":"agent_analytics","value":"agent_analytics"},"options":[{"selected":true,"text":"agent_analytics","value":"agent_analytics"}],"hide":2,"skipUrlSync":true},{"type":"constant","name":"table","label":"Events table","description":"Raw events table name (ViewManager table_id). Locked to a constant so viewers cannot repoint panels at arbitrary tables.","query":"agent_events","current":{"selected":false,"text":"agent_events","value":"agent_events"},"options":[{"selected":true,"text":"agent_events","value":"agent_events"}],"hide":2,"skipUrlSync":true},{"type":"constant","name":"view_prefix","label":"View prefix","description":"Prefix ViewManager applies to view names (default adk_). Locked to a constant so viewers cannot repoint panels at arbitrary views.","query":"adk_","current":{"selected":false,"text":"adk_","value":"adk_"},"options":[{"selected":true,"text":"adk_","value":"adk_"}],"hide":2,"skipUrlSync":true},{"type":"constant","name":"price_per_1m_input_tokens","label":"Input price (USD per 1M tokens)","description":"USD charged per 1,000,000 input tokens, read by the Estimated cost panel. The default 1.25 is a placeholder — edit it to match the pricing of the model(s) you run. Locked to a constant, like the project and dataset above, so a crafted dashboard URL cannot substitute arbitrary text into the cost arithmetic.","query":"1.25","current":{"selected":false,"text":"1.25","value":"1.25"},"options":[{"selected":true,"text":"1.25","value":"1.25"}],"hide":2,"skipUrlSync":true},{"type":"constant","name":"price_per_1m_output_tokens","label":"Output price (USD per 1M tokens)","description":"USD charged per 1,000,000 output tokens, read by the Estimated cost panel. The default 5.00 is a placeholder — edit it to match the pricing of the model(s) you run. Locked to a constant, like the project and dataset above, so a crafted dashboard URL cannot substitute arbitrary text into the cost arithmetic.","query":"5.00","current":{"selected":false,"text":"5.00","value":"5.00"},"options":[{"selected":true,"text":"5.00","value":"5.00"}],"hide":2,"skipUrlSync":true},{"type":"query","name":"agent","label":"Agent","description":"Select one or more AI Agents to filter metrics by. The dropdown lists at most 1000 agents active in the time range; type or paste any other agent name to select one the list left out.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"query":{"refId":"tempvar","editorMode":"code","rawQuery":true,"rawSql":"-- Variable: agent dropdown options.\n-- Lists every agent active in the time range, alphabetically.\n-- The LIMIT is a defensive cap, not an expected truncation: agent cardinality\n-- is normally a handful of names, so 1000 only bites on a runaway deployment\n-- that would otherwise hand Grafana more options than its frontend can render.\n-- Truncation drops the alphabetically last agents; narrow the dashboard's time\n-- range so the window holds fewer than 1000 agents to bring them back, or type\n-- the agent name straight into the picker, which accepts custom values.\nSELECT DISTINCT agent\nFROM `${project}.${dataset}.${table}`\nWHERE $__timeFilter(timestamp)\n  AND agent IS NOT NULL\nORDER BY agent\nLIMIT 1000\n","format":1,"location":""},"definition":"-- Variable: agent dropdown options.\n-- Lists every agent active in the time range, alphabetically.\n-- The LIMIT is a defensive cap, not an expected truncation: agent cardinality\n-- is normally a handful of names, so 1000 only bites on a runaway deployment\n-- that would otherwise hand Grafana more options than its frontend can render.\n-- Truncation drops the alphabetically last agents; narrow the dashboard's time\n-- range so the window holds fewer than 1000 agents to bring them back, or type\n-- the agent name straight into the picker, which accepts custom values.\nSELECT DISTINCT agent\nFROM `${project}.${dataset}.${table}`\nWHERE $__timeFilter(timestamp)\n  AND agent IS NOT NULL\nORDER BY agent\nLIMIT 1000\n","refresh":2,"multi":true,"includeAll":true,"allowCustomValue":true,"allValue":"[\"___ALL___\"]","current":{"selected":true,"text":["All"],"value":["$__all"]},"options":[],"sort":0,"regex":"","hide":0,"skipUrlSync":false},{"type":"query","name":"user_id","label":"User ID","description":"Filter panels by one or more User IDs. The dropdown lists the 1000 most recently active users in the time range; type or paste any other user ID to select one the list left out.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"query":{"refId":"tempvar","editorMode":"code","rawQuery":true,"rawSql":"-- Variable: user_id dropdown options.\n-- Lists every user active in the time range, most recently active first.\n-- The LIMIT is a guard against user_id's cardinality: a consumer-facing\n-- deployment can touch far more users in a day than Grafana's dropdown can\n-- render, and the search box runs entirely in the frontend over the options it\n-- was given, so an oversized list degrades into an unusable picker. Capping at\n-- the 1000 most recently active users keeps the variable renderable.\n-- Truncated older users are still reachable: narrow the dashboard's time range\n-- so the window they fall in holds fewer than 1000 users, or type the user ID\n-- straight into the picker, which accepts custom values.\nSELECT user_id\nFROM `${project}.${dataset}.${table}`\nWHERE $__timeFilter(timestamp)\n  AND user_id IS NOT NULL\nGROUP BY user_id\nORDER BY MAX(timestamp) DESC\nLIMIT 1000\n","format":1,"location":""},"definition":"-- Variable: user_id dropdown options.\n-- Lists every user active in the time range, most recently active first.\n-- The LIMIT is a guard against user_id's cardinality: a consumer-facing\n-- deployment can touch far more users in a day than Grafana's dropdown can\n-- render, and the search box runs entirely in the frontend over the options it\n-- was given, so an oversized list degrades into an unusable picker. Capping at\n-- the 1000 most recently active users keeps the variable renderable.\n-- Truncated older users are still reachable: narrow the dashboard's time range\n-- so the window they fall in holds fewer than 1000 users, or type the user ID\n-- straight into the picker, which accepts custom values.\nSELECT user_id\nFROM `${project}.${dataset}.${table}`\nWHERE $__timeFilter(timestamp)\n  AND user_id IS NOT NULL\nGROUP BY user_id\nORDER BY MAX(timestamp) DESC\nLIMIT 1000\n","refresh":2,"multi":true,"includeAll":true,"allowCustomValue":true,"allValue":"[\"___ALL___\"]","current":{"selected":true,"text":["All"],"value":["$__all"]},"options":[],"sort":0,"regex":"","hide":0,"skipUrlSync":false},{"type":"query","name":"event_type","label":"Event Type","description":"Filter by specific event types. Applies to the general raw-table panels: Events Over Time, Events by Agent, Recent Sessions and Trace Detail. Ignored by the Overview stats, Errors Over Time, and LLM/Tool specific panels.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"query":{"refId":"tempvar","editorMode":"code","rawQuery":true,"rawSql":"SELECT DISTINCT event_type FROM `${project}.${dataset}.${table}` WHERE event_type IS NOT NULL AND $__timeFilter(timestamp) ORDER BY event_type\n","format":1,"location":""},"definition":"SELECT DISTINCT event_type FROM `${project}.${dataset}.${table}` WHERE event_type IS NOT NULL AND $__timeFilter(timestamp) ORDER BY event_type\n","refresh":2,"multi":true,"includeAll":true,"allValue":"[\"___ALL___\"]","current":{"selected":true,"text":["All"],"value":["$__all"]},"options":[],"sort":0,"regex":"","hide":0,"skipUrlSync":false},{"type":"query","name":"session_id","label":"Session","description":"Filter panels to one or more specific sessions. The dropdown lists the 1000 most recently active sessions in the time range; type or paste any other session ID to select one the list left out.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"query":{"refId":"tempvar","editorMode":"code","rawQuery":true,"rawSql":"-- Variable: session_id dropdown options (independent filter).\n-- This variable intentionally does not cascade from any other filter: no agent,\n-- user_id, or event_type clause appears below, so the list is a global scan for\n-- every session active in the time range, most recently active first.\n-- Cascading would make an upstream filter change drop the active session out of\n-- this list, and Grafana would then silently re-select a different session (or,\n-- with multi-select, prune the user's selection down to whatever survived). We\n-- prefer the dashboard to show \"No Data\" for contradictory filter selections\n-- rather than forcefully changing the user's selected sessions behind their\n-- back.\n-- Trade-off: the dropdown lists sessions that may not match the current Agent /\n-- User ID / Event Type selections, so picking one can legitimately render every\n-- panel empty. That is the intended, recoverable outcome — widen the other\n-- filters to bring the data back.\n-- The LIMIT is a guard against session_id's cardinality, which is unbounded in\n-- a way that agent, user_id and event_type are not: a busy deployment can open\n-- hundreds of thousands of sessions in a single day, and handing that many\n-- options to Grafana exhausts the frontend rather than producing a usable\n-- dropdown. Capping at the 1000 most recently active sessions keeps the\n-- variable renderable. Truncated older sessions are still reachable: narrow the\n-- dashboard's time range so the window they fall in holds fewer than 1000\n-- sessions, and they move back into the list.\nSELECT session_id\nFROM `${project}.${dataset}.${table}`\nWHERE $__timeFilter(timestamp)\n  AND session_id IS NOT NULL\nGROUP BY session_id\nORDER BY MAX(timestamp) DESC\nLIMIT 1000\n","format":1,"location":""},"definition":"-- Variable: session_id dropdown options (independent filter).\n-- This variable intentionally does not cascade from any other filter: no agent,\n-- user_id, or event_type clause appears below, so the list is a global scan for\n-- every session active in the time range, most recently active first.\n-- Cascading would make an upstream filter change drop the active session out of\n-- this list, and Grafana would then silently re-select a different session (or,\n-- with multi-select, prune the user's selection down to whatever survived). We\n-- prefer the dashboard to show \"No Data\" for contradictory filter selections\n-- rather than forcefully changing the user's selected sessions behind their\n-- back.\n-- Trade-off: the dropdown lists sessions that may not match the current Agent /\n-- User ID / Event Type selections, so picking one can legitimately render every\n-- panel empty. That is the intended, recoverable outcome — widen the other\n-- filters to bring the data back.\n-- The LIMIT is a guard against session_id's cardinality, which is unbounded in\n-- a way that agent, user_id and event_type are not: a busy deployment can open\n-- hundreds of thousands of sessions in a single day, and handing that many\n-- options to Grafana exhausts the frontend rather than producing a usable\n-- dropdown. Capping at the 1000 most recently active sessions keeps the\n-- variable renderable. Truncated older sessions are still reachable: narrow the\n-- dashboard's time range so the window they fall in holds fewer than 1000\n-- sessions, and they move back into the list.\nSELECT session_id\nFROM `${project}.${dataset}.${table}`\nWHERE $__timeFilter(timestamp)\n  AND session_id IS NOT NULL\nGROUP BY session_id\nORDER BY MAX(timestamp) DESC\nLIMIT 1000\n","refresh":2,"multi":true,"includeAll":true,"allowCustomValue":true,"allValue":"[\"___ALL___\"]","current":{"selected":true,"text":["All"],"value":["$__all"]},"options":[],"sort":0,"regex":"","hide":0,"skipUrlSync":false}]},"links":[],"panels":[{"type":"row","title":"Overview (Filters: Agent, User, Session | Event Type: Events over time and Events by agent only)","collapsed":false,"id":1,"gridPos":{"h":1,"w":24,"x":0,"y":0},"panels":[]},{"type":"stat","title":"Sessions","id":2,"gridPos":{"h":4,"w":6,"x":0,"y":1},"description":"Distinct session_ids in the selected time range. Ignores the Event Type filter: the four Overview stats share one query that stays unfiltered so the error rate keeps its global context.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: Overview stats (Sessions, Events, Error rate, Avg LLM latency).\n-- One row, four columns; each Grafana stat panel picks one field.\n-- NOTE: The avg_llm_latency_ms subquery performs an extra full scan of llm_responses.\n-- This is an intentional UX decision to provide a top-level scalar metric alongside\n-- the dedicated time-series panel below.\n-- The event_type filter is intentionally NOT applied anywhere in this query.\n-- Errors arrive as their own event types (LLM_ERROR, TOOL_ERROR, ...), so a\n-- selection like LLM_RESPONSE would exclude every error row and report a 0%\n-- error rate when errors did occur — the same exemption errors_over_time.sql\n-- makes. The llm_responses subquery is exempt for a second reason: that view\n-- already holds exactly one event type, so filtering it would blank the metric\n-- for every non-LLM selection.\n-- HAVING COUNT(*) \u003e 0 keeps the no-data contract: an unaggregated SELECT over\n-- aggregates always emits one row, so an empty filter intersection would\n-- otherwise report a confident \"0 sessions, 0 events, 0% error rate\" instead of\n-- letting the stat panels fall back to their \"No matching data\" text.\nSELECT\n  COUNT(DISTINCT e.session_id) AS sessions,\n  COUNT(*) AS events,\n  SAFE_DIVIDE(\n    COUNTIF(ENDS_WITH(e.event_type, '_ERROR') OR e.error_message IS NOT NULL OR UPPER(e.status) = 'ERROR'),\n    COUNT(*)\n  ) AS error_rate,\n  (\n    SELECT AVG(r.total_ms)\n    FROM `${project}.${dataset}.${view_prefix}llm_responses` AS r\n    WHERE $__timeFilter(r.timestamp)\n      AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR r.agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n      AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR r.user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n      AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR r.session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\n  ) AS avg_llm_latency_ms\nFROM `${project}.${dataset}.${table}` AS e\nWHERE $__timeFilter(e.timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR e.agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR e.user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR e.session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nHAVING COUNT(*) \u003e 0\n","format":1,"location":""}],"fieldConfig":{"defaults":{"unit":"short","noValue":"No matching data","color":{"mode":"thresholds"},"thresholds":{"mode":"absolute","steps":[{"color":"text","value":null}]}},"overrides":[]},"options":{"reduceOptions":{"calcs":["lastNotNull"],"fields":"/^sessions$/","values":false},"colorMode":"value","graphMode":"none","justifyMode":"auto","orientation":"auto","textMode":"auto"}},{"type":"stat","title":"Events","id":3,"gridPos":{"h":4,"w":6,"x":6,"y":1},"description":"Total agent_events rows in the selected time range. Ignores the Event Type filter: the four Overview stats share one query that stays unfiltered so the error rate keeps its global context.","datasource":{"type":"datasource","uid":"-- Dashboard --"},"targets":[{"refId":"A","datasource":{"type":"datasource","uid":"-- Dashboard --"},"panelId":2}],"fieldConfig":{"defaults":{"unit":"short","noValue":"No matching data","color":{"mode":"thresholds"},"thresholds":{"mode":"absolute","steps":[{"color":"text","value":null}]}},"overrides":[]},"options":{"reduceOptions":{"calcs":["lastNotNull"],"fields":"/^events$/","values":false},"colorMode":"value","graphMode":"none","justifyMode":"auto","orientation":"auto","textMode":"auto"}},{"type":"stat","title":"Event error rate","id":4,"gridPos":{"h":4,"w":6,"x":12,"y":1},"description":"Error events divided by all event rows, not failed calls or failed sessions. An event counts as an error when its event_type ends in _ERROR, it has a non-NULL error_message, or UPPER(status) = 'ERROR'. The 1% (yellow) and 5% (red) thresholds are examples to tune for your traffic. See dashboards/grafana/queries/README.md. Ignores the Event Type filter: the four Overview stats share one query that stays unfiltered so the error rate keeps its global context.","datasource":{"type":"datasource","uid":"-- Dashboard --"},"targets":[{"refId":"A","datasource":{"type":"datasource","uid":"-- Dashboard --"},"panelId":2}],"fieldConfig":{"defaults":{"unit":"percentunit","decimals":2,"noValue":"No matching data","color":{"mode":"thresholds"},"thresholds":{"mode":"absolute","steps":[{"color":"green","value":null},{"color":"yellow","value":0.01},{"color":"red","value":0.05}]}},"overrides":[]},"options":{"reduceOptions":{"calcs":["lastNotNull"],"fields":"/^error_rate$/","values":false},"colorMode":"value","graphMode":"none","justifyMode":"auto","orientation":"auto","textMode":"auto"}},{"type":"stat","title":"Avg LLM latency","id":5,"gridPos":{"h":4,"w":6,"x":18,"y":1},"description":"Mean total_ms across LLM responses. Reads 'No matching data' rather than 0 when no LLM latency telemetry matches the current filters. Ignores the Event Type filter: the four Overview stats share one query that stays unfiltered so the error rate keeps its global context.","datasource":{"type":"datasource","uid":"-- Dashboard --"},"targets":[{"refId":"A","datasource":{"type":"datasource","uid":"-- Dashboard --"},"panelId":2}],"fieldConfig":{"defaults":{"unit":"ms","decimals":0,"noValue":"No matching data","color":{"mode":"thresholds"},"thresholds":{"mode":"absolute","steps":[{"color":"text","value":null}]}},"overrides":[]},"options":{"reduceOptions":{"calcs":["lastNotNull"],"fields":"/^avg_llm_latency_ms$/","values":false},"colorMode":"value","graphMode":"none","justifyMode":"auto","orientation":"auto","textMode":"auto"}},{"type":"timeseries","title":"Events over time","id":6,"gridPos":{"h":8,"w":12,"x":0,"y":5},"description":"Event volume per event_type. Honors the Event Type filter — the only panel in this row that does.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: Events over time, one series per event_type (Overview row).\nSELECT\n  $__timeGroup(timestamp, $__interval) AS time,\n  event_type,\n  COUNT(*) AS events\nFROM `${project}.${dataset}.${table}`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${event_type:json}) OR event_type IN UNNEST(ARRAY\u003cSTRING\u003e${event_type:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nGROUP BY time, event_type\nORDER BY time\n","format":0,"location":""}],"fieldConfig":{"defaults":{"unit":"short","color":{"mode":"palette-classic"},"custom":{"drawStyle":"line","lineWidth":2,"fillOpacity":10,"showPoints":"never","spanNulls":false,"gradientMode":"opacity","stacking":{"mode":"normal","group":"A"}}},"overrides":[]},"options":{"legend":{"displayMode":"list","placement":"bottom","showLegend":true},"tooltip":{"mode":"multi","sort":"desc"}}},{"type":"timeseries","title":"Errors over time","id":7,"gridPos":{"h":8,"w":12,"x":12,"y":5},"description":"Error events per event_type. An event counts as an error when event_type ends in _ERROR, error_message is non-NULL, or UPPER(status) = 'ERROR'. An empty panel reads \"No errors in range\": the query returns no rows, which is not a broken panel. It cannot tell \"no errors\" apart from \"no events matched the filters\" — check the Overview stat panels, which read \"No matching data\" when the filter combination matches nothing at all.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: Errors over time, one series per event_type (Overview row).\n-- The event_type filter is intentionally NOT applied here. Errors arrive as\n-- their own event types (LLM_ERROR, TOOL_ERROR, ...), so filtering on a\n-- selection like LLM_RESPONSE would exclude every error row and make the panel\n-- report zero errors when errors did occur.\nSELECT\n  $__timeGroup(timestamp, $__interval) AS time,\n  event_type,\n  COUNT(*) AS errors\nFROM `${project}.${dataset}.${table}`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND (ENDS_WITH(event_type, '_ERROR') OR error_message IS NOT NULL OR UPPER(status) = 'ERROR')\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nGROUP BY time, event_type\nORDER BY time\n","format":0,"location":""}],"fieldConfig":{"defaults":{"unit":"short","noValue":"No errors in range","color":{"mode":"palette-classic"},"custom":{"drawStyle":"line","lineWidth":2,"fillOpacity":10,"showPoints":"never","spanNulls":false,"gradientMode":"opacity","stacking":{"mode":"normal","group":"A"}}},"overrides":[]},"options":{"legend":{"displayMode":"list","placement":"bottom","showLegend":true},"tooltip":{"mode":"multi","sort":"desc"}}},{"type":"barchart","title":"Events by agent","id":21,"gridPos":{"h":8,"w":12,"x":0,"y":13},"description":"Event volume per agent over the raw ${table}. Honors the Event Type filter — with a selection active the bars read \"events of the selected type(s) per agent\". Events written without an agent group under \"unknown\" rather than being dropped, so with Event Type on All the bars add up to the Events stat above.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: Events by agent (Overview row).\n-- Event volume per agent over the raw ${table}, so every event type counts, not\n-- just the ones a typed view exposes.\n-- This query DOES honor the Event Type filter: neither exemption in\n-- queries/README.md applies (it reads the raw table, and it does not count\n-- errors), so with a selection active the bars read \"events of the selected\n-- type(s) per agent\". It is the second panel in the Overview row to do so.\n-- agent is nullable on the raw table; IFNULL groups those rows under \"unknown\"\n-- rather than dropping them, so the bars still add up to the Events stat above\n-- whenever the Event Type filter is on All.\n-- The output column is agent_name, not agent, so the GROUP BY names the IFNULL\n-- alias instead of resolving back to the raw nullable column.\n-- HAVING COUNT(*) \u003e 0 is a written-down contract rather than a live filter: the\n-- GROUP BY already emits no rows when nothing matches, which is what lets the\n-- panel fall back to its \"No matching data\" text. Stating it next to the\n-- aggregate keeps a later edit that widens the input set (an outer join, or a\n-- COUNTIF replacing the count) from silently drawing zero-height bars.\nSELECT\n  IFNULL(agent, 'unknown') AS agent_name,\n  COUNT(*) AS events\nFROM `${project}.${dataset}.${table}`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${event_type:json}) OR event_type IN UNNEST(ARRAY\u003cSTRING\u003e${event_type:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nGROUP BY agent_name\nHAVING COUNT(*) \u003e 0\nORDER BY events DESC\n","format":1,"location":""}],"fieldConfig":{"defaults":{"unit":"short","noValue":"No matching data","color":{"mode":"palette-classic"},"custom":{"fillOpacity":80,"lineWidth":0,"gradientMode":"none","axisLabel":""}},"overrides":[]},"options":{"orientation":"horizontal","xTickLabelRotation":0,"showValue":"auto","barWidth":0.85,"groupWidth":0.7,"legend":{"displayMode":"list","placement":"bottom","showLegend":true},"tooltip":{"mode":"multi","sort":"none"}}},{"type":"table","title":"Top error messages","id":22,"gridPos":{"h":8,"w":12,"x":12,"y":13},"description":"Distinct error_message strings in range, most frequent first, capped at 50. Only events carrying a non-NULL error_message appear: an error that recorded no message (event_type ending in _ERROR, or UPPER(status) = 'ERROR', with a NULL error_message) has no string to group under, so these counts are a subset of what Errors over time charts. Ignores the Event Type filter for the same reason Errors over time does — errors carry their own *_ERROR event types. sessions and agents count the distinct sessions and agents that hit each message; last_seen is the most recent occurrence in range.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: Top error messages (Overview row).\n-- Ranks the distinct error_message strings in the window by how often they\n-- occur, so the loudest failure mode is the first row.\n-- Scope: only events carrying a non-NULL error_message. An error event that\n-- recorded no message (event_type ending in _ERROR, or UPPER(status) = 'ERROR',\n-- with error_message NULL) has no string to group under and is intentionally\n-- absent, so these counts are a subset of what Errors over time charts.\n-- No event_type filter: errors arrive as their own event types (LLM_ERROR,\n-- TOOL_ERROR, ...), so honoring a selection like LLM_RESPONSE would report zero\n-- errors when errors did occur — the same exemption errors_over_time.sql makes.\n-- HAVING COUNT(*) \u003e 0 is a written-down contract rather than a live filter: the\n-- GROUP BY already emits no rows when nothing matches, which is what lets the\n-- panel fall back to its \"No errors in range\" text. Stating it next to the\n-- aggregate keeps a later edit that widens the input set (an outer join, or the\n-- error predicate moved out of the WHERE into a COUNTIF) from silently listing\n-- zero-count rows.\nSELECT\n  error_message,\n  COUNT(*) AS errors,\n  COUNT(DISTINCT session_id) AS sessions,\n  COUNT(DISTINCT agent) AS agents,\n  MAX(timestamp) AS last_seen\nFROM `${project}.${dataset}.${table}`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND error_message IS NOT NULL\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nGROUP BY error_message\nHAVING COUNT(*) \u003e 0\nORDER BY errors DESC\nLIMIT 50\n","format":1,"location":""}],"fieldConfig":{"defaults":{"noValue":"No errors in range","color":{"mode":"thresholds"},"custom":{"align":"auto","cellOptions":{"type":"auto"},"filterable":true},"thresholds":{"mode":"absolute","steps":[{"color":"text","value":null}]}},"overrides":[]},"options":{"showHeader":true,"cellHeight":"sm","sortBy":[{"displayName":"errors","desc":true}],"footer":{"show":false,"reducer":["sum"],"countRows":false}}},{"type":"row","title":"LLM \u0026 FinOps (Filters: Agent, User, Session | Ignores: Event Type)","collapsed":false,"id":8,"gridPos":{"h":1,"w":24,"x":0,"y":21},"panels":[]},{"type":"timeseries","title":"Token usage over time","id":9,"gridPos":{"h":8,"w":12,"x":0,"y":22},"description":"Prompt / completion / total tokens from ${view_prefix}llm_responses. Missing usage telemetry degrades to 0.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: Token usage over time (LLM \u0026 FinOps row).\n-- Uses the typed llm_responses view. Missing usage telemetry\n-- degrades to 0 for sums (IFNULL) rather than dropping the bucket.\n-- Token counts come from content.usage (usage_*_tokens) or, when a row\n-- has none, from attributes.usage_metadata, which the direct logger\n-- writes instead. COALESCE picks one value per field, so a row that\n-- carries both is counted once.\n-- No event_type filter: the view is already scoped to a single event type,\n-- so filtering it would blank the panel for every non-LLM selection.\nSELECT\n  $__timeGroup(timestamp, $__interval) AS time,\n  IFNULL(SUM(COALESCE(usage_prompt_tokens,\n    SAFE_CAST(JSON_VALUE(usage_metadata, '$.prompt_tokens') AS INT64))), 0) AS prompt_tokens,\n  IFNULL(SUM(COALESCE(usage_completion_tokens,\n    SAFE_CAST(JSON_VALUE(usage_metadata, '$.completion_tokens') AS INT64))), 0) AS completion_tokens,\n  IFNULL(SUM(COALESCE(usage_total_tokens,\n    SAFE_CAST(JSON_VALUE(usage_metadata, '$.total_tokens') AS INT64))), 0) AS total_tokens\nFROM `${project}.${dataset}.${view_prefix}llm_responses`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nGROUP BY time\nORDER BY time\n","format":0,"location":""}],"fieldConfig":{"defaults":{"unit":"short","color":{"mode":"palette-classic"},"custom":{"drawStyle":"line","lineWidth":2,"fillOpacity":10,"showPoints":"never","spanNulls":false,"gradientMode":"opacity"}},"overrides":[]},"options":{"legend":{"displayMode":"list","placement":"bottom","showLegend":true},"tooltip":{"mode":"multi","sort":"desc"}}},{"type":"timeseries","title":"LLM latency (p50 / p95 / TTFT)","id":10,"gridPos":{"h":8,"w":12,"x":12,"y":22},"description":"Approximate p50/p95 total latency and p50 time to first token from ${view_prefix}llm_responses. Rows with missing latency are ignored, so gaps mean no latency samples in that bucket.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: LLM latency percentiles + time-to-first-token (LLM \u0026 FinOps row).\n-- Latency aggregates deliberately stay NULL when telemetry is missing so\n-- the chart shows gaps instead of fake zeros.\n-- No event_type filter: the view is already scoped to a single event type,\n-- so filtering it would blank the panel for every non-LLM selection.\nSELECT\n  $__timeGroup(timestamp, $__interval) AS time,\n  APPROX_QUANTILES(total_ms, 100)[OFFSET(50)] AS p50_total_ms,\n  APPROX_QUANTILES(total_ms, 100)[OFFSET(95)] AS p95_total_ms,\n  APPROX_QUANTILES(ttft_ms, 100)[OFFSET(50)] AS p50_ttft_ms\nFROM `${project}.${dataset}.${view_prefix}llm_responses`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nGROUP BY time\nORDER BY time\n","format":0,"location":""}],"fieldConfig":{"defaults":{"unit":"ms","color":{"mode":"palette-classic"},"custom":{"drawStyle":"line","lineWidth":2,"fillOpacity":0,"showPoints":"never","spanNulls":false,"gradientMode":"opacity"},"decimals":0},"overrides":[{"matcher":{"id":"byName","options":"p50_total_ms"},"properties":[{"id":"displayName","value":"LLM p50"},{"id":"color","value":{"mode":"fixed","fixedColor":"blue"}}]},{"matcher":{"id":"byName","options":"p95_total_ms"},"properties":[{"id":"displayName","value":"LLM p95"},{"id":"color","value":{"mode":"fixed","fixedColor":"orange"}}]},{"matcher":{"id":"byName","options":"p50_ttft_ms"},"properties":[{"id":"displayName","value":"TTFT p50"},{"id":"color","value":{"mode":"fixed","fixedColor":"purple"}}]}]},"options":{"legend":{"displayMode":"list","placement":"bottom","showLegend":true},"tooltip":{"mode":"multi","sort":"desc"}}},{"type":"barchart","title":"Tokens by model","id":11,"gridPos":{"h":12,"w":16,"x":0,"y":30},"description":"Token totals grouped by model_version (response-side attribute).","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: Tokens by model (LLM \u0026 FinOps row).\n-- model_version is the response-side attribute exposed by the\n-- llm_responses view; rows without it group under \"unknown\". That\n-- includes direct-logger rows, which carry attributes.model instead.\n-- Token counts come from content.usage (usage_*_tokens) or, when a row\n-- has none, from attributes.usage_metadata, which the direct logger\n-- writes instead. COALESCE picks one value per field, so a row that\n-- carries both is counted once.\n-- No event_type filter: the view is already scoped to a single event type,\n-- so filtering it would blank the panel for every non-LLM selection.\nSELECT\n  IFNULL(model_version, 'unknown') AS model,\n  IFNULL(SUM(COALESCE(usage_prompt_tokens,\n    SAFE_CAST(JSON_VALUE(usage_metadata, '$.prompt_tokens') AS INT64))), 0) AS prompt_tokens,\n  IFNULL(SUM(COALESCE(usage_completion_tokens,\n    SAFE_CAST(JSON_VALUE(usage_metadata, '$.completion_tokens') AS INT64))), 0) AS completion_tokens,\n  IFNULL(SUM(COALESCE(usage_total_tokens,\n    SAFE_CAST(JSON_VALUE(usage_metadata, '$.total_tokens') AS INT64))), 0) AS total_tokens,\n  COUNT(*) AS responses\nFROM `${project}.${dataset}.${view_prefix}llm_responses`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nGROUP BY model\nORDER BY total_tokens DESC\n","format":1,"location":""}],"fieldConfig":{"defaults":{"unit":"short","color":{"mode":"palette-classic"},"custom":{"fillOpacity":80,"lineWidth":0,"gradientMode":"none","axisLabel":""}},"overrides":[{"matcher":{"id":"byName","options":"total_tokens"},"properties":[{"id":"custom.hideFrom","value":{"tooltip":false,"viz":true,"legend":true}}]},{"matcher":{"id":"byName","options":"responses"},"properties":[{"id":"custom.hideFrom","value":{"tooltip":false,"viz":true,"legend":true}}]}]},"options":{"orientation":"horizontal","xTickLabelRotation":0,"showValue":"auto","barWidth":0.85,"groupWidth":0.7,"legend":{"displayMode":"list","placement":"bottom","showLegend":true},"tooltip":{"mode":"multi","sort":"none"}}},{"type":"stat","title":"Estimated cost (placeholder rates)","id":12,"gridPos":{"h":4,"w":8,"x":16,"y":30},"description":"DERIVED estimate, not telemetry: token counts x the per-1M-token rates held in the price_per_1m_input_tokens and price_per_1m_output_tokens dashboard variables. The defaults are placeholders — edit those two variables (Dashboard settings → Variables) to match your model pricing. Token counts are the primary FinOps signal. Computed by the LLM calls query and reused here through the Dashboard data source, so this stat adds no BigQuery job.","datasource":{"type":"datasource","uid":"-- Dashboard --"},"targets":[{"datasource":{"type":"datasource","uid":"-- Dashboard --"},"panelId":23,"refId":"A"}],"fieldConfig":{"defaults":{"unit":"currencyUSD","decimals":4,"noValue":"No matching data","color":{"mode":"thresholds"},"thresholds":{"mode":"absolute","steps":[{"color":"text","value":null}]}},"overrides":[]},"options":{"reduceOptions":{"calcs":["lastNotNull"],"fields":"/^estimated_cost_usd$/","values":false},"colorMode":"value","graphMode":"none","justifyMode":"auto","orientation":"auto","textMode":"auto"}},{"type":"stat","title":"Total tokens","id":20,"gridPos":{"h":4,"w":8,"x":16,"y":34},"description":"Sum of the provider-reported usage.total token count (usage_total_tokens in ${view_prefix}llm_responses) over the selected time range and filters. This is the provider's own total rather than prompt + completion added up here, so it can differ from that sum when a provider bills cached, reasoning or other tokens it does not report in those two fields.","datasource":{"type":"datasource","uid":"-- Dashboard --"},"targets":[{"datasource":{"type":"datasource","uid":"-- Dashboard --"},"panelId":23,"refId":"A"}],"fieldConfig":{"defaults":{"unit":"short","noValue":"No matching data","color":{"mode":"thresholds"},"thresholds":{"mode":"absolute","steps":[{"color":"text","value":null}]}},"overrides":[]},"options":{"reduceOptions":{"calcs":["lastNotNull"],"fields":"/^total_tokens$/","values":false},"colorMode":"value","graphMode":"none","justifyMode":"auto","orientation":"auto","textMode":"auto"}},{"type":"stat","title":"LLM calls","id":23,"gridPos":{"h":4,"w":8,"x":16,"y":38},"description":"Distinct LLM calls in range, counted by trace_id/span_id so a streaming installation's response chunks count as one call — the number of completed model calls the rest of this row aggregates over. Read from ${view_prefix}llm_responses, which holds exactly that one event type, so the Event Type filter is ignored (honoring it would blank the stat for every non-LLM selection). Divide the token and cost panels by this to get a per-call average. The same query also feeds the Estimated cost and Total tokens stats through the Dashboard data source, so the three stats cost one BigQuery job.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","format":1,"location":"","rawQuery":true,"rawSql":"-- Panel: LLM calls (LLM \u0026 FinOps row). The same result also drives the\n-- \"Estimated cost\" and \"Total tokens\" stats through the Dashboard data source.\n-- One scan of llm_responses answers all three single-row stats: they read the\n-- same view under the same filters and the same no-data contract, so separate\n-- queries only re-read the same rows as separate BigQuery jobs.\n-- llm_calls is the number of distinct LLM calls in the window: the call\n-- volume the token, latency and cost panels in this row are averaging and\n-- summing over.\n-- Counted per span, not per row: a streaming installation records one\n-- LLM_RESPONSE per chunk, so COUNT(*) would report chunks as calls. This is the\n-- same distinct-span definition the Looker Studio build uses for \"LLM calls\".\n-- trace_id and span_id are nullable, and CONCAT of a NULL is NULL, so rows that\n-- carry no span key are added back one-per-row rather than silently dropped.\n-- estimated_cost_usd is DERIVED, not telemetry: the SDK records token counts\n-- only. The rates come from the price_per_1m_input_tokens /\n-- price_per_1m_output_tokens dashboard variables, whose defaults are\n-- placeholders — edit them in Dashboard settings \u003e Variables to match the\n-- pricing of the model(s) you actually run, rather than editing this file. Both\n-- variables are read as USD per 1,000,000 tokens, which is the unit model price\n-- lists publish. The panel is intentionally labeled \"Estimated Cost\" for this\n-- reason; token counts are the primary FinOps signal.\n-- The two variables are `constant`s with skipUrlSync, so a crafted dashboard\n-- URL cannot substitute arbitrary text into the arithmetic below.\n-- total_tokens is the provider-reported total, read by \"Total tokens\".\n-- Token counts come from content.usage (usage_*_tokens) or, when a row\n-- has none, from attributes.usage_metadata, which the direct logger\n-- writes instead. COALESCE picks one value per field, so a row that\n-- carries both is counted once.\n-- No event_type filter: the llm_responses view is already scoped to a single\n-- event type, so every row here is an LLM_RESPONSE by construction and adding\n-- the filter would blank these stats for every non-LLM selection.\n-- HAVING COUNT(*) \u003e 0 keeps the no-data contract: an unaggregated SELECT over\n-- aggregates always emits one row, so an empty filter intersection would\n-- otherwise report a confident \"0 calls\" / zero cost / zero tokens instead of\n-- letting the stat panels fall back to their \"No matching data\" text.\nSELECT\n  COUNT(DISTINCT CONCAT(trace_id, '|', span_id))\n    + COUNTIF(trace_id IS NULL OR span_id IS NULL) AS llm_calls,\n  IFNULL(SUM(COALESCE(usage_prompt_tokens,\n      SAFE_CAST(JSON_VALUE(usage_metadata, '$.prompt_tokens') AS INT64))), 0)\n      / 1e6 * ${price_per_1m_input_tokens}    -- $ / 1M input tokens\n    + IFNULL(SUM(COALESCE(usage_completion_tokens,\n      SAFE_CAST(JSON_VALUE(usage_metadata, '$.completion_tokens') AS INT64))), 0)\n      / 1e6 * ${price_per_1m_output_tokens}  -- $ / 1M output tokens\n    AS estimated_cost_usd,\n  IFNULL(SUM(COALESCE(usage_total_tokens,\n    SAFE_CAST(JSON_VALUE(usage_metadata, '$.total_tokens') AS INT64))), 0)\n    AS total_tokens\nFROM `${project}.${dataset}.${view_prefix}llm_responses`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nHAVING COUNT(*) \u003e 0\n","refId":"A"}],"fieldConfig":{"defaults":{"unit":"short","noValue":"No matching data","color":{"mode":"thresholds"},"thresholds":{"mode":"absolute","steps":[{"color":"text","value":null}]}},"overrides":[]},"options":{"reduceOptions":{"calcs":["lastNotNull"],"fields":"/^llm_calls$/","values":false},"colorMode":"value","graphMode":"none","justifyMode":"auto","orientation":"auto","textMode":"auto"}},{"type":"row","title":"Tools \u0026 Execution (Filters: Agent, User, Session | Ignores: Event Type)","collapsed":false,"id":13,"gridPos":{"h":1,"w":24,"x":0,"y":42},"panels":[]},{"type":"barchart","title":"Tool invocations by tool","id":14,"gridPos":{"h":8,"w":8,"x":0,"y":43},"description":"Invocations per tool from ${view_prefix}tool_starts, so failed invocations are counted (${view_prefix}tool_completions would drop them).","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: Tool invocations by tool (Tools row).\n-- Uses the typed tool_starts view so failed invocations are included in the\n-- volume (the tool_completions view would drop them).\n-- No event_type filter: the view is already scoped to a single event type,\n-- so filtering it would blank the panel for every non-tool selection.\nSELECT\n  tool_name,\n  COUNT(*) AS invocations\nFROM `${project}.${dataset}.${view_prefix}tool_starts`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nGROUP BY tool_name\nORDER BY invocations DESC\n","format":1,"location":""}],"fieldConfig":{"defaults":{"unit":"short","color":{"mode":"palette-classic"},"custom":{"fillOpacity":80,"lineWidth":0,"gradientMode":"none","axisLabel":""}},"overrides":[]},"options":{"orientation":"horizontal","xTickLabelRotation":0,"showValue":"auto","barWidth":0.85,"groupWidth":0.7,"legend":{"displayMode":"list","placement":"bottom","showLegend":true},"tooltip":{"mode":"multi","sort":"none"}}},{"type":"table","title":"Tool latency","id":15,"gridPos":{"h":8,"w":8,"x":8,"y":43},"description":"Per-tool latency; NULLs mean missing latency telemetry.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: Tool latency by tool (Tools row).\n-- Latency stays NULL when missing (no IFNULL) so averages aren't skewed.\n-- No event_type filter: the view is already scoped to a single event type,\n-- so filtering it would blank the panel for every non-tool selection.\nSELECT\n  tool_name,\n  COUNT(*) AS completions,\n  AVG(total_ms) AS avg_ms,\n  APPROX_QUANTILES(total_ms, 100)[OFFSET(50)] AS p50_ms,\n  APPROX_QUANTILES(total_ms, 100)[OFFSET(95)] AS p95_ms\nFROM `${project}.${dataset}.${view_prefix}tool_completions`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nGROUP BY tool_name\nORDER BY p95_ms DESC\n","format":1,"location":""}],"fieldConfig":{"defaults":{"color":{"mode":"thresholds"},"custom":{"align":"auto","cellOptions":{"type":"auto"},"filterable":true},"thresholds":{"mode":"absolute","steps":[{"color":"text","value":null}]}},"overrides":[{"matcher":{"id":"byRegexp","options":".*_ms$"},"properties":[{"id":"unit","value":"ms"}]}]},"options":{"showHeader":true,"cellHeight":"sm","sortBy":[{"displayName":"p95_ms","desc":true}],"footer":{"show":false,"reducer":["sum"],"countRows":false}}},{"type":"table","title":"Tool errors","id":16,"gridPos":{"h":8,"w":8,"x":16,"y":43},"description":"TOOL_ERROR events plus completions that carry a non-NULL error_message or UPPER(status) = 'ERROR'. UNION ALL is intentional: one logical failure that emits both a TOOL_ERROR and an error-status TOOL_COMPLETED appears as two rows.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: Tool errors (Tools row).\n-- Combines the dedicated TOOL_ERROR view with any error-status completions.\n-- UNION ALL intentionally preserves both telemetry records when one logical\n-- failure emits a TOOL_ERROR and an error-status TOOL_COMPLETED event.\n-- No event_type filter: both views are already scoped to a single event\n-- type each, so filtering them would blank the panel for every non-tool\n-- selection.\nSELECT\n  timestamp,\n  agent,\n  session_id,\n  tool_name,\n  error_message\nFROM `${project}.${dataset}.${view_prefix}tool_errors`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\n\nUNION ALL\n\nSELECT\n  timestamp,\n  agent,\n  session_id,\n  tool_name,\n  error_message\nFROM `${project}.${dataset}.${view_prefix}tool_completions`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND (error_message IS NOT NULL OR UPPER(status) = 'ERROR')\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nORDER BY timestamp DESC\nLIMIT 100\n","format":1,"location":""}],"fieldConfig":{"defaults":{"color":{"mode":"thresholds"},"custom":{"align":"auto","cellOptions":{"type":"auto"},"filterable":true},"thresholds":{"mode":"absolute","steps":[{"color":"text","value":null}]}},"overrides":[]},"options":{"showHeader":true,"cellHeight":"sm","sortBy":[],"footer":{"show":false,"reducer":["sum"],"countRows":false}}},{"type":"row","title":"Sessions \u0026 Traces (Filters: Agent, User, Event Type, Session)","collapsed":false,"id":17,"gridPos":{"h":1,"w":24,"x":0,"y":51},"panels":[]},{"type":"table","title":"Recent sessions","id":18,"gridPos":{"h":8,"w":24,"x":0,"y":52},"description":"Session rollups over the raw ${table} table, capped at the 250 most recently active sessions in the time range — narrow the time range to reach older ones. All four filters are honored, but Agent, User and Event Type only select WHICH sessions are listed: each listed session's counts then cover that whole session, including the events those filters excluded, so they will not match the Overview stats. Filter to one agent and session_agents_in_window can still read 2, and session_errors_in_window can still include another agent's errors. session_errors_in_window counts events whose event_type ends in _ERROR, or that carry a non-NULL error_message, or whose UPPER(status) = 'ERROR'. session_users_in_window lists every distinct user_id in the session, so it can name more than one. session_input_tokens_in_window / session_output_tokens_in_window sum $.usage.prompt / $.usage.completion, or attributes.usage_metadata when a row has no content usage, over the session's LLM_RESPONSE events — the same values the LLM \u0026 FinOps panels report as prompt/completion tokens. Click a session_id to open its Trace detail: the link keeps the time range and data source, pins Session to that session and clears the Agent, User ID and Event Type filters, so the timeline covers the whole session the row rolls up; the Session dropdown above still accepts a typed or pasted value.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: Recent sessions (Sessions \u0026 Traces row).\n-- Session-level rollup over the raw agent_events table.\n-- All four filters apply, but agent, user_id and event_type only decide *which\n-- sessions are listed*: each gets its own LOGICAL_OR(...) in the HAVING over\n-- the GROUP BY, and the three are ANDed. A session is kept when it contains a\n-- match for each filter somewhere in the window — the matches need not be the\n-- same event. Applying them in the outer WHERE would drop events before the\n-- GROUP BY, so every rollup below would describe a filtered slice of the\n-- session while still being labelled as the session itself.\n-- HAVING rather than a `session_id IN (SELECT ...)` subquery: the subquery\n-- expresses the same predicate but reads the table a second time, and BigQuery\n-- bills bytes scanned per reference rather than collapsing the two reads.\n-- Consequently the per-session rollup columns below cover every event the\n-- session has in the window, including events the Agent / User / Event Type\n-- filters excluded, so they will not sum to the Overview stats.\n-- session_id IS NOT NULL matches var_session_id.sql: events written without a\n-- session would otherwise collapse into one NULL row that names no session and\n-- that the Session dropdown cannot select for the trace panel below.\n-- The LIMIT caps the table at the 250 most recently active sessions in the\n-- window. Truncated older sessions are reachable by narrowing the dashboard's\n-- time range, the same escape hatch var_session_id.sql documents.\n-- session_users_in_window is a STRING_AGG rather than ANY_VALUE: nothing in the\n-- schema stops two user_ids from sharing a session, and ANY_VALUE would silently\n-- name one of them. It reads like COUNT(DISTINCT agent) below — the column is\n-- there to show when a session is not the single-user thing it was assumed to\n-- be, so it lists every user rather than picking one.\n-- The token columns read $.usage.prompt / $.usage.completion straight off the\n-- raw content payload and fall back to attributes.usage_metadata, which the\n-- direct logger writes instead; COALESCE counts a row that carries both once.\n-- This panel groups the raw table, so it cannot use the typed\n-- ${view_prefix}llm_responses view; the LLM \u0026 FinOps panels apply the same\n-- fallback to that view's usage_prompt_tokens / usage_completion_tokens.\n-- They are named input/output to match the price_per_1m_input_tokens /\n-- price_per_1m_output_tokens variables that price them. Only LLM_RESPONSE\n-- carries a usage block, and the IF() says so explicitly rather than leaning on\n-- the path being absent from every other event type's content — the view these\n-- numbers mirror is scoped to LLM_RESPONSE, and this sum has to scope itself.\n-- Like the counts, they cover the whole session in the window and so will not\n-- tie out against Token usage over time whenever a filter is active.\nSELECT\n  session_id,\n  STRING_AGG(DISTINCT user_id, ', ' ORDER BY user_id) AS session_users_in_window,\n  MIN(timestamp) AS started_in_window_at,\n  MAX(timestamp) AS last_event_in_window_at,\n  TIMESTAMP_DIFF(MAX(timestamp), MIN(timestamp), SECOND) AS duration_in_window_s,\n  COUNT(DISTINCT agent) AS session_agents_in_window,\n  COUNT(*) AS session_events_in_window,\n  COUNTIF(ENDS_WITH(event_type, '_ERROR') OR error_message IS NOT NULL OR UPPER(status) = 'ERROR') AS session_errors_in_window,\n  IFNULL(SUM(IF(event_type = 'LLM_RESPONSE',\n    COALESCE(SAFE_CAST(JSON_VALUE(content, '$.usage.prompt') AS INT64),\n      SAFE_CAST(JSON_VALUE(attributes, '$.usage_metadata.prompt_tokens') AS INT64)),\n    NULL)), 0)\n    AS session_input_tokens_in_window,\n  IFNULL(SUM(IF(event_type = 'LLM_RESPONSE',\n    COALESCE(SAFE_CAST(JSON_VALUE(content, '$.usage.completion') AS INT64),\n      SAFE_CAST(JSON_VALUE(attributes, '$.usage_metadata.completion_tokens') AS INT64)),\n    NULL)), 0)\n    AS session_output_tokens_in_window\nFROM `${project}.${dataset}.${table}`\nWHERE $__timeFilter(timestamp)\n  AND session_id IS NOT NULL\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nGROUP BY session_id\nHAVING LOGICAL_OR('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND LOGICAL_OR('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND LOGICAL_OR('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${event_type:json}) OR event_type IN UNNEST(ARRAY\u003cSTRING\u003e${event_type:json}))\nORDER BY last_event_in_window_at DESC\nLIMIT 250\n","format":1,"location":""}],"fieldConfig":{"defaults":{"color":{"mode":"thresholds"},"custom":{"align":"auto","cellOptions":{"type":"auto"},"filterable":true},"thresholds":{"mode":"absolute","steps":[{"color":"text","value":null}]}},"overrides":[{"matcher":{"id":"byName","options":"session_id"},"properties":[{"id":"links","value":[{"title":"Open session trace (all agents and event types)","url":"${__url.path}?${__url_time_range}\u0026${datasource:queryparam}\u0026var-agent=%24__all\u0026var-user_id=%24__all\u0026var-event_type=%24__all\u0026var-session_id=${__data.fields.session_id:percentencode}\u0026viewPanel=19","targetBlank":false}]}]}]},"options":{"showHeader":true,"cellHeight":"sm","sortBy":[{"displayName":"last_event_in_window_at","desc":true}],"footer":{"show":false,"reducer":["sum"],"countRows":false}}},{"type":"table","title":"Trace detail — ${session_id:text}","id":19,"gridPos":{"h":10,"w":24,"x":0,"y":60},"description":"Event timeline within the active time window for the selected session. Capped at the 500 most recent events, so with Session on All you see the newest activity rather than the oldest; click the timestamp header to re-sort a pinned session into chronological order. trace_id, and otel_trace_id when the producer writes attributes.otel, identify each event's trace. model is COALESCE($.model, $.model_version) since requests and responses store it under different attribute keys.","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"targets":[{"refId":"A","datasource":{"type":"grafana-bigquery-datasource","uid":"${datasource}"},"editorMode":"code","rawQuery":true,"rawSql":"-- Panel: Trace detail for the selected session (Sessions \u0026 Traces row).\n-- Queries the raw table so every event type appears in one timeline.\n-- - Filter variables are interpolated with the json formatter below: each value\n--   becomes a double-quoted JSON string, which is also a valid BigQuery string\n--   literal, so quotes and backslashes in a value stay data.\n-- - session_id is selected explicitly: when the session filter is left on All,\n--   or several sessions are picked, the timeline interleaves events from\n--   different sessions and the column is the only way to tell them apart.\n-- - trace_id, and otel_trace_id when the producer writes attributes.otel,\n--   lead from a session to a specific trace.\n-- - COALESCE(model, model_version): `model` exists on LLM_REQUEST attributes,\n--   `model_version` on LLM_RESPONSE attributes — one column covers both.\n-- - ORDER BY ... DESC decides *which* 500 rows survive the LIMIT, and that is\n--   the part a user cannot recover from. With the session filter on All the\n--   ascending order returned the oldest 500 events in the range, so a busy\n--   window showed the first few minutes and nothing since. Reading one pinned\n--   session as a chronological timeline is still available: the panel is a\n--   Grafana table, so clicking the `timestamp` header re-sorts the returned\n--   rows client-side.\nSELECT\n  timestamp,\n  session_id,\n  event_type,\n  agent,\n  invocation_id,\n  trace_id,\n  span_id,\n  parent_span_id,\n  JSON_VALUE(attributes, '$.otel.trace_id') AS otel_trace_id,\n  status,\n  COALESCE(\n    JSON_VALUE(attributes, '$.model'),\n    JSON_VALUE(attributes, '$.model_version')\n  ) AS model,\n  JSON_VALUE(content, '$.tool') AS tool_name,\n  SAFE_CAST(JSON_VALUE(latency_ms, '$.total_ms') AS INT64) AS total_ms,\n  error_message\nFROM `${project}.${dataset}.${table}`\nWHERE $__timeFilter(timestamp)\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}) OR agent IN UNNEST(ARRAY\u003cSTRING\u003e${agent:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}) OR user_id IN UNNEST(ARRAY\u003cSTRING\u003e${user_id:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${event_type:json}) OR event_type IN UNNEST(ARRAY\u003cSTRING\u003e${event_type:json}))\n  AND ('___ALL___' IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}) OR session_id IN UNNEST(ARRAY\u003cSTRING\u003e${session_id:json}))\nORDER BY timestamp DESC\nLIMIT 500\n","format":1,"location":""}],"fieldConfig":{"defaults":{"color":{"mode":"thresholds"},"custom":{"align":"auto","cellOptions":{"type":"auto"},"filterable":true},"thresholds":{"mode":"absolute","steps":[{"color":"text","value":null}]}},"overrides":[{"matcher":{"id":"byRegexp","options":".*_ms$"},"properties":[{"id":"unit","value":"ms"}]}]},"options":{"showHeader":true,"cellHeight":"sm","sortBy":[],"footer":{"show":false,"reducer":["sum"],"countRows":false}}}]}</script>
+<script type="application/json" id="build-meta">{"mainSources":{"2":"query","3":2,"4":2,"5":2,"6":"query","7":"query","21":"query","22":"query","9":"query","10":"query","11":"query","12":"query","20":12,"23":"query","14":"query","15":"query","16":"query","18":"query","19":"query"},"mainPanelQueries":15,"trialPanelQueries":14}</script>
+<script>
+/* BQAA Grafana demo - core: palette, seeded synthetic fixture, panel queries, unit formatting.
+   Pure logic: no DOM access, so it can be unit-tested outside a browser. */
+(function (root) {
+  'use strict';
+
+  var SECOND = 1000, MINUTE = 60000, HOUR = 3600000, DAY = 86400000;
+
+  // ---------------------------------------------------------------------------
+  // Palette. Grafana colour families, re-stepped so every adjacent pair passes
+  // the categorical checks (lightness band, chroma floor, CVD and normal-vision
+  // separation, 3:1 contrast) on Grafana's dark panel surface #181b1f.
+  // ---------------------------------------------------------------------------
+  var SERIES = ['#56A64B', '#BA43A9', '#5794F2', '#C08A00', '#E02F44', '#A352CC', '#1E9BB0', '#E8691A'];
+  // Named colours used by fieldConfig overrides (fixedColor) map onto the same steps.
+  var NAMED = { green: '#56A64B', magenta: '#BA43A9', blue: '#5794F2', yellow: '#C08A00', red: '#E02F44', purple: '#A352CC', teal: '#1E9BB0', orange: '#E8691A' };
+  // Threshold (status) colours keep Grafana's own status steps, distinct from the series steps.
+  var STATUS = { green: '#73BF69', yellow: '#FADE2A', orange: '#FF9830', red: '#F2495C' };
+  // Event types keep one colour on every panel and under every filter (colour follows the entity).
+  var EVENT_TYPES = ['USER_MESSAGE_RECEIVED', 'LLM_REQUEST', 'LLM_RESPONSE', 'TOOL_STARTING',
+    'LLM_ERROR', 'TOOL_COMPLETED', 'AGENT_COMPLETED', 'TOOL_ERROR'];
+  var EVENT_COLOR = {};
+  EVENT_TYPES.forEach(function (t, i) { EVENT_COLOR[t] = SERIES[i]; });
+
+  // ---------------------------------------------------------------------------
+  // Seeded PRNG (mulberry32) + a per-hour seed mixer, so the events of any given
+  // hour are identical on every page load.
+  // ---------------------------------------------------------------------------
+  var SEED = 550;
+
+  function mulberry32(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      var t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function mix(a, b) {
+    var h = (Math.imul(a >>> 0, 0x9E3779B1) ^ Math.imul(b >>> 0, 0x85EBCA77)) >>> 0;
+    h = Math.imul(h ^ (h >>> 16), 0x7FEB352D) >>> 0;
+    h = Math.imul(h ^ (h >>> 15), 0x846CA68B) >>> 0;
+    return (h ^ (h >>> 16)) >>> 0;
+  }
+
+  function Rand(seed) {
+    var u = mulberry32(seed);
+    var r = {
+      u: u,
+      int: function (lo, hi) { return lo + Math.floor(u() * (hi - lo + 1)); },
+      chance: function (p) { return u() < p; },
+      pick: function (arr) { return arr[Math.floor(u() * arr.length)]; },
+      wpick: function (arr, w) {
+        var s = 0, i;
+        for (i = 0; i < w.length; i++) s += w[i];
+        var t = u() * s;
+        for (i = 0; i < arr.length; i++) { t -= w[i]; if (t < 0) return arr[i]; }
+        return arr[arr.length - 1];
+      },
+      hex: function (n) {
+        var s = '';
+        while (s.length < n) s += ('0000000' + (Math.floor(u() * 4294967296) >>> 0).toString(16)).slice(-8);
+        return s.slice(0, n);
+      },
+      normal: function () {
+        var a = 0; while (a === 0) a = u();
+        return Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * u());
+      },
+      logn: function (median, sigma) { return median * Math.exp(sigma * r.normal()); },
+      poisson: function (lambda) {
+        var L = Math.exp(-lambda), k = 0, p = 1;
+        do { k++; p *= u(); } while (p > L);
+        return k - 1;
+      }
+    };
+    return r;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Synthetic agent_events fixture (shape follows the SDK's seed-events scenarios).
+  // ---------------------------------------------------------------------------
+  var AGENT = {
+    intake: 'retail-intake-triage-agent',
+    fraud: 'retail-fraud-abuse-agent',
+    quality: 'retail-quality-defect-agent',
+    faq: 'support-faq-agent',
+    billing: 'billing-dispute-agent'
+  };
+  var USERS = [], USER_W = [];
+  for (var ui = 0; ui < 48; ui++) {
+    USERS.push('user-' + ('00' + ui).slice(-3));
+    USER_W.push(1 / Math.pow(ui + 1, 0.8));
+  }
+  // Placeholder model identifiers: the preview must not name real providers or models.
+  var MODELS = {
+    large: { model: 'demo-llm-large', version: 'demo-llm-large-002', med: 2600, sigma: 0.42, ttft: 640, p: [1800, 6200], c: [160, 900], reason: 0.35 },
+    fast: { model: 'demo-llm-fast', version: 'demo-llm-fast-001', med: 1150, sigma: 0.38, ttft: 330, p: [900, 4200], c: [60, 520], reason: 0 },
+    mini: { model: 'demo-llm-mini', version: 'demo-llm-mini-001', med: 560, sigma: 0.34, ttft: 190, p: [300, 1600], c: [30, 260], reason: 0 }
+  };
+  var TOOLS = {
+    authenticate_customer: { med: 140, sigma: 0.35, err: 0.004 },
+    lookup_order_history: { med: 430, sigma: 0.55, err: 0.014, crm: true },
+    classify_return_reason: { med: 260, sigma: 0.40, err: 0.003 },
+    inspect_item_photo: { med: 1350, sigma: 0.45, err: 0.022, photo: true },
+    compute_return_ratio: { med: 180, sigma: 0.35, err: 0.002 },
+    cross_account_pattern_match: { med: 920, sigma: 0.50, err: 0.009 },
+    score_risk: { med: 310, sigma: 0.35, err: 0.003 },
+    log_defect_report: { med: 230, sigma: 0.40, err: 0.004 },
+    search_help_center: { med: 380, sigma: 0.45, err: 0.005 },
+    create_support_ticket: { med: 520, sigma: 0.40, err: 0.012 },
+    fetch_invoice: { med: 610, sigma: 0.50, err: 0.024, payments: true },
+    open_dispute: { med: 740, sigma: 0.45, err: 0.016, payments: true }
+  };
+  var CRM_ERRORS = ['legacy_crm_db timeout while retrieving order history', 'legacy_crm_db returned stale customer profile'];
+  var PAYMENT_ERRORS = ['payments_api 503: upstream unavailable', 'payments_api 409: dispute already open for invoice'];
+  var PHOTO_ERRORS = ['photo_store 404: item photo not found'];
+  var GENERIC_ERRORS = ['invalid tool arguments: order_id is required', 'tool deadline exceeded after 30000 ms'];
+  var LLM_ERRORS = ['429 RESOURCE_EXHAUSTED: request rate limit exceeded',
+    '504 DEADLINE_EXCEEDED: model call exceeded the 60 s deadline',
+    '400 INVALID_ARGUMENT: prompt exceeds the context window'];
+
+  function minuteOfDayUTC(ts) { return Math.floor((((ts % DAY) + DAY) % DAY) / MINUTE); }
+  // A daily 65-minute legacy CRM degradation and a 30-minute rate-limit burst give the
+  // error panels something to show in any 24-hour window.
+  function crmIncident(ts) { var m = minuteOfDayUTC(ts); return m >= 13 * 60 + 5 && m < 14 * 60 + 10; }
+  function rateLimitBurst(ts) { var m = minuteOfDayUTC(ts); return m >= 17 * 60 + 5 && m < 17 * 60 + 35; }
+  function peakLoad(ts) {
+    var h = minuteOfDayUTC(ts) / 60, d = Math.min(Math.abs(h - 16.5), 24 - Math.abs(h - 16.5));
+    return 1 + 0.45 * Math.exp(-d * d / 8);
+  }
+  function sessionsPerHour(hourStart) {
+    var dt = new Date(hourStart), h = dt.getUTCHours() + 0.5, dow = dt.getUTCDay();
+    var d = Math.min(Math.abs(h - 16), 24 - Math.abs(h - 16));
+    var diurnal = Math.exp(-d * d / (2 * 4.5 * 4.5));
+    return (4 + 26 * diurnal) * (dow === 0 || dow === 6 ? 0.55 : 1);
+  }
+
+  function ev(ts, type, agent, span, parent) {
+    return { ts: ts, type: type, agent: agent, span: span, parent: parent, session: null, user: null,
+      inv: null, trace: null, otel: false, status: 'ok', model: null, mv: null, tool: null,
+      ms: null, ttft: null, pt: null, ct: null, tt: null, err: null, seq: 0 };
+  }
+  function push(c, e) {
+    e.session = c.session; e.user = c.user; e.inv = c.inv; e.trace = c.trace;
+    e.otel = c.otel; e.seq = c.out.length;
+    c.out.push(e);
+  }
+
+  function llmCall(c, agent, parent, t, tier, turn, depth) {
+    var r = c.r, M = MODELS[tier], span = r.hex(16);
+    var req = ev(t, 'LLM_REQUEST', agent, span, parent);
+    req.model = M.model;
+    push(c, req);
+    var burst = rateLimitBurst(t);
+    if ((depth || 0) < 2 && r.chance(burst ? 0.12 : 0.014)) {
+      var ems = burst ? r.int(30, 250) : r.int(8000, 60000);
+      t += ems;
+      var er = ev(t, 'LLM_ERROR', agent, span, parent);
+      er.model = M.model; er.ms = ems; er.status = 'error';
+      er.err = burst ? LLM_ERRORS[0] : (ems > 50000 ? LLM_ERRORS[1] : r.pick(LLM_ERRORS));
+      push(c, er);
+      return llmCall(c, agent, parent, t + r.int(400, 2500), tier, turn, (depth || 0) + 1);
+    }
+    var load = peakLoad(t);
+    var ms = Math.max(120, Math.round(r.logn(M.med * load, M.sigma)));
+    var ttft = Math.max(40, Math.min(ms - 10, Math.round(r.logn(M.ttft * load, 0.3))));
+    var pt = Math.round(r.int(M.p[0], M.p[1]) * (1 + 0.35 * turn));
+    var ct = r.int(M.c[0], M.c[1]);
+    // Provider totals can include reasoning/cached tokens beyond prompt + completion.
+    var tt = pt + ct + (r.chance(M.reason) ? r.int(60, 700) : 0);
+    if (tier === 'fast' && r.chance(0.2)) {
+      // Streaming: one LLM_RESPONSE row per chunk, same span; only the final row carries usage.
+      var chunks = r.int(2, 4);
+      for (var i = 1; i < chunks; i++) {
+        var ch = ev(t + ttft + Math.round((ms - ttft) * (i - 1) / chunks), 'LLM_RESPONSE', agent, span, parent);
+        ch.mv = M.version;
+        push(c, ch);
+      }
+    }
+    t += ms;
+    var res = ev(t, 'LLM_RESPONSE', agent, span, parent);
+    res.mv = M.version; res.ms = ms; res.ttft = ttft; res.pt = pt; res.ct = ct; res.tt = tt;
+    push(c, res);
+    return t + r.int(8, 60);
+  }
+
+  // Direct-logger row: usage lives in attributes.usage_metadata, the model in attributes.model
+  // (not model_version), and there is no agent or span - so it is one call per row.
+  function directLog(c, t) {
+    var r = c.r, M = MODELS.mini;
+    t += r.int(200, 1500);
+    var ms = Math.max(120, Math.round(r.logn(M.med, M.sigma)));
+    var e = ev(t + ms, 'LLM_RESPONSE', null, null, null);
+    e.model = M.model; e.ms = ms; e.ttft = Math.max(40, Math.min(ms - 10, Math.round(r.logn(M.ttft, 0.3))));
+    e.pt = r.int(400, 1400); e.ct = r.int(60, 220); e.tt = e.pt + e.ct;
+    push(c, e);
+    return t + ms + r.int(10, 60);
+  }
+
+  function toolErrorMessage(r, T, inc) {
+    if (T.crm) return inc ? r.pick(CRM_ERRORS) : (r.chance(0.7) ? CRM_ERRORS[1] : CRM_ERRORS[0]);
+    if (T.payments) return r.pick(PAYMENT_ERRORS);
+    if (T.photo) return PHOTO_ERRORS[0];
+    return r.pick(GENERIC_ERRORS);
+  }
+  function softMessage(T) {
+    if (T.crm) return 'partial order history: legacy_crm_db page 2 timed out';
+    if (T.payments) return 'payments_api degraded: served a cached invoice';
+    return 'tool returned an empty result';
+  }
+
+  function toolCall(c, agent, parent, t, name) {
+    var r = c.r, T = TOOLS[name], span = r.hex(16);
+    var st = ev(t, 'TOOL_STARTING', agent, span, parent);
+    st.tool = name;
+    push(c, st);
+    var inc = !!T.crm && crmIncident(t);
+    var ms = Math.max(5, Math.round(r.logn(T.med * (inc ? 3.2 : 1) * (T.payments ? peakLoad(t) : 1), T.sigma)));
+    t += ms;
+    if (r.chance(inc ? 0.45 : T.err * 2.7)) {
+      var e = ev(t, 'TOOL_ERROR', agent, span, parent);
+      e.tool = name; e.ms = ms; e.status = 'error'; e.err = toolErrorMessage(r, T, inc);
+      push(c, e);
+      return { t: t + r.int(20, 200), failed: true, msg: e.err };
+    }
+    var done = ev(t, 'TOOL_COMPLETED', agent, span, parent);
+    done.tool = name;
+    done.ms = r.chance(0.025) ? null : ms; // missing latency telemetry
+    if (r.chance(inc ? 0.14 : 0.007)) {
+      done.status = 'error';
+      done.err = r.chance(0.6) ? softMessage(T) : null; // some error-status rows carry no message
+    }
+    push(c, done);
+    return { t: t + r.int(10, 120), failed: false };
+  }
+
+  function subAgent(c, agent, parent, t, turn, tier, tools) {
+    var r = c.r, span = r.hex(16), t0 = t, failed = null;
+    t = llmCall(c, agent, span, t, tier, turn);
+    for (var i = 0; i < tools.length; i++) {
+      var x = toolCall(c, agent, span, t, tools[i]);
+      t = x.t;
+      if (x.failed) { failed = x.msg; break; }
+    }
+    if (!failed) t = llmCall(c, agent, span, t, tier === 'large' ? 'large' : 'mini', turn);
+    var done = ev(t, 'AGENT_COMPLETED', agent, span, parent);
+    done.ms = t - t0;
+    if (failed) { done.status = 'error'; done.err = failed; }
+    push(c, done);
+    return t + r.int(10, 60);
+  }
+
+  function invocation(c, kind, t, turn) {
+    var r = c.r;
+    c.inv = 'e-' + r.hex(8) + '-' + r.hex(4);
+    c.trace = r.hex(32);
+    var root = r.hex(16);
+    var top = kind === 'retail' ? AGENT.intake : (kind === 'faq' ? AGENT.faq : AGENT.billing);
+    var tStart = t, fail = null, x;
+    push(c, ev(t, 'USER_MESSAGE_RECEIVED', top, r.hex(16), root));
+    t += r.int(15, 90);
+    var span = r.hex(16);
+    if (kind === 'retail') {
+      t = llmCall(c, top, span, t, 'fast', turn);
+      x = toolCall(c, top, span, t, 'authenticate_customer'); t = x.t;
+      x = toolCall(c, top, span, t, 'lookup_order_history'); t = x.t;
+      if (x.failed && r.chance(0.5)) { x = toolCall(c, top, span, t, 'lookup_order_history'); t = x.t; }
+      if (x.failed) fail = x.msg;
+      if (!fail) {
+        x = toolCall(c, top, span, t, 'classify_return_reason'); t = x.t;
+        if (r.chance(0.55)) { x = toolCall(c, top, span, t, 'inspect_item_photo'); t = x.t; }
+        t = llmCall(c, top, span, t, 'fast', turn);
+        if (r.chance(0.55)) t = subAgent(c, AGENT.fraud, span, t, turn, 'large', ['compute_return_ratio', 'cross_account_pattern_match', 'score_risk']);
+        if (r.chance(0.4)) t = subAgent(c, AGENT.quality, span, t, turn, 'mini', ['inspect_item_photo', 'log_defect_report']);
+        t = llmCall(c, top, span, t, 'fast', turn);
+      }
+    } else if (kind === 'faq') {
+      t = llmCall(c, top, span, t, r.chance(0.5) ? 'mini' : 'fast', turn);
+      x = toolCall(c, top, span, t, 'search_help_center'); t = x.t;
+      t = llmCall(c, top, span, t, 'fast', turn);
+      if (r.chance(0.25)) {
+        x = toolCall(c, top, span, t, 'create_support_ticket'); t = x.t;
+        if (x.failed) fail = x.msg;
+      }
+      if (r.chance(0.3)) t = directLog(c, t);
+    } else {
+      t = llmCall(c, top, span, t, 'fast', turn);
+      x = toolCall(c, top, span, t, 'fetch_invoice'); t = x.t;
+      if (x.failed) fail = x.msg;
+      else {
+        t = llmCall(c, top, span, t, 'large', turn);
+        if (r.chance(0.5)) { x = toolCall(c, top, span, t, 'open_dispute'); t = x.t; }
+        t = llmCall(c, top, span, t, 'fast', turn);
+      }
+    }
+    var done = ev(t, 'AGENT_COMPLETED', top, span, root);
+    done.ms = t - tStart;
+    if (fail) { done.status = 'error'; done.err = fail; }
+    push(c, done);
+    return t;
+  }
+
+  function genHour(hourIdx, out) {
+    var r = Rand(mix(SEED, hourIdx));
+    var hourStart = hourIdx * HOUR;
+    var n = r.poisson(sessionsPerHour(hourStart));
+    for (var i = 0; i < n; i++) {
+      var kind = r.wpick(['retail', 'faq', 'billing'], [0.46, 0.34, 0.20]);
+      var c = { r: r, out: out, session: 'sess-' + r.hex(8), user: r.wpick(USERS, USER_W),
+        otel: r.chance(0.6), inv: null, trace: null };
+      var t = hourStart + Math.floor(r.u() * HOUR);
+      var turns = kind === 'faq' ? r.int(1, 3) : r.int(1, 2);
+      for (var k = 0; k < turns; k++) {
+        t = invocation(c, kind, t, k);
+        t += r.int(15000, 120000); // user think time between turns
+      }
+    }
+  }
+
+  // Seven days of history ending with the current (partial) hour. Rows later than "now"
+  // exist in the fixture but fall outside every $__timeFilter window.
+  function buildFixture(nowMs) {
+    var endHour = Math.floor(nowMs / HOUR);
+    var startHour = endHour - 7 * 24 - 1;
+    var out = [];
+    for (var h = startHour; h <= endHour; h++) genHour(h, out);
+    out.sort(function (a, b) { return a.ts - b.ts || a.seq - b.seq; });
+    return { events: out, builtForHour: endHour, startMs: (startHour + 1) * HOUR, seed: SEED };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Panel queries: one JS port per panel SQL in the dashboard JSON, keyed by panel id.
+  // Each honours the same filters, NULL handling, ordering and LIMITs as its SQL.
+  // ---------------------------------------------------------------------------
+  function lowerBound(arr, ts) { var lo = 0, hi = arr.length; while (lo < hi) { var m = (lo + hi) >>> 1; if (arr[m].ts < ts) lo = m + 1; else hi = m; } return lo; }
+  function upperBound(arr, ts) { var lo = 0, hi = arr.length; while (lo < hi) { var m = (lo + hi) >>> 1; if (arr[m].ts <= ts) lo = m + 1; else hi = m; } return lo; }
+  // $__timeFilter(timestamp) -> timestamp BETWEEN from AND to
+  function scan(D, c, fn) {
+    var a = D.events, lo = lowerBound(a, c.from), hi = upperBound(a, c.to);
+    for (var i = lo; i < hi; i++) fn(a[i]);
+  }
+  function scanDesc(D, c, fn) {
+    var a = D.events, lo = lowerBound(a, c.from), hi = upperBound(a, c.to);
+    for (var i = hi - 1; i >= lo; i--) if (fn(a[i]) === false) return;
+  }
+  function isErr(e) { return e.type.slice(-6) === '_ERROR' || e.err != null || (e.status != null && e.status.toUpperCase() === 'ERROR'); }
+  // '___ALL___' IN UNNEST(...) OR col IN UNNEST(...): NULL never matches a concrete selection.
+  function ok(set, v) { return set == null || (v != null && set.has(v)); }
+  function fAUS(c, e) { return ok(c.vars.agent, e.agent) && ok(c.vars.user_id, e.user) && ok(c.vars.session_id, e.session); }
+  function fAUES(c, e) { return fAUS(c, e) && ok(c.vars.event_type, e.type); }
+
+  function fld(name, type, values, extra) {
+    var f = { name: name, type: type, values: values, config: {} };
+    if (extra) for (var k in extra) f[k] = extra[k];
+    return f;
+  }
+  function frameOf(fields) { return { fields: fields, length: fields.length ? fields[0].values.length : 0 }; }
+  function rowsFrame(cols, rows) {
+    return frameOf(cols.map(function (col, j) {
+      return fld(col[0], col[1], rows.map(function (r) { return r[j] === undefined ? null : r[j]; }));
+    }));
+  }
+  // $__timeGroup(timestamp, $__interval): epoch-aligned buckets across the whole range.
+  function bucketAxis(c) {
+    var first = Math.floor(c.from / c.interval) * c.interval;
+    var n = Math.floor((c.to - first) / c.interval) + 1, times = new Array(n);
+    for (var i = 0; i < n; i++) times[i] = first + i * c.interval;
+    return { first: first, n: n, times: times };
+  }
+  function bidx(ax, c, ts) { return Math.floor((ts - ax.first) / c.interval); }
+  function typeRank(t) { var i = EVENT_TYPES.indexOf(t); return i < 0 ? 100 : i; }
+  function quantile(sorted, q) { return sorted.length ? sorted[Math.round(q * (sorted.length - 1))] : null; }
+  function numAsc(a, b) { return a - b; }
+
+  function seriesByType(D, c, pred, valueName) {
+    var ax = bucketAxis(c), map = new Map();
+    scan(D, c, function (e) {
+      if (!pred(c, e)) return;
+      var a = map.get(e.type);
+      if (!a) { a = new Float64Array(ax.n); map.set(e.type, a); }
+      a[bidx(ax, c, e.ts)]++;
+    });
+    var keys = Array.from(map.keys()).sort(function (x, y) { return typeRank(x) - typeRank(y) || (x < y ? -1 : 1); });
+    return frameOf([fld('time', 'time', ax.times)].concat(keys.map(function (k) {
+      return fld(k, 'number', Array.from(map.get(k)), { labels: { event_type: k }, entity: k, valueName: valueName });
+    })));
+  }
+
+  var Q = {};
+
+  // Overview stats: sessions, events, error_rate, avg_llm_latency_ms (no Event Type filter).
+  Q[2] = function (D, c) {
+    var n = 0, errs = 0, latSum = 0, latN = 0, sess = new Set();
+    scan(D, c, function (e) {
+      if (!fAUS(c, e)) return;
+      n++;
+      if (e.session != null) sess.add(e.session);
+      if (isErr(e)) errs++;
+      if (e.type === 'LLM_RESPONSE' && e.ms != null) { latSum += e.ms; latN++; }
+    });
+    var cols = [['sessions', 'number'], ['events', 'number'], ['error_rate', 'number'], ['avg_llm_latency_ms', 'number']];
+    return rowsFrame(cols, n ? [[sess.size, n, errs / n, latN ? latSum / latN : null]] : []);
+  };
+  // Events over time: honours Event Type.
+  Q[6] = function (D, c) { return seriesByType(D, c, fAUES, 'events'); };
+  // Errors over time: error predicate, no Event Type filter.
+  Q[7] = function (D, c) { return seriesByType(D, c, function (cc, e) { return fAUS(cc, e) && isErr(e); }, 'errors'); };
+  // Events by agent: IFNULL(agent, 'unknown'), honours Event Type.
+  Q[21] = function (D, c) {
+    var m = new Map();
+    scan(D, c, function (e) {
+      if (!fAUES(c, e)) return;
+      var k = e.agent == null ? 'unknown' : e.agent;
+      m.set(k, (m.get(k) || 0) + 1);
+    });
+    var rows = Array.from(m.entries()).sort(function (a, b) { return b[1] - a[1]; });
+    return rowsFrame([['agent_name', 'string'], ['events', 'number']], rows);
+  };
+  // Top error messages: non-NULL error_message only, LIMIT 50.
+  Q[22] = function (D, c) {
+    var m = new Map();
+    scan(D, c, function (e) {
+      if (e.err == null || !fAUS(c, e)) return;
+      var s = m.get(e.err);
+      if (!s) { s = { n: 0, sessions: new Set(), agents: new Set(), last: e.ts }; m.set(e.err, s); }
+      s.n++;
+      if (e.session != null) s.sessions.add(e.session);
+      if (e.agent != null) s.agents.add(e.agent);
+      if (e.ts > s.last) s.last = e.ts;
+    });
+    var rows = Array.from(m.entries()).sort(function (a, b) { return b[1].n - a[1].n; }).slice(0, 50)
+      .map(function (x) { return [x[0], x[1].n, x[1].sessions.size, x[1].agents.size, x[1].last]; });
+    return rowsFrame([['error_message', 'string'], ['errors', 'number'], ['sessions', 'number'], ['agents', 'number'], ['last_seen', 'time']], rows);
+  };
+  // Token usage over time from llm_responses.
+  Q[9] = function (D, c) {
+    var ax = bucketAxis(c), p = new Float64Array(ax.n), q = new Float64Array(ax.n), t = new Float64Array(ax.n);
+    scan(D, c, function (e) {
+      if (e.type !== 'LLM_RESPONSE' || !fAUS(c, e)) return;
+      var i = bidx(ax, c, e.ts);
+      if (e.pt != null) p[i] += e.pt;
+      if (e.ct != null) q[i] += e.ct;
+      if (e.tt != null) t[i] += e.tt;
+    });
+    return frameOf([fld('time', 'time', ax.times), fld('prompt_tokens', 'number', Array.from(p)),
+      fld('completion_tokens', 'number', Array.from(q)), fld('total_tokens', 'number', Array.from(t))]);
+  };
+  // LLM latency percentiles: NULL (a gap) when a bucket has no latency samples.
+  Q[10] = function (D, c) {
+    var ax = bucketAxis(c), tot = [], ttf = [], i;
+    for (i = 0; i < ax.n; i++) { tot.push([]); ttf.push([]); }
+    scan(D, c, function (e) {
+      if (e.type !== 'LLM_RESPONSE' || !fAUS(c, e)) return;
+      var k = bidx(ax, c, e.ts);
+      if (e.ms != null) tot[k].push(e.ms);
+      if (e.ttft != null) ttf[k].push(e.ttft);
+    });
+    var p50 = [], p95 = [], t50 = [];
+    for (i = 0; i < ax.n; i++) {
+      tot[i].sort(numAsc); ttf[i].sort(numAsc);
+      p50.push(quantile(tot[i], 0.5)); p95.push(quantile(tot[i], 0.95)); t50.push(quantile(ttf[i], 0.5));
+    }
+    return frameOf([fld('time', 'time', ax.times), fld('p50_total_ms', 'number', p50),
+      fld('p95_total_ms', 'number', p95), fld('p50_ttft_ms', 'number', t50)]);
+  };
+  // Tokens by model: IFNULL(model_version, 'unknown'); responses = COUNT(*) (chunk rows included).
+  Q[11] = function (D, c) {
+    var m = new Map();
+    scan(D, c, function (e) {
+      if (e.type !== 'LLM_RESPONSE' || !fAUS(c, e)) return;
+      var k = e.mv == null ? 'unknown' : e.mv, s = m.get(k);
+      if (!s) { s = [0, 0, 0, 0]; m.set(k, s); }
+      if (e.pt != null) s[0] += e.pt;
+      if (e.ct != null) s[1] += e.ct;
+      if (e.tt != null) s[2] += e.tt;
+      s[3]++;
+    });
+    var rows = Array.from(m.entries()).sort(function (a, b) { return b[1][2] - a[1][2]; })
+      .map(function (x) { return [x[0]].concat(x[1]); });
+    return rowsFrame([['model', 'string'], ['prompt_tokens', 'number'], ['completion_tokens', 'number'],
+      ['total_tokens', 'number'], ['responses', 'number']], rows);
+  };
+  // LLM calls: the one query behind LLM calls, Estimated cost and Total tokens.
+  Q[23] = function (D, c) {
+    var rows = 0, spans = new Set(), keyless = 0, p = 0, q = 0, t = 0;
+    scan(D, c, function (e) {
+      if (e.type !== 'LLM_RESPONSE' || !fAUS(c, e)) return;
+      rows++;
+      if (e.trace == null || e.span == null) keyless++;
+      else spans.add(e.trace + '|' + e.span);
+      if (e.pt != null) p += e.pt;
+      if (e.ct != null) q += e.ct;
+      if (e.tt != null) t += e.tt;
+    });
+    var cols = [['llm_calls', 'number'], ['estimated_cost_usd', 'number'], ['total_tokens', 'number']];
+    var cost = p / 1e6 * c.prices.input + q / 1e6 * c.prices.output;
+    return rowsFrame(cols, rows ? [[spans.size + keyless, cost, t]] : []);
+  };
+  // Tool invocations from tool_starts.
+  Q[14] = function (D, c) {
+    var m = new Map();
+    scan(D, c, function (e) {
+      if (e.type !== 'TOOL_STARTING' || !fAUS(c, e)) return;
+      m.set(e.tool, (m.get(e.tool) || 0) + 1);
+    });
+    var rows = Array.from(m.entries()).sort(function (a, b) { return b[1] - a[1]; });
+    return rowsFrame([['tool_name', 'string'], ['invocations', 'number']], rows);
+  };
+  // Tool latency from tool_completions; NULL latency stays NULL.
+  Q[15] = function (D, c) {
+    var m = new Map();
+    scan(D, c, function (e) {
+      if (e.type !== 'TOOL_COMPLETED' || !fAUS(c, e)) return;
+      var s = m.get(e.tool);
+      if (!s) { s = { n: 0, sum: 0, arr: [] }; m.set(e.tool, s); }
+      s.n++;
+      if (e.ms != null) { s.sum += e.ms; s.arr.push(e.ms); }
+    });
+    var rows = Array.from(m.entries()).map(function (x) {
+      var s = x[1]; s.arr.sort(numAsc);
+      return [x[0], s.n, s.arr.length ? s.sum / s.arr.length : null, quantile(s.arr, 0.5), quantile(s.arr, 0.95)];
+    }).sort(function (a, b) { return (b[4] == null ? -1 : b[4]) - (a[4] == null ? -1 : a[4]); });
+    return rowsFrame([['tool_name', 'string'], ['completions', 'number'], ['avg_ms', 'number'], ['p50_ms', 'number'], ['p95_ms', 'number']], rows);
+  };
+  // Tool errors: TOOL_ERROR UNION ALL error-status completions, newest 100.
+  Q[16] = function (D, c) {
+    var rows = [];
+    scanDesc(D, c, function (e) {
+      var hit = e.type === 'TOOL_ERROR' ||
+        (e.type === 'TOOL_COMPLETED' && (e.err != null || (e.status != null && e.status.toUpperCase() === 'ERROR')));
+      if (!hit || !fAUS(c, e)) return;
+      rows.push([e.ts, e.agent, e.session, e.tool, e.err]);
+      return rows.length < 100;
+    });
+    return rowsFrame([['timestamp', 'time'], ['agent', 'string'], ['session_id', 'string'], ['tool_name', 'string'], ['error_message', 'string']], rows);
+  };
+  // Recent sessions: session filter in WHERE, Agent/User/Event Type as LOGICAL_OR in HAVING.
+  Q[18] = function (D, c) {
+    var S = new Map();
+    scan(D, c, function (e) {
+      if (e.session == null || !ok(c.vars.session_id, e.session)) return;
+      var s = S.get(e.session);
+      if (!s) {
+        s = { id: e.session, users: new Set(), min: e.ts, max: e.ts, agents: new Set(), n: 0, errs: 0,
+          pin: 0, pout: 0, mA: false, mU: false, mE: false };
+        S.set(e.session, s);
+      }
+      if (e.user != null) s.users.add(e.user);
+      if (e.ts < s.min) s.min = e.ts;
+      if (e.ts > s.max) s.max = e.ts;
+      if (e.agent != null) s.agents.add(e.agent);
+      s.n++;
+      if (isErr(e)) s.errs++;
+      if (e.type === 'LLM_RESPONSE') { if (e.pt != null) s.pin += e.pt; if (e.ct != null) s.pout += e.ct; }
+      if (!s.mA && ok(c.vars.agent, e.agent)) s.mA = true;
+      if (!s.mU && ok(c.vars.user_id, e.user)) s.mU = true;
+      if (!s.mE && ok(c.vars.event_type, e.type)) s.mE = true;
+    });
+    var rows = Array.from(S.values()).filter(function (s) { return s.mA && s.mU && s.mE; })
+      .sort(function (a, b) { return b.max - a.max; }).slice(0, 250)
+      .map(function (s) {
+        return [s.id, s.users.size ? Array.from(s.users).sort().join(', ') : null, s.min, s.max,
+          Math.floor((s.max - s.min) / SECOND), s.agents.size, s.n, s.errs, s.pin, s.pout];
+      });
+    return rowsFrame([['session_id', 'string'], ['session_users_in_window', 'string'], ['started_in_window_at', 'time'],
+      ['last_event_in_window_at', 'time'], ['duration_in_window_s', 'number'], ['session_agents_in_window', 'number'],
+      ['session_events_in_window', 'number'], ['session_errors_in_window', 'number'],
+      ['session_input_tokens_in_window', 'number'], ['session_output_tokens_in_window', 'number']], rows);
+  };
+  // Trace detail: newest 500 events under all four filters.
+  Q[19] = function (D, c) {
+    var rows = [];
+    scanDesc(D, c, function (e) {
+      if (!fAUES(c, e)) return;
+      rows.push([e.ts, e.session, e.type, e.agent, e.inv, e.trace, e.span, e.parent,
+        e.otel && e.trace != null ? e.trace : null, e.status, e.model != null ? e.model : e.mv, e.tool,
+        e.ms != null ? Math.round(e.ms) : null, e.err]);
+      return rows.length < 500;
+    });
+    return rowsFrame([['timestamp', 'time'], ['session_id', 'string'], ['event_type', 'string'], ['agent', 'string'],
+      ['invocation_id', 'string'], ['trace_id', 'string'], ['span_id', 'string'], ['parent_span_id', 'string'],
+      ['otel_trace_id', 'string'], ['status', 'string'], ['model', 'string'], ['tool_name', 'string'],
+      ['total_ms', 'number'], ['error_message', 'string']], rows);
+  };
+
+  // Dashboard variable options, mirroring the templating queries.
+  function variableOptions(D, c) {
+    var agents = new Set(), users = new Map(), types = new Set(), sessions = new Map();
+    scan(D, c, function (e) {
+      if (e.agent != null) agents.add(e.agent);
+      if (e.user != null) users.set(e.user, e.ts);
+      types.add(e.type);
+      if (e.session != null) sessions.set(e.session, e.ts);
+    });
+    function byRecent(m) {
+      return Array.from(m.entries()).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 1000)
+        .map(function (x) { return x[0]; });
+    }
+    return { agent: Array.from(agents).sort().slice(0, 1000), user_id: byRecent(users),
+      event_type: Array.from(types).sort(), session_id: byRecent(sessions) };
+  }
+
+  var INTERVALS = [MINUTE, 2 * MINUTE, 5 * MINUTE, 10 * MINUTE, 15 * MINUTE, 30 * MINUTE, HOUR, 2 * HOUR, 3 * HOUR, 6 * HOUR, 12 * HOUR, DAY];
+  function pickInterval(rangeMs) {
+    var want = rangeMs / 120;
+    for (var i = 0; i < INTERVALS.length; i++) if (INTERVALS[i] >= want) return INTERVALS[i];
+    return DAY;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Unit formatting, following Grafana's value formatters.
+  // ---------------------------------------------------------------------------
+  function decimalsFor(v) {
+    var a = Math.abs(v);
+    if (!isFinite(a) || a === 0) return 0;
+    var log10 = Math.floor(Math.log(a) / Math.LN10), dec = -log10 + 1;
+    var norm = a / Math.pow(10, -dec);
+    if (norm > 2.25) ++dec;
+    if (v % 1 === 0) dec = 0;
+    return Math.max(0, dec);
+  }
+  function toFixed(v, dec) {
+    if (dec == null) dec = decimalsFor(v);
+    dec = Math.max(0, Math.min(20, dec));
+    return v.toFixed(dec);
+  }
+  function scaled(v, dec, factor, ext) {
+    var steps = 0, s = v;
+    while (Math.abs(s) >= factor && steps < ext.length - 1) { steps++; s /= factor; }
+    return toFixed(s, dec) + ext[steps];
+  }
+  var SHORT = ['', ' K', ' Mil', ' Bil', ' Tri', ' Quadr'];
+  var CURRENCY = ['', 'K', 'M', 'B', 'T'];
+  function fmtMs(v, dec) {
+    var a = Math.abs(v);
+    if (a < SECOND) return toFixed(v, dec) + ' ms';
+    if (a < MINUTE) return toFixed(v / SECOND, dec) + ' s';
+    if (a < HOUR) return toFixed(v / MINUTE, dec) + ' min';
+    if (a < DAY) return toFixed(v / HOUR, dec) + ' hour';
+    return toFixed(v / DAY, dec) + ' day';
+  }
+  function fmt(v, unit, dec) {
+    if (v == null || (typeof v === 'number' && isNaN(v))) return '';
+    if (typeof v !== 'number') return String(v);
+    switch (unit) {
+      case 'short': return scaled(v, dec, 1000, SHORT);
+      case 'percentunit': return toFixed(v * 100, dec) + '%';
+      case 'percent': return toFixed(v, dec) + '%';
+      case 'ms': return fmtMs(v, dec);
+      case 's': return fmtMs(v * SECOND, dec);
+      case 'currencyUSD': return (v < 0 ? '-$' : '$') + scaled(Math.abs(v), dec, 1000, CURRENCY);
+      default: return toFixed(v, dec);
+    }
+  }
+  function stepDecimals(step) {
+    for (var d = 0; d < 6; d++) {
+      var x = step * Math.pow(10, d);
+      if (Math.abs(x - Math.round(x)) < 1e-6 * Math.max(1, x)) return d;
+    }
+    return 6;
+  }
+  function trimZeros(s) { return s.replace(/(\.\d*?[1-9])0+(?=\D|$)/, '$1').replace(/\.0+(?=\D|$)/, ''); }
+  // Axis ticks: decimals follow the tick step, so labels stay short and aligned.
+  function fmtTick(v, unit, step) {
+    if (v === 0) {
+      if (unit === 'ms') return '0 ms';
+      if (unit === 'percentunit' || unit === 'percent') return '0%';
+      if (unit === 'currencyUSD') return '$0';
+      return '0';
+    }
+    var f, k = 0, ext, s, sStep;
+    switch (unit) {
+      case 'short': case 'currencyUSD':
+        ext = unit === 'short' ? SHORT : CURRENCY;
+        s = v; sStep = step;
+        while (Math.abs(s) >= 1000 && k < ext.length - 1) { s /= 1000; sStep /= 1000; k++; }
+        f = toFixed(s, stepDecimals(sStep)) + ext[k];
+        return (unit === 'currencyUSD' ? '$' : '') + trimZeros(f);
+      case 'percentunit': return trimZeros(toFixed(v * 100, stepDecimals(step * 100))) + '%';
+      case 'ms':
+        if (Math.abs(v) < SECOND) return trimZeros(toFixed(v, stepDecimals(step))) + ' ms';
+        if (Math.abs(v) < MINUTE) return trimZeros(toFixed(v / SECOND, stepDecimals(step / SECOND))) + ' s';
+        return trimZeros(toFixed(v / MINUTE, stepDecimals(step / MINUTE))) + ' min';
+      default: return trimZeros(toFixed(v, stepDecimals(step)));
+    }
+  }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function fmtDateTime(ts) {
+    var d = new Date(ts);
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + ' ' +
+      pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+  }
+
+  root.BQAA_CORE = {
+    SECOND: SECOND, MINUTE: MINUTE, HOUR: HOUR, DAY: DAY,
+    SERIES: SERIES, NAMED: NAMED, STATUS: STATUS, EVENT_TYPES: EVENT_TYPES, EVENT_COLOR: EVENT_COLOR,
+    buildFixture: buildFixture, QUERIES: Q, variableOptions: variableOptions, pickInterval: pickInterval,
+    fmt: fmt, fmtTick: fmtTick, fmtDateTime: fmtDateTime, pad2: pad2, isErr: isErr
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* BQAA Grafana demo - UI: renders the embedded dashboard JSON with vanilla JS + inline SVG. */
+(function () {
+  'use strict';
+  var C = window.BQAA_CORE;
+  var DASH = JSON.parse(document.getElementById('dashboard-json').textContent);
+  var META = JSON.parse(document.getElementById('build-meta').textContent);
+  var MINUTE = C.MINUTE, HOUR = C.HOUR, DAY = C.DAY;
+  var FONT = (getComputedStyle(document.documentElement).getPropertyValue('--font') || 'sans-serif').trim();
+  var SURFACE = '#181b1f';
+
+  // ---------------------------------------------------------------- DOM helpers
+  function append(el, kid) {
+    if (kid == null || kid === false) return;
+    if (Array.isArray(kid)) { kid.forEach(function (k) { append(el, k); }); return; }
+    el.appendChild(typeof kid === 'string' ? document.createTextNode(kid) : kid);
+  }
+  function h(tag, props) {
+    var el = document.createElement(tag);
+    if (props) Object.keys(props).forEach(function (k) {
+      var v = props[k];
+      if (v == null || v === false) return;
+      if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else if (k === 'style') el.style.cssText = v;
+      else if (k.slice(0, 2) === 'on') el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? '' : String(v));
+    });
+    for (var i = 2; i < arguments.length; i++) append(el, arguments[i]);
+    return el;
+  }
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  function sv(tag, attrs, parent) {
+    var el = document.createElementNS(SVGNS, tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) { if (attrs[k] != null) el.setAttribute(k, String(attrs[k])); });
+    if (parent) parent.appendChild(el);
+    return el;
+  }
+  function svText(parent, attrs, text) { var t = sv('text', attrs, parent); t.textContent = text; return t; }
+  var mctx = document.createElement('canvas').getContext('2d');
+  function textW(s, px, weight) { mctx.font = (weight || 400) + ' ' + px + 'px ' + FONT; return mctx.measureText(s).width; }
+  function truncate(s, maxW, px) {
+    if (textW(s, px) <= maxW) return s;
+    var lo = 0, hi = s.length;
+    while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (textW(s.slice(0, mid) + '…', px) <= maxW) lo = mid; else hi = mid - 1; }
+    return s.slice(0, lo) + '…';
+  }
+  function icon(name, size) {
+    var s = size || 16;
+    var svg = sv('svg', { width: s, height: s, viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.5,
+      'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true', focusable: 'false', class: 'ic' });
+    var P = {
+      chevron: 'M4 6l4 4 4-4',
+      clock: 'M8 1.75a6.25 6.25 0 1 0 0 12.5 6.25 6.25 0 0 0 0-12.5zM8 4.5V8l2.5 1.5',
+      zoomout: 'M7 2.25a4.75 4.75 0 1 0 0 9.5 4.75 4.75 0 0 0 0-9.5zM4.75 7h4.5M10.5 10.5l3 3',
+      refresh: 'M13.25 8a5.25 5.25 0 1 1-1.54-3.71M13.25 2.5v3.25H10',
+      funnel: 'M2.5 3h11L9.25 8v4l-2.5 1.5V8z',
+      code: 'M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5',
+      table: 'M2.25 3.25h11.5v9.5H2.25zM2.25 6.5h11.5M2.25 9.75h11.5M6.5 6.5v6.25'
+    };
+    sv('path', { d: P[name] }, svg);
+    return svg;
+  }
+
+  // ---------------------------------------------------------------- dashboard model
+  var TPL = (DASH.templating && DASH.templating.list) || [];
+  // The JSON ships placeholder constants; the preview shows its own placeholder project id.
+  var DEMO_VALUES = { project: 'demo-project' };
+  function constValue(name) {
+    if (Object.prototype.hasOwnProperty.call(DEMO_VALUES, name)) return DEMO_VALUES[name];
+    var v = TPL.find(function (x) { return x.name === name; });
+    if (!v) return null;
+    if (v.current && v.current.value != null && !Array.isArray(v.current.value)) return String(v.current.value);
+    return v.query != null ? String(v.query) : null;
+  }
+  var QUERY_VARS = TPL.filter(function (v) { return v.type === 'query'; });
+  var CONST_VARS = TPL.filter(function (v) { return v.type === 'constant'; });
+  var DS_VAR = TPL.find(function (v) { return v.type === 'datasource'; });
+  var prices = { input: parseFloat(constValue('price_per_1m_input_tokens')), output: parseFloat(constValue('price_per_1m_output_tokens')) };
+
+  var RANGES = [['now-15m', 'Last 15 minutes', 15 * MINUTE], ['now-30m', 'Last 30 minutes', 30 * MINUTE],
+    ['now-1h', 'Last 1 hour', HOUR], ['now-3h', 'Last 3 hours', 3 * HOUR], ['now-6h', 'Last 6 hours', 6 * HOUR],
+    ['now-12h', 'Last 12 hours', 12 * HOUR], ['now-24h', 'Last 24 hours', DAY], ['now-2d', 'Last 2 days', 2 * DAY],
+    ['now-7d', 'Last 7 days', 7 * DAY]].map(function (r) { return { from: r[0], label: r[1], ms: r[2] }; });
+  function parseDur(s) {
+    var m = /^(\d+)(s|m|h|d)$/.exec(String(s || '').trim());
+    return m ? +m[1] * { s: 1000, m: MINUTE, h: HOUR, d: DAY }[m[2]] : null;
+  }
+  // Refresh picker options come straight from timepicker.refresh_intervals.
+  var REFRESH = ((DASH.timepicker && DASH.timepicker.refresh_intervals) || []).filter(function (s) { return parseDur(s); });
+
+  var state = {
+    now: Math.floor(Date.now() / 1000) * 1000,
+    range: RANGES.find(function (r) { return r.from === (DASH.time && DASH.time.from); }) || RANGES[6],
+    refresh: REFRESH.indexOf(DASH.refresh) >= 0 ? DASH.refresh : '',
+    vars: {}, mode: {}, collapsed: {}, hidden: {}, tableState: {},
+    results: {}, options: {}, ctx: null, renderErrors: [], lastRefresh: 0
+  };
+  QUERY_VARS.forEach(function (v) { state.vars[v.name] = null; }); // null = All
+
+  var ITEMS = [], curRow = null;
+  (DASH.panels || []).forEach(function (p) {
+    if (p.type === 'row') {
+      curRow = p;
+      state.collapsed[p.id] = !!p.collapsed;
+      ITEMS.push({ panel: p, row: null });
+      (p.panels || []).forEach(function (q) { ITEMS.push({ panel: q, row: p }); });
+    } else ITEMS.push({ panel: p, row: curRow });
+  });
+  var BY_ID = {};
+  ITEMS.forEach(function (it) { BY_ID[it.panel.id] = it; });
+  var SECTIONS = [];
+  ITEMS.forEach(function (it) {
+    if (it.panel.type === 'row') { SECTIONS.push({ row: it, children: [] }); return; }
+    if (!SECTIONS.length) SECTIONS.push({ row: null, children: [] });
+    SECTIONS[SECTIONS.length - 1].children.push(it);
+  });
+
+  function target(p) { return (p.targets || [])[0] || null; }
+  function dsUid(p) { var t = target(p); return (t && t.datasource && t.datasource.uid) || (p.datasource && p.datasource.uid) || null; }
+  function sourceOf(p) { var t = target(p); return dsUid(p) === '-- Dashboard --' && t && t.panelId != null ? t.panelId : null; }
+  function hasSql(p) { var t = target(p); return !!(t && t.rawSql != null); }
+  function defaultsOf(p) { return (p.fieldConfig && p.fieldConfig.defaults) || {}; }
+  function joinAnd(list) { return list.length < 2 ? list.join('') : list.slice(0, -1).join(', ') + ' and ' + list[list.length - 1]; }
+  function titleOf(id) { var it = BY_ID[id]; return it ? interpolate(it.panel.title) : 'panel ' + id; }
+  var CONSUMERS = {};
+  ITEMS.forEach(function (it) { var s = sourceOf(it.panel); if (s != null) (CONSUMERS[s] = CONSUMERS[s] || []).push(it.panel.id); });
+  // Wiring of bqaa-dashboard.json, captured at build time: panel id -> 'query' or source panel id.
+  var MAIN = META.mainSources || {};
+  function prChange(p) {
+    var s = sourceOf(p);
+    if (s == null) return null;
+    var was = MAIN[String(p.id)];
+    if (was === undefined || String(was) === String(s)) return null;
+    return { was: was, now: s };
+  }
+  function feedsPr(p) { return (CONSUMERS[p.id] || []).some(function (id) { return prChange(BY_ID[id].panel); }); }
+  function rootOf(id, wiring) { var seen = 0; while (wiring[id] !== 'query' && wiring[id] != null && seen++ < 10) id = wiring[id]; return id; }
+  function trialWiring() { var w = {}; ITEMS.forEach(function (it) { var p = it.panel; if (p.type === 'row') return; var s = sourceOf(p); w[p.id] = s != null ? s : (hasSql(p) ? 'query' : null); }); return w; }
+  function jobsFor(ids, wiring) { var set = new Set(); ids.forEach(function (id) { set.add(String(rootOf(String(id), wiring))); }); return set.size; }
+  function panelQueryCount() { return ITEMS.filter(function (it) { return it.panel.type !== 'row' && hasSql(it.panel) && sourceOf(it.panel) == null; }).length; }
+
+  function varText(name) {
+    var sel = state.vars[name];
+    return sel == null ? 'All' : Array.from(sel).join(' + ');
+  }
+  function interpolate(s) {
+    return String(s == null ? '' : s).replace(/\$\{(\w+)(?::(\w+))?\}/g, function (m, name) {
+      if (Object.prototype.hasOwnProperty.call(state.vars, name)) return varText(name);
+      if (DS_VAR && name === DS_VAR.name) return 'BigQuery (synthetic demo data)';
+      var c = constValue(name);
+      return c == null ? m : c;
+    });
+  }
+  // Grafana's stringToJsRegex: "/re/flags" as written, otherwise the pattern anchored as ^pattern$.
+  function regexFrom(s) {
+    var m = /^\/(.*)\/([gimsuy]*)$/.exec(String(s));
+    return m ? new RegExp(m[1], m[2]) : new RegExp('^' + String(s) + '$');
+  }
+  function namedColor(name) {
+    if (!name) return C.SERIES[0];
+    if (name.charAt(0) === '#') return name;
+    return C.NAMED[name] || C.SERIES[0];
+  }
+  function statusColor(name) {
+    if (!name || name === 'text' || name === 'transparent') return null;
+    if (name.charAt(0) === '#') return name;
+    return C.STATUS[name] || null;
+  }
+
+  // Field config: defaults + overrides (byName / byRegexp) from the JSON.
+  function resolveField(p, f, idx, raw) {
+    var fc = p.fieldConfig || {}, d = fc.defaults || {};
+    var r = { name: f.name, type: f.type, values: f.values, label: f.name, unit: raw ? null : d.unit,
+      decimals: raw ? null : d.decimals, color: null, hideViz: false, hideLegend: false, hideTooltip: false, links: null };
+    if (f.entity && C.EVENT_COLOR[f.entity]) r.color = C.EVENT_COLOR[f.entity]; // colour follows the event type
+    else if (d.color && d.color.mode === 'fixed') r.color = namedColor(d.color.fixedColor);
+    else r.color = C.SERIES[idx % C.SERIES.length]; // palette-classic: by field index
+    (fc.overrides || []).forEach(function (o) {
+      var m = o.matcher || {}, hit = false;
+      if (m.id === 'byName') hit = m.options === f.name;
+      else if (m.id === 'byRegexp') { try { hit = regexFrom(m.options).test(f.name); } catch (e) { hit = false; } }
+      if (!hit) return;
+      (o.properties || []).forEach(function (pr) {
+        if (pr.id === 'displayName') r.label = pr.value;
+        else if (pr.id === 'unit') r.unit = pr.value;
+        else if (pr.id === 'decimals' && !raw) r.decimals = pr.value;
+        else if (pr.id === 'color' && pr.value && pr.value.mode === 'fixed') r.color = namedColor(pr.value.fixedColor);
+        else if (pr.id === 'custom.hideFrom' && pr.value) { r.hideViz = !!pr.value.viz; r.hideLegend = !!pr.value.legend; r.hideTooltip = !!pr.value.tooltip; }
+        else if (pr.id === 'links' && !raw) r.links = pr.value;
+      });
+    });
+    return r;
+  }
+  function trimNum(v) { return Number.isInteger(v) ? String(v) : v.toFixed(4).replace(/\.?0+$/, ''); }
+  function cellText(c, i, raw) {
+    var v = c.values[i];
+    if (v == null) return '';
+    if (c.type === 'time') return C.fmtDateTime(v);
+    if (c.type === 'number') return raw && !c.unit ? trimNum(v) : C.fmt(v, c.unit, c.decimals);
+    return String(v);
+  }
+
+  // ---------------------------------------------------------------- data
+  var fixture = null;
+  function ensureFixture() {
+    var hr = Math.floor(state.now / HOUR);
+    if (!fixture || fixture.builtForHour !== hr) fixture = C.buildFixture(state.now);
+  }
+  function runQueries() {
+    ensureFixture();
+    var to = state.now, from = to - state.range.ms;
+    var ctx = { from: from, to: to, interval: C.pickInterval(state.range.ms), vars: state.vars, prices: prices };
+    state.ctx = ctx;
+    var res = {};
+    ITEMS.forEach(function (it) {
+      var p = it.panel;
+      if (p.type === 'row' || sourceOf(p) != null || !hasSql(p)) return;
+      var q = C.QUERIES[p.id];
+      res[p.id] = q ? q(fixture, ctx) : null;
+    });
+    // -- Dashboard -- data source: the panel reuses another panel's query result.
+    ITEMS.forEach(function (it) { var s = sourceOf(it.panel); if (s != null) res[it.panel.id] = res[s] || null; });
+    state.results = res;
+    state.options = C.variableOptions(fixture, ctx);
+    state.lastRefresh = Date.now();
+  }
+
+  // ---------------------------------------------------------------- tooltip + menus
+  var tip = h('div', { class: 'tooltip', role: 'tooltip', hidden: true });
+  document.body.appendChild(tip);
+  function showTooltipAt(content, x, y, kind) {
+    tip.textContent = '';
+    tip.className = 'tooltip' + (kind ? ' tooltip-' + kind : '');
+    tip.appendChild(content);
+    tip.hidden = false;
+    var r = tip.getBoundingClientRect();
+    var left = x + 14, top = y + 14;
+    if (left + r.width > window.innerWidth - 8) left = Math.max(8, x - r.width - 14);
+    if (top + r.height > window.innerHeight - 8) top = Math.max(8, y - r.height - 14);
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+  function hideTooltip() { tip.hidden = true; }
+
+  var openMenuEl = null, openAnchor = null;
+  function openMenu(menu, anchor) {
+    closeMenus();
+    menu.style.position = 'fixed';
+    menu.style.visibility = 'hidden';
+    document.body.appendChild(menu);
+    var r = anchor.getBoundingClientRect();
+    var left = r.left, mw = menu.offsetWidth, mh = menu.offsetHeight;
+    if (left + mw > window.innerWidth - 8) left = Math.max(8, window.innerWidth - 8 - mw);
+    var top = r.bottom + 4;
+    if (top + mh > window.innerHeight - 8 && r.top - mh - 4 > 8) top = r.top - mh - 4;
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+    menu.style.visibility = '';
+    openMenuEl = menu; openAnchor = anchor;
+    anchor.setAttribute('aria-expanded', 'true');
+  }
+  function closeMenus() {
+    if (!openMenuEl) return;
+    openMenuEl.remove();
+    if (openAnchor) openAnchor.setAttribute('aria-expanded', 'false');
+    openMenuEl = null; openAnchor = null;
+  }
+  document.addEventListener('pointerdown', function (e) {
+    if (openMenuEl && !openMenuEl.contains(e.target) && !(openAnchor && openAnchor.contains(e.target))) closeMenus();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeMenus(); hideTooltip(); } });
+  window.addEventListener('scroll', function () { closeMenus(); hideTooltip(); }, { passive: true });
+  function optionRow(label, selected, onPick, multi) {
+    return h('button', { class: 'opt', type: 'button', role: 'option', 'aria-selected': String(!!selected), onclick: onPick },
+      multi ? h('span', { class: 'check', 'aria-hidden': 'true', text: selected ? '✓' : '' }) :
+        h('span', { class: 'tick-mark', 'aria-hidden': 'true', text: selected ? '✓' : '' }),
+      h('span', { class: 'opt-label', text: label }));
+  }
+
+  // ---------------------------------------------------------------- toolbar
+  var varButtons = {};
+  function buildToolbar() {
+    var vars = document.getElementById('vars');
+    vars.textContent = '';
+    if (DS_VAR) {
+      vars.appendChild(h('div', { class: 'var' },
+        h('span', { class: 'var-label', title: DS_VAR.description || '', text: DS_VAR.label || DS_VAR.name }),
+        h('button', { class: 'var-btn', type: 'button', disabled: true, title: 'No BigQuery connection in this preview' },
+          h('span', { class: 'var-val', text: 'BigQuery (synthetic demo data)' }))));
+    }
+    QUERY_VARS.forEach(function (v) {
+      if (v.hide === 2) return;
+      var btn = h('button', { class: 'var-btn', type: 'button', 'aria-haspopup': 'listbox', 'aria-expanded': 'false',
+        id: 'var-' + v.name, title: v.description || '' }, h('span', { class: 'var-val' }), icon('chevron', 14));
+      btn.addEventListener('click', function () { if (openAnchor === btn) { closeMenus(); return; } openVarMenu(v, btn); });
+      varButtons[v.name] = btn;
+      vars.appendChild(h('div', { class: 'var' }, h('label', { class: 'var-label', for: 'var-' + v.name, text: v.label || v.name }), btn));
+    });
+    if (CONST_VARS.length) {
+      var cb = h('button', { class: 'tb-btn subtle', type: 'button', 'aria-haspopup': 'dialog', 'aria-expanded': 'false',
+        title: 'Constant variables (hidden in Grafana; shown here with preview placeholder values)' }, 'Constants', icon('chevron', 14));
+      cb.addEventListener('click', function () { if (openAnchor === cb) { closeMenus(); return; } openConstMenu(cb); });
+      vars.appendChild(cb);
+    }
+
+    var tb = document.getElementById('toolbar');
+    tb.textContent = '';
+    var sqlBtn = h('button', { class: 'tb-btn', id: 'sql-toggle', type: 'button', 'aria-pressed': 'false',
+      title: 'Show every panel’s SQL from the dashboard JSON' }, icon('code'), 'Show SQL');
+    sqlBtn.addEventListener('click', function () {
+      var on = sqlBtn.getAttribute('aria-pressed') !== 'true';
+      ITEMS.forEach(function (it) { if (it.panel.type !== 'row') state.mode[it.panel.id] = on ? 'sql' : 'viz'; });
+      renderAll();
+    });
+    var timeBtn = h('button', { class: 'tb-btn', id: 'time-btn', type: 'button', 'aria-haspopup': 'listbox', 'aria-expanded': 'false',
+      title: 'Time range' }, icon('clock'), h('span', { id: 'time-label' }), icon('chevron', 14));
+    timeBtn.addEventListener('click', function () { if (openAnchor === timeBtn) { closeMenus(); return; } openTimeMenu(timeBtn); });
+    var zoomBtn = h('button', { class: 'tb-btn icon-only', type: 'button', title: 'Zoom out time range', 'aria-label': 'Zoom out time range' }, icon('zoomout'));
+    zoomBtn.addEventListener('click', function () {
+      var i = RANGES.indexOf(state.range);
+      if (i < RANGES.length - 1) { state.range = RANGES[i + 1]; refreshAll(); }
+    });
+    var refBtn = h('button', { class: 'tb-btn icon-only', type: 'button', title: 'Refresh dashboard', 'aria-label': 'Refresh dashboard' }, icon('refresh'));
+    refBtn.addEventListener('click', function () { state.now = Date.now(); refreshAll(); });
+    var intBtn = h('button', { class: 'tb-btn', id: 'refresh-btn', type: 'button', 'aria-haspopup': 'listbox', 'aria-expanded': 'false',
+      title: 'Auto-refresh interval' }, h('span', { id: 'refresh-label' }), icon('chevron', 14));
+    intBtn.addEventListener('click', function () { if (openAnchor === intBtn) { closeMenus(); return; } openRefreshMenu(intBtn); });
+    tb.appendChild(sqlBtn);
+    tb.appendChild(h('div', { class: 'tb-group' }, timeBtn, zoomBtn));
+    tb.appendChild(h('div', { class: 'tb-group' }, refBtn, intBtn));
+    updateToolbar();
+  }
+  function updateToolbar() {
+    Object.keys(varButtons).forEach(function (name) {
+      var b = varButtons[name], t = varText(name);
+      b.querySelector('.var-val').textContent = t;
+      b.setAttribute('aria-label', name + ': ' + t);
+    });
+    document.getElementById('time-label').textContent = state.range.label;
+    document.getElementById('refresh-label').textContent = state.refresh || 'Off';
+    var allSql = ITEMS.every(function (it) { return it.panel.type === 'row' || state.mode[it.panel.id] === 'sql'; });
+    document.getElementById('sql-toggle').setAttribute('aria-pressed', String(allSql));
+  }
+  function openVarMenu(v, anchor) {
+    var search = h('input', { class: 'menu-search', type: 'text', 'aria-label': 'Search ' + (v.label || v.name),
+      placeholder: v.allowCustomValue ? 'Search or type a custom value' : 'Search' });
+    var list = h('div', { class: 'menu-list', role: 'listbox', 'aria-multiselectable': String(!!v.multi) });
+    var note = h('div', { class: 'menu-note' });
+    function toggle(o) {
+      var sel = state.vars[v.name];
+      sel = sel == null ? new Set() : new Set(sel);
+      if (!v.multi) sel = new Set(sel.has(o) ? [] : [o]);
+      else if (sel.has(o)) sel.delete(o); else sel.add(o);
+      state.vars[v.name] = sel.size ? sel : null;
+      draw();
+      refreshAll();
+    }
+    function draw() {
+      list.textContent = '';
+      var q = search.value.trim(), ql = q.toLowerCase(), sel = state.vars[v.name];
+      var opts = (state.options[v.name] || []).slice();
+      if (sel) sel.forEach(function (s) { if (opts.indexOf(s) < 0) opts.unshift(s); }); // custom values stay listed
+      if (v.includeAll && !ql) list.appendChild(optionRow('All', sel == null, function () { state.vars[v.name] = null; draw(); refreshAll(); }, true));
+      var shown = 0, total = 0;
+      opts.forEach(function (o) {
+        if (ql && o.toLowerCase().indexOf(ql) < 0) return;
+        total++;
+        if (shown >= 200) return;
+        shown++;
+        list.appendChild(optionRow(o, !!(sel && sel.has(o)), function () { toggle(o); }, true));
+      });
+      if (q && v.allowCustomValue && opts.indexOf(q) < 0) list.appendChild(optionRow('Use custom value: ' + q, false, function () { toggle(q); }, true));
+      if (!total && !(q && v.allowCustomValue)) list.appendChild(h('div', { class: 'menu-empty', text: 'No options found' }));
+      note.textContent = (opts.length) + ' option' + (opts.length === 1 ? '' : 's') + ' in range' + (total > shown ? ' · showing ' + shown + ', type to narrow' : '');
+    }
+    search.addEventListener('input', draw);
+    search.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { var q = search.value.trim(); if (q && (v.allowCustomValue || (state.options[v.name] || []).indexOf(q) >= 0)) toggle(q); }
+    });
+    var menu = h('div', { class: 'menu var-menu' }, search, list, note);
+    draw();
+    openMenu(menu, anchor);
+    search.focus();
+  }
+  function openConstMenu(anchor) {
+    var rows = CONST_VARS.map(function (v) {
+      return h('div', { class: 'const-row' }, h('code', { text: v.name }), h('span', { class: 'const-val', text: constValue(v.name) }));
+    });
+    openMenu(h('div', { class: 'menu const-menu', role: 'dialog', 'aria-label': 'Constant variables' },
+      h('div', { class: 'menu-title', text: 'Constant variables (hidden in Grafana)' }), rows,
+      h('div', { class: 'menu-note', text: 'Placeholder values for this preview. Edit the real ones in Dashboard settings → Variables.' })), anchor);
+  }
+  function openTimeMenu(anchor) {
+    var list = h('div', { class: 'menu-list', role: 'listbox' });
+    RANGES.forEach(function (r) {
+      list.appendChild(optionRow(r.label, r === state.range, function () { state.range = r; closeMenus(); refreshAll(); }));
+    });
+    openMenu(h('div', { class: 'menu time-menu' }, list,
+      h('div', { class: 'menu-note', text: 'Relative to now · browser time zone' })), anchor);
+  }
+  var timer = null;
+  function setRefresh(val) {
+    state.refresh = val;
+    if (timer) clearInterval(timer);
+    timer = null;
+    var ms = parseDur(val);
+    if (ms) timer = setInterval(function () { state.now = Date.now(); refreshAll(); }, ms);
+    updateToolbar();
+  }
+  function openRefreshMenu(anchor) {
+    var list = h('div', { class: 'menu-list', role: 'listbox' });
+    [''].concat(REFRESH).forEach(function (val) {
+      list.appendChild(optionRow(val || 'Off', val === state.refresh, function () { closeMenus(); setRefresh(val); }));
+    });
+    openMenu(h('div', { class: 'menu refresh-menu' }, list,
+      h('div', { class: 'menu-note', text: 'Intervals from timepicker.refresh_intervals' })), anchor);
+  }
+
+  // ---------------------------------------------------------------- grid + layout
+  var grid = document.getElementById('grid');
+  function chevronIcon() { var s = icon('chevron', 16); s.classList.add('chev'); return s; }
+  function buildRow(it) {
+    var p = it.panel;
+    var title = h('span', { class: 'row-title' });
+    var btn = h('button', { class: 'row-toggle', type: 'button', 'aria-expanded': String(!state.collapsed[p.id]) }, chevronIcon(), title);
+    var count = ITEMS.filter(function (x) { return x.row === p; }).length;
+    var el = h('div', { class: 'dash-row' + (state.collapsed[p.id] ? ' collapsed' : ''), 'data-panel-id': p.id, 'data-panel-type': 'row' },
+      btn, h('span', { class: 'row-count', text: '(' + count + ' panel' + (count === 1 ? '' : 's') + ')' }));
+    btn.addEventListener('click', function () {
+      state.collapsed[p.id] = !state.collapsed[p.id];
+      btn.setAttribute('aria-expanded', String(!state.collapsed[p.id]));
+      el.classList.toggle('collapsed', state.collapsed[p.id]);
+      layout();
+      renderAll();
+    });
+    it.titleEl = title;
+    return el;
+  }
+  function linkTargets(p) {
+    var s = sourceOf(p), root = s != null ? s : p.id;
+    return [root].concat(CONSUMERS[root] || []);
+  }
+  function setLinked(ids, on) { ids.forEach(function (id) { var x = BY_ID[id]; if (x && x.el) x.el.classList.toggle('linked', on); }); }
+  function buildPanel(it) {
+    var p = it.panel;
+    var title = h('h2', { class: 'panel-title' });
+    var header = h('div', { class: 'panel-header' }, title);
+    if (p.description || prChange(p) || feedsPr(p)) {
+      var info = h('button', { class: 'panel-info', type: 'button', 'aria-label': 'Panel description', text: 'i' });
+      var showDesc = function () { var r = info.getBoundingClientRect(); showTooltipAt(descriptionNode(it), r.left, r.bottom - 8, 'desc'); };
+      info.addEventListener('mouseenter', showDesc);
+      info.addEventListener('focus', showDesc);
+      info.addEventListener('click', showDesc);
+      info.addEventListener('mouseleave', hideTooltip);
+      info.addEventListener('blur', hideTooltip);
+      header.appendChild(info);
+    }
+    var pc = prChange(p), chip = null;
+    if (pc) chip = h('span', { class: 'chip chip-pr', title: 'Efficiency trial change: reads the ' + titleOf(pc.now) + ' query result (panel ' + pc.now + ') through the -- Dashboard -- data source' },
+      h('b', { text: 'PR' }), '↳ ' + titleOf(pc.now));
+    else if (feedsPr(p)) chip = h('span', { class: 'chip chip-pr', title: 'Efficiency trial change: this query also feeds ' + joinAnd(CONSUMERS[p.id].map(titleOf)) },
+      h('b', { text: 'PR' }), 'feeds ' + CONSUMERS[p.id].length + ' stats');
+    else if (sourceOf(p) != null) chip = h('span', { class: 'chip', title: 'Reads the ' + titleOf(sourceOf(p)) + ' query result through the -- Dashboard -- data source' },
+      '↳ ' + titleOf(sourceOf(p)));
+    if (chip) {
+      chip.addEventListener('mouseenter', function () { setLinked(linkTargets(p), true); });
+      chip.addEventListener('mouseleave', function () { setLinked(linkTargets(p), false); });
+      header.appendChild(chip);
+    }
+    header.appendChild(h('span', { class: 'panel-spacer' }));
+    header.appendChild(h('span', { class: 'panel-type', title: 'Panel type', text: p.type }));
+    var tBtn = h('button', { class: 'panel-btn', type: 'button', 'aria-pressed': 'false', title: 'Table view of the query result', 'aria-label': 'Table view' }, icon('table', 14));
+    var qBtn = h('button', { class: 'panel-btn', type: 'button', 'aria-pressed': 'false', title: 'Show this panel’s SQL from the JSON', 'aria-label': 'Show SQL' }, icon('code', 14));
+    tBtn.addEventListener('click', function () { toggleMode(it, 'table'); });
+    qBtn.addEventListener('click', function () { toggleMode(it, 'sql'); });
+    header.appendChild(tBtn);
+    header.appendChild(qBtn);
+    var body = h('div', { class: 'panel-body' });
+    var el = h('section', { class: 'panel', 'data-panel-id': p.id, 'data-panel-type': p.type }, header, body);
+    it.titleEl = title; it.body = body; it.tBtn = tBtn; it.qBtn = qBtn;
+    return el;
+  }
+  function descriptionNode(it) {
+    var p = it.panel, wrap = h('div', { class: 'desc' });
+    wrap.appendChild(h('div', { class: 'desc-title', text: interpolate(p.title) + ' · ' + p.type }));
+    if (p.description) wrap.appendChild(h('p', { text: interpolate(p.description) }));
+    var pc = prChange(p);
+    if (pc) {
+      var before = pc.was === 'query' ? 'In bqaa-dashboard.json this stat runs its own BigQuery query.'
+        : 'In bqaa-dashboard.json this stat reads the ' + titleOf(pc.was) + ' query result (panel ' + pc.was + ').';
+      var group = [pc.now].concat(CONSUMERS[pc.now] || []);
+      wrap.appendChild(h('p', { class: 'desc-pr' }, h('strong', { text: 'Preview note — PR change. ' }),
+        before + ' In this efficiency trial it reads the ' + titleOf(pc.now) + ' query result (panel ' + pc.now +
+        ') through the -- Dashboard -- data source, so ' + joinAnd(group.map(titleOf)) + ' come from one query: ' +
+        jobsFor(group, trialWiring()) + ' BigQuery job instead of ' + jobsFor(group, MAIN) + '.'));
+    } else if (feedsPr(p)) {
+      var g2 = [p.id].concat(CONSUMERS[p.id]);
+      wrap.appendChild(h('p', { class: 'desc-pr' }, h('strong', { text: 'Preview note — PR change. ' }),
+        'This query also returns the fields that ' + joinAnd(CONSUMERS[p.id].map(titleOf)) +
+        ' display; they read this result through the -- Dashboard -- data source. ' + jobsFor(g2, trialWiring()) +
+        ' BigQuery job for ' + g2.length + ' stats (bqaa-dashboard.json: ' + jobsFor(g2, MAIN) + ').'));
+    } else if (sourceOf(p) != null) {
+      wrap.appendChild(h('p', { class: 'desc-note', text: 'Reads the ' + titleOf(sourceOf(p)) + ' query result (panel ' + sourceOf(p) + ') through the -- Dashboard -- data source; no query of its own.' }));
+    }
+    return wrap;
+  }
+  function toggleMode(it, mode) {
+    var cur = state.mode[it.panel.id] || 'viz';
+    state.mode[it.panel.id] = cur === mode ? 'viz' : mode;
+    renderItem(it);
+    updateToolbar();
+  }
+  function buildGrid() {
+    grid.textContent = '';
+    ITEMS.forEach(function (it) {
+      it.el = it.panel.type === 'row' ? buildRow(it) : buildPanel(it);
+      grid.appendChild(it.el);
+    });
+  }
+  var GAP = 8, CELL = 30;
+  function gp(p) { var g = p.gridPos || {}; return { x: g.x || 0, y: g.y || 0, w: g.w || 24, h: g.h || 8 }; }
+  function place(el, left, top, width, height) {
+    el.style.left = left + 'px'; el.style.top = top + 'px';
+    el.style.width = width + 'px'; el.style.height = height + 'px';
+  }
+  // 24-column grid: 30px cells, 8px gutters (Grafana's GRID_CELL_HEIGHT / GRID_CELL_VMARGIN).
+  function layout() {
+    var W = grid.clientWidth, mobile = W < 769, colW = (W - GAP * 23) / 24;
+    var px = function (units) { return units * CELL + (units - 1) * GAP; };
+    if (!mobile) {
+      var cursor = 0;
+      SECTIONS.forEach(function (sec) {
+        var base = cursor, maxY = cursor, rowY = 0;
+        if (sec.row) {
+          sec.row.el.hidden = false;
+          place(sec.row.el, 0, cursor * (CELL + GAP), W, CELL);
+          cursor += 1; base = cursor; maxY = cursor;
+          rowY = gp(sec.row.panel).y + 1;
+        }
+        var collapsed = sec.row && state.collapsed[sec.row.panel.id];
+        sec.children.forEach(function (it) {
+          if (collapsed) { it.el.hidden = true; return; }
+          it.el.hidden = false;
+          var g = gp(it.panel), y = sec.row ? base + Math.max(0, g.y - rowY) : g.y;
+          place(it.el, g.x * (colW + GAP), y * (CELL + GAP), g.w * colW + (g.w - 1) * GAP, px(g.h));
+          maxY = Math.max(maxY, y + g.h);
+        });
+        cursor = Math.max(cursor, maxY);
+      });
+      grid.style.height = Math.max(0, cursor * (CELL + GAP) - GAP) + 'px';
+    } else {
+      var top = 0;
+      SECTIONS.forEach(function (sec) {
+        if (sec.row) { sec.row.el.hidden = false; place(sec.row.el, 0, top, W, CELL); top += CELL + GAP; }
+        var collapsed = sec.row && state.collapsed[sec.row.panel.id];
+        sec.children.slice().sort(function (a, b) { var A = gp(a.panel), B = gp(b.panel); return A.y - B.y || A.x - B.x; })
+          .forEach(function (it) {
+            if (collapsed) { it.el.hidden = true; return; }
+            it.el.hidden = false;
+            var hh = Math.max(px(gp(it.panel).h), 150);
+            place(it.el, 0, top, W, hh);
+            top += hh + GAP;
+          });
+      });
+      grid.style.height = Math.max(0, top - GAP) + 'px';
+    }
+  }
+
+  // ---------------------------------------------------------------- render
+  var charts = new Map();
+  function renderAll() {
+    state.renderErrors = [];
+    charts.clear();
+    hideTooltip();
+    ITEMS.forEach(function (it) {
+      if (it.panel.type === 'row') { it.titleEl.textContent = interpolate(it.panel.title); return; }
+      if (it.el.hidden) return;
+      renderItem(it);
+    });
+    updateToolbar();
+    updateFooter();
+    setVerification();
+  }
+  function renderItem(it) {
+    var p = it.panel, body = it.body, mode = state.mode[p.id] || 'viz';
+    it.titleEl.textContent = interpolate(p.title);
+    it.titleEl.title = interpolate(p.title);
+    it.tBtn.setAttribute('aria-pressed', String(mode === 'table'));
+    it.qBtn.setAttribute('aria-pressed', String(mode === 'sql'));
+    charts.delete(p.id);
+    body.textContent = '';
+    body.className = 'panel-body';
+    state.renderErrors = state.renderErrors.filter(function (e) { return e.id !== p.id; });
+    try {
+      var frame = state.results[p.id];
+      if (mode === 'sql') renderSql(it);
+      else if (mode === 'table') renderTable(it, frame, true);
+      else if (p.type === 'stat') renderStat(it, frame);
+      else if (p.type === 'timeseries') renderTimeseries(it, frame);
+      else if (p.type === 'barchart') renderBarchart(it, frame);
+      else if (p.type === 'table') renderTable(it, frame, false);
+      else renderUnsupported(it, frame);
+      it.el.setAttribute('data-rendered', 'ok');
+      it.el.setAttribute('data-mode', mode);
+    } catch (err) {
+      body.textContent = '';
+      body.appendChild(h('div', { class: 'panel-error', text: 'Panel render error: ' + (err && err.message) }));
+      it.el.setAttribute('data-rendered', 'error');
+      state.renderErrors.push({ id: p.id, message: String(err && err.message) });
+      if (window.console) console.error('panel ' + p.id, err);
+    }
+  }
+  function noData(it, text) {
+    it.body.appendChild(h('div', { class: 'no-data', text: text || 'No data' }));
+  }
+  function pickField(frame, spec) {
+    if (!frame) return null;
+    var nums = frame.fields.filter(function (f) { return f.type === 'number'; });
+    if (!spec) return nums[0] || null;
+    var re;
+    try { re = regexFrom(spec); } catch (e) { return nums[0] || null; }
+    return frame.fields.find(function (f) { return re.test(f.name); }) || null;
+  }
+  function thresholdInfo(d, v) {
+    var steps = (d.thresholds && d.thresholds.steps) || [], idx = -1;
+    steps.forEach(function (s, i) { if (s.value == null || v >= s.value) idx = i; });
+    return { steps: steps, index: idx, step: idx >= 0 ? steps[idx] : null };
+  }
+
+  // ---- stat
+  function renderStat(it, frame) {
+    var p = it.panel, d = defaultsOf(p), o = p.options || {}, ro = o.reduceOptions || {}, body = it.body;
+    body.classList.add('stat');
+    var f = pickField(frame, ro.fields), v = null;
+    if (f) for (var i = f.values.length - 1; i >= 0; i--) { var x = f.values[i]; if (x != null && !(typeof x === 'number' && isNaN(x))) { v = x; break; } }
+    var box = h('div', { class: 'stat-box' }), caps = h('div', { class: 'stat-captions' }), valEl = null, text = '';
+    body.appendChild(box);
+    if (v == null) box.appendChild(h('div', { class: 'stat-novalue', text: d.noValue || 'No data' }));
+    else {
+      text = C.fmt(v, d.unit, d.decimals);
+      valEl = h('div', { class: 'stat-value', text: text });
+      box.appendChild(valEl);
+      var th = thresholdInfo(d, v);
+      if (d.color && d.color.mode === 'thresholds' && o.colorMode !== 'none') {
+        var col = statusColor(th.step && th.step.color);
+        if (col) valEl.style.color = col;
+      }
+      if (th.steps.length > 1 && th.step) {
+        var fmtT = function (x) { return C.fmt(x, d.unit, d.decimals); };
+        var last = th.index === th.steps.length - 1, first = th.index === 0;
+        var label = first ? 'below the ' + fmtT(th.steps[1].value) + ' example threshold'
+          : 'at or above the ' + fmtT(th.step.value) + ' example threshold';
+        caps.appendChild(h('div', { class: 'stat-caption' },
+          h('span', { class: 'status-icon', 'aria-hidden': 'true', style: 'color:' + (statusColor(th.step.color) || 'inherit'),
+            text: first ? '✓' : (last ? '✕' : '▲') }), ' ' + label));
+      }
+    }
+    var pc = prChange(p);
+    if (pc) caps.appendChild(h('div', { class: 'stat-caption pr', text: '↳ from the ' + titleOf(pc.now) + ' query result' }));
+    else if (feedsPr(p)) caps.appendChild(h('div', { class: 'stat-caption pr', text: 'same result feeds ' + CONSUMERS[p.id].map(titleOf).join(' + ') }));
+    if (caps.childNodes.length) body.appendChild(caps);
+    if (valEl) {
+      var bw = box.clientWidth - 8, bh = box.clientHeight;
+      var size = Math.max(12, Math.min(84, bh * 0.78, bw / Math.max(1, textW(text, 100, 500)) * 100));
+      valEl.style.fontSize = Math.floor(size) + 'px';
+    }
+  }
+
+  // ---- legend
+  function buildLegend(it, series, kind) {
+    var lg = h('div', { class: 'legend' });
+    var hidden = state.hidden[it.panel.id] || new Set();
+    series.forEach(function (sr) {
+      var off = hidden.has(sr.name);
+      lg.appendChild(h('button', { class: 'legend-item' + (off ? ' off' : ''), type: 'button', 'aria-pressed': String(!off),
+        title: 'Click to show only this series · Shift/Ctrl-click to toggle it',
+        onclick: function (e) { legendClick(it, series, sr, e); } },
+      h('span', { class: 'legend-key ' + kind, style: 'background:' + sr.color, 'aria-hidden': 'true' }),
+      h('span', { class: 'legend-label', text: sr.label })));
+    });
+    return lg;
+  }
+  function legendClick(it, series, sr, e) {
+    var id = it.panel.id, names = series.map(function (s) { return s.name; });
+    var hid = new Set(state.hidden[id] || []);
+    if (e.shiftKey || e.ctrlKey || e.metaKey) { if (hid.has(sr.name)) hid.delete(sr.name); else hid.add(sr.name); }
+    else {
+      var onlyThis = names.every(function (n) { return n === sr.name ? !hid.has(n) : hid.has(n); });
+      hid = onlyThis ? new Set() : new Set(names.filter(function (n) { return n !== sr.name; }));
+    }
+    if (hid.size >= names.length) hid = new Set();
+    state.hidden[id] = hid;
+    renderItem(it);
+  }
+
+  // ---- axes helpers
+  function niceTicks(max, count) {
+    if (!(max > 0)) max = 1;
+    var raw = max / Math.max(1, count), mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10)), norm = raw / mag;
+    var step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
+    var top = Math.ceil(max / step - 1e-9) * step, ticks = [];
+    for (var k = 0; k * step <= top + step / 2; k++) ticks.push(k * step);
+    return { ticks: ticks, max: top, step: step };
+  }
+  var TSTEPS = [MINUTE, 2 * MINUTE, 5 * MINUTE, 10 * MINUTE, 15 * MINUTE, 30 * MINUTE, HOUR, 2 * HOUR, 3 * HOUR, 6 * HOUR, 12 * HOUR, DAY, 2 * DAY];
+  function timeTicks(x0, x1, plotW) {
+    var span = x1 - x0, multiDay = span > DAY + MINUTE;
+    var maxTicks = Math.max(2, Math.floor(plotW / ((multiDay ? 78 : 40) + 26)));
+    var step = TSTEPS.find(function (s) { return span / s <= maxTicks; }) || TSTEPS[TSTEPS.length - 1];
+    var off = new Date(x0).getTimezoneOffset() * MINUTE, out = [];
+    for (var t = Math.ceil((x0 - off) / step) * step + off; t <= x1; t += step) {
+      var d = new Date(t), hm = C.pad2(d.getHours()) + ':' + C.pad2(d.getMinutes());
+      var md = C.pad2(d.getMonth() + 1) + '/' + C.pad2(d.getDate());
+      out.push({ t: t, label: !multiDay ? hm : (step >= DAY || (d.getHours() === 0 && d.getMinutes() === 0) ? md : md + ' ' + hm) });
+    }
+    return out;
+  }
+  function svgRoot(viz, W, H, label) {
+    var svg = sv('svg', { width: W, height: H, viewBox: '0 0 ' + W + ' ' + H, class: 'chart', role: 'img', 'aria-label': label });
+    viz.appendChild(svg);
+    return svg;
+  }
+
+  // ---- timeseries
+  function renderTimeseries(it, frame) {
+    var p = it.panel, d = defaultsOf(p), cu = d.custom || {}, o = p.options || {}, body = it.body;
+    var tf = frame && frame.fields.find(function (f) { return f.type === 'time'; });
+    var nums = frame ? frame.fields.filter(function (f) { return f.type === 'number'; }) : [];
+    if (!tf || !nums.length) return noData(it, d.noValue);
+    var series = nums.map(function (f, i) { return resolveField(p, f, i); });
+    var hidden = state.hidden[p.id] || new Set();
+    var vis = series.filter(function (s) { return !s.hideViz && !hidden.has(s.name); });
+    var viz = h('div', { class: 'viz' });
+    body.appendChild(viz);
+    if (!o.legend || o.legend.showLegend !== false) body.appendChild(buildLegend(it, series.filter(function (s) { return !s.hideLegend; }), 'line'));
+    var W = Math.floor(viz.clientWidth), H = Math.floor(viz.clientHeight);
+    if (W < 40 || H < 40) return;
+    var times = tf.values, n = times.length, x0 = state.ctx.from, x1 = state.ctx.to;
+    var stacked = !!(cu.stacking && cu.stacking.mode === 'normal');
+    var ymax = 0, i, v;
+    if (stacked) for (i = 0; i < n; i++) { var s = 0; vis.forEach(function (sr) { var x = sr.values[i]; if (x != null) s += x; }); if (s > ymax) ymax = s; }
+    else vis.forEach(function (sr) { sr.values.forEach(function (x) { if (x != null && x > ymax) ymax = x; }); });
+    var unit = d.unit, M = { t: 8, r: 14, b: 22, l: 0 };
+    var plotH = Math.max(10, H - M.t - M.b);
+    var yt = niceTicks(ymax, Math.max(2, Math.min(8, Math.floor(plotH / 34))));
+    var ylab = yt.ticks.map(function (x) { return C.fmtTick(x, unit, yt.step); });
+    M.l = Math.ceil(Math.max.apply(null, ylab.map(function (x) { return textW(x, 12); }))) + 14;
+    var plotW = Math.max(10, W - M.l - M.r);
+    var X = function (t) { return M.l + (t - x0) / (x1 - x0) * plotW; };
+    var Y = function (val) { return M.t + plotH - (val / yt.max) * plotH; };
+    var svg = svgRoot(viz, W, H, interpolate(p.title) + ' — time series, ' + vis.map(function (s) { return s.label; }).join(', '));
+    var uid = 'p' + p.id + '-' + Math.random().toString(36).slice(2, 7);
+    var defs = sv('defs', null, svg);
+    var clip = sv('clipPath', { id: uid + '-clip' }, defs);
+    sv('rect', { x: M.l, y: M.t - 3, width: plotW, height: plotH + 6 }, clip);
+    var gGrid = sv('g', { class: 'gridlines' }, svg);
+    yt.ticks.forEach(function (tv, k) {
+      var y = Math.round(Y(tv)) + 0.5;
+      sv('line', { x1: M.l, x2: M.l + plotW, y1: y, y2: y }, gGrid);
+      svText(svg, { x: M.l - 8, y: y + 4, 'text-anchor': 'end', class: 'tick' }, ylab[k]);
+    });
+    timeTicks(x0, x1, plotW).forEach(function (tk) {
+      var x = Math.round(X(tk.t)) + 0.5;
+      sv('line', { x1: x, x2: x, y1: M.t, y2: M.t + plotH }, gGrid);
+      svText(svg, { x: x, y: M.t + plotH + 16, 'text-anchor': 'middle', class: 'tick' }, tk.label);
+    });
+    var gArea = sv('g', { 'clip-path': 'url(#' + uid + '-clip)' }, svg);
+    var gLine = sv('g', { 'clip-path': 'url(#' + uid + '-clip)' }, svg);
+    var fillOp = (cu.fillOpacity || 0) / 100, lw = cu.lineWidth || 1, grad = cu.gradientMode === 'opacity';
+    var base = new Float64Array(n), drawn = [];
+    vis.forEach(function (sr, si) {
+      var tops = new Array(n), bots = new Array(n), segs = [], cur = null, k;
+      for (k = 0; k < n; k++) {
+        var val = sr.values[k];
+        if (val == null) { tops[k] = null; continue; }
+        bots[k] = stacked ? base[k] : 0;
+        tops[k] = bots[k] + val;
+        if (stacked) base[k] = tops[k];
+      }
+      for (k = 0; k < n; k++) { if (tops[k] == null) { cur = null; continue; } if (!cur) { cur = []; segs.push(cur); } cur.push(k); }
+      var fill = sr.color, fo = fillOp;
+      if (fillOp > 0 && grad) {
+        var gid = uid + '-g' + si;
+        var lg = sv('linearGradient', { id: gid, x1: 0, y1: M.t, x2: 0, y2: M.t + plotH, gradientUnits: 'userSpaceOnUse' }, defs);
+        sv('stop', { offset: 0, 'stop-color': sr.color, 'stop-opacity': fillOp }, lg);
+        sv('stop', { offset: 1, 'stop-color': sr.color, 'stop-opacity': 0 }, lg);
+        fill = 'url(#' + gid + ')'; fo = 1;
+      }
+      segs.forEach(function (sg) {
+        var top = sg.map(function (j, q) { return (q ? 'L' : 'M') + X(times[j]).toFixed(1) + ',' + Y(tops[j]).toFixed(1); }).join('');
+        if (fillOp > 0 && sg.length > 1) {
+          var back = '';
+          for (var q = sg.length - 1; q >= 0; q--) back += 'L' + X(times[sg[q]]).toFixed(1) + ',' + Y(bots[sg[q]]).toFixed(1);
+          sv('path', { d: top + back + 'Z', fill: fill, 'fill-opacity': fo, stroke: 'none' }, gArea);
+        }
+        if (sg.length === 1) sv('circle', { cx: X(times[sg[0]]).toFixed(1), cy: Y(tops[sg[0]]).toFixed(1), r: 2, fill: sr.color }, gLine);
+        else sv('path', { d: top, fill: 'none', stroke: sr.color, 'stroke-width': lw, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, gLine);
+      });
+      drawn.push({ sr: sr, tops: tops });
+    });
+    // Hover: crosshair + one tooltip listing every series at that time; shared crosshair (graphTooltip).
+    var cross = sv('line', { class: 'crosshair', x1: -9, x2: -9, y1: M.t, y2: M.t + plotH, visibility: 'hidden' }, svg);
+    var gDots = sv('g', { 'pointer-events': 'none' }, svg);
+    var ov = sv('rect', { x: M.l, y: M.t, width: plotW, height: plotH, fill: 'transparent', class: 'overlay', tabindex: 0,
+      'aria-label': interpolate(p.title) + ': focus and use the arrow keys to read values' }, svg);
+    var iMin = 0;
+    while (iMin < n - 1 && times[iMin] < x0) iMin++;
+    function nearest(t) {
+      var lo = iMin, hi = n - 1;
+      while (lo < hi) { var mid = (lo + hi) >> 1; if (times[mid] < t) lo = mid + 1; else hi = mid; }
+      if (lo > iMin && Math.abs(times[lo - 1] - t) <= Math.abs(times[lo] - t)) lo--;
+      return lo;
+    }
+    function setCross(t) {
+      if (t == null || t < x0 || t > x1) { cross.setAttribute('visibility', 'hidden'); return; }
+      var x = X(t).toFixed(1);
+      cross.setAttribute('x1', x); cross.setAttribute('x2', x); cross.setAttribute('visibility', 'visible');
+    }
+    var curIdx = -1;
+    function show(k, cx, cy) {
+      curIdx = k;
+      var t = times[k];
+      setCross(t);
+      gDots.textContent = '';
+      drawn.forEach(function (dw) {
+        if (dw.tops[k] == null) return;
+        sv('circle', { cx: X(t).toFixed(1), cy: Y(dw.tops[k]).toFixed(1), r: 4, fill: dw.sr.color, stroke: SURFACE, 'stroke-width': 2 }, gDots);
+      });
+      var rows = vis.filter(function (s) { return !s.hideTooltip; }).map(function (s) { return { s: s, v: s.values[k] }; });
+      var sort = o.tooltip && o.tooltip.sort;
+      if (sort === 'desc' || sort === 'asc') rows.sort(function (a, b) {
+        var A = a.v == null ? -Infinity : a.v, B = b.v == null ? -Infinity : b.v;
+        return sort === 'desc' ? B - A : A - B;
+      });
+      var content = h('div', { class: 'tt' }, h('div', { class: 'tt-head', text: C.fmtDateTime(t) }));
+      rows.forEach(function (r) {
+        content.appendChild(h('div', { class: 'tt-row' }, h('span', { class: 'tt-key', style: 'background:' + r.s.color }),
+          h('span', { class: 'tt-name', text: r.s.label }), h('span', { class: 'tt-val', text: r.v == null ? '—' : C.fmt(r.v, r.s.unit, r.s.decimals) })));
+      });
+      showTooltipAt(content, cx, cy, 'chart');
+      if (DASH.graphTooltip) charts.forEach(function (c, id) { if (id !== p.id) c.cross(t); });
+    }
+    function clear() {
+      curIdx = -1; setCross(null); gDots.textContent = ''; hideTooltip();
+      if (DASH.graphTooltip) charts.forEach(function (c, id) { if (id !== p.id) c.cross(null); });
+    }
+    ov.addEventListener('pointermove', function (e) {
+      var r = svg.getBoundingClientRect();
+      show(nearest(x0 + (e.clientX - r.left - M.l) / plotW * (x1 - x0)), e.clientX, e.clientY);
+    });
+    ov.addEventListener('pointerleave', clear);
+    function keyShow(k) { var r = svg.getBoundingClientRect(); show(k, r.left + X(times[k]), r.top + M.t + 12); }
+    ov.addEventListener('focus', function () { keyShow(curIdx >= 0 ? curIdx : n - 1); });
+    ov.addEventListener('blur', clear);
+    ov.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      keyShow(Math.max(iMin, Math.min(n - 1, (curIdx < 0 ? n - 1 : curIdx) + (e.key === 'ArrowLeft' ? -1 : 1))));
+    });
+    charts.set(p.id, { cross: setCross });
+  }
+
+  // ---- barchart (horizontal orientation, grouped series)
+  function barPath(x, y, w, hh) {
+    var r = Math.min(4, hh / 2, w);
+    if (r < 0.75) return 'M' + x + ',' + y + 'h' + w + 'v' + hh + 'h' + (-w) + 'Z';
+    return 'M' + x + ',' + y + 'H' + (x + w - r) + 'Q' + (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + r) +
+      'V' + (y + hh - r) + 'Q' + (x + w) + ',' + (y + hh) + ' ' + (x + w - r) + ',' + (y + hh) + 'H' + x + 'Z';
+  }
+  function renderBarchart(it, frame) {
+    var p = it.panel, d = defaultsOf(p), cu = d.custom || {}, o = p.options || {}, body = it.body;
+    var cat = frame && frame.fields.find(function (f) { return f.type === 'string'; });
+    var nums = frame ? frame.fields.filter(function (f) { return f.type === 'number'; }).map(function (f, i) { return resolveField(p, f, i); }) : [];
+    if (!frame || !frame.length || !cat || !nums.length) return noData(it, d.noValue);
+    var hidden = state.hidden[p.id] || new Set();
+    var vis = nums.filter(function (s) { return !s.hideViz && !hidden.has(s.name); });
+    var viz = h('div', { class: 'viz' });
+    body.appendChild(viz);
+    if (!o.legend || o.legend.showLegend !== false) body.appendChild(buildLegend(it, nums.filter(function (s) { return !s.hideLegend; }), 'rect'));
+    var W = Math.floor(viz.clientWidth), H = Math.floor(viz.clientHeight);
+    if (W < 60 || H < 30) return;
+    var labels = cat.values.map(function (x) { return x == null ? '' : String(x); }), nCat = labels.length;
+    var xmax = 0;
+    vis.forEach(function (s) { s.values.forEach(function (x) { if (x != null && x > xmax) xmax = x; }); });
+    var fo = (cu.fillOpacity == null ? 80 : cu.fillOpacity) / 100;
+    var M = { t: 4, b: 22, l: 0, r: 0 };
+    var labelMax = Math.min(W * 0.38, Math.max.apply(null, labels.map(function (x) { return textW(x, 12); })) + 4);
+    M.l = Math.ceil(labelMax) + 10;
+    var showVals = o.showValue !== 'never';
+    var valW = 0;
+    if (showVals) vis.forEach(function (s) { s.values.forEach(function (x) { if (x != null) valW = Math.max(valW, textW(C.fmt(x, s.unit, s.decimals), 12)); }); });
+    M.r = Math.ceil(valW) + 14;
+    var plotW = Math.max(10, W - M.l - M.r), plotH = Math.max(10, H - M.t - M.b);
+    var xt = niceTicks(xmax, Math.max(2, Math.min(8, Math.floor(plotW / 90))));
+    var X = function (val) { return M.l + (val / xt.max) * plotW; };
+    var svg = svgRoot(viz, W, H, interpolate(p.title) + ' — bar chart of ' + vis.map(function (s) { return s.label; }).join(', ') + ' by ' + cat.name);
+    var gGrid = sv('g', { class: 'gridlines' }, svg);
+    xt.ticks.forEach(function (tv) {
+      var x = Math.round(X(tv)) + 0.5;
+      sv('line', { x1: x, x2: x, y1: M.t, y2: M.t + plotH }, gGrid);
+      svText(svg, { x: x, y: M.t + plotH + 16, 'text-anchor': 'middle', class: 'tick' }, C.fmtTick(tv, d.unit, xt.step));
+    });
+    var hl = sv('rect', { x: 0, y: -100, width: W, height: 0, class: 'band-hl' }, svg);
+    var gBars = sv('g', null, svg);
+    var band = plotH / nCat, gw = o.groupWidth == null ? 0.7 : o.groupWidth, bw = o.barWidth == null ? 0.97 : o.barWidth;
+    var nv = Math.max(1, vis.length), GAPB = 2;
+    var barH = Math.max(2, Math.min(24, (band * gw - GAPB * (nv - 1)) / nv * bw));
+    var groupH = barH * nv + GAPB * (nv - 1);
+    labels.forEach(function (lab, i) {
+      var yc = M.t + band * (i + 0.5), y0 = yc - groupH / 2;
+      svText(svg, { x: M.l - 8, y: yc + 4, 'text-anchor': 'end', class: 'tick cat' }, truncate(lab, labelMax, 12));
+      vis.forEach(function (s, j) {
+        var val = s.values[i];
+        if (val == null) return;
+        var y = y0 + j * (barH + GAPB), w = Math.max(0, X(val) - M.l);
+        sv('path', { d: barPath(M.l, +y.toFixed(1), +w.toFixed(1), +barH.toFixed(1)), fill: s.color, 'fill-opacity': fo }, gBars);
+        if (showVals && barH >= 9) svText(svg, { x: (M.l + w + 6).toFixed(1), y: (y + barH / 2 + 4).toFixed(1), class: 'bar-val' }, C.fmt(val, s.unit, s.decimals));
+      });
+      var hit = sv('rect', { x: 0, y: (M.t + band * i).toFixed(1), width: W, height: band.toFixed(1), fill: 'transparent', class: 'hit', tabindex: 0,
+        'aria-label': lab + ': ' + nums.filter(function (s) { return !s.hideTooltip; }).map(function (s) { return s.label + ' ' + C.fmt(s.values[i], s.unit, s.decimals); }).join(', ') }, svg);
+      var showBar = function (cx, cy) {
+        hl.setAttribute('y', (M.t + band * i).toFixed(1));
+        hl.setAttribute('height', band.toFixed(1));
+        var content = h('div', { class: 'tt' }, h('div', { class: 'tt-head', text: lab }));
+        nums.filter(function (s) { return !s.hideTooltip; }).forEach(function (s) {
+          content.appendChild(h('div', { class: 'tt-row' }, h('span', { class: 'tt-key box', style: 'background:' + (s.hideViz ? 'transparent' : s.color) }),
+            h('span', { class: 'tt-name', text: s.label }), h('span', { class: 'tt-val', text: C.fmt(s.values[i], s.unit, s.decimals) })));
+        });
+        showTooltipAt(content, cx, cy, 'chart');
+      };
+      hit.addEventListener('pointermove', function (e) { showBar(e.clientX, e.clientY); });
+      hit.addEventListener('focus', function () { var r = hit.getBoundingClientRect(); showBar(r.left + M.l + 20, r.top + 4); });
+      var off = function () { hl.setAttribute('height', 0); hideTooltip(); };
+      hit.addEventListener('pointerleave', off);
+      hit.addEventListener('blur', off);
+    });
+  }
+
+  // ---- table
+  function funnel() { return icon('funnel', 12); }
+  function renderTable(it, frame, raw) {
+    var p = it.panel, d = defaultsOf(p), body = it.body;
+    if (!frame || !frame.length) return noData(it, raw ? 'No data' : (d.noValue || 'No data'));
+    var cols = frame.fields.map(function (f, j) { return resolveField(p, f, j, raw); });
+    var key = (raw ? 'raw:' : '') + p.id, ts = state.tableState[key];
+    if (!ts) {
+      ts = state.tableState[key] = { sort: null, filters: {} };
+      var sb = !raw && p.options && p.options.sortBy && p.options.sortBy[0];
+      if (sb) ts.sort = { name: sb.displayName, desc: !!sb.desc };
+    }
+    var idx = [], i;
+    for (i = 0; i < frame.length; i++) idx.push(i);
+    var fkeys = Object.keys(ts.filters).filter(function (k) { return ts.filters[k]; });
+    if (fkeys.length) idx = idx.filter(function (r) {
+      return fkeys.every(function (k) {
+        var c = cols.find(function (cc) { return cc.label === k; });
+        return !c || cellText(c, r, raw).toLowerCase().indexOf(ts.filters[k].toLowerCase()) >= 0;
+      });
+    });
+    var sc = ts.sort && cols.find(function (cc) { return cc.label === ts.sort.name || cc.name === ts.sort.name; });
+    if (sc) {
+      var dir = ts.sort.desc ? -1 : 1;
+      idx.sort(function (a, b) {
+        var x = sc.values[a], y = sc.values[b];
+        if (x == null && y == null) return 0;
+        if (x == null) return 1;
+        if (y == null) return -1;
+        return (typeof x === 'number' && typeof y === 'number' ? x - y : String(x).localeCompare(String(y))) * dir;
+      });
+    }
+    var filterable = !raw && d.custom && d.custom.filterable;
+    var trh = h('tr');
+    cols.forEach(function (c) {
+      var sorted = !!(sc && sc === c);
+      var th = h('th', { scope: 'col', class: c.type === 'number' ? 'num' : null, 'aria-sort': sorted ? (ts.sort.desc ? 'descending' : 'ascending') : 'none' });
+      var sbtn = h('button', { class: 'th-sort', type: 'button', title: 'Sort by ' + c.label }, c.label,
+        sorted ? h('span', { class: 'sort-ind', 'aria-hidden': 'true', text: ts.sort.desc ? ' ↓' : ' ↑' }) : null);
+      sbtn.addEventListener('click', function () {
+        if (!sorted) ts.sort = { name: c.label, desc: true };
+        else if (ts.sort.desc) ts.sort = { name: c.label, desc: false };
+        else ts.sort = null;
+        renderItem(it);
+      });
+      th.appendChild(sbtn);
+      if (filterable) {
+        var active = !!ts.filters[c.label];
+        var fb = h('button', { class: 'th-filter' + (active ? ' active' : ''), type: 'button', 'aria-label': 'Filter ' + c.label,
+          'aria-haspopup': 'dialog', 'aria-expanded': 'false', title: active ? 'Filter: contains “' + ts.filters[c.label] + '”' : 'Filter this column' }, funnel());
+        fb.addEventListener('click', function (e) { e.stopPropagation(); openFilter(it, ts, c, fb); });
+        th.appendChild(fb);
+      }
+      trh.appendChild(th);
+    });
+    var tbody = h('tbody'), frag = document.createDocumentFragment();
+    idx.forEach(function (r) {
+      var tr = h('tr');
+      cols.forEach(function (c) {
+        var txt = cellText(c, r, raw), td = h('td', { class: c.type === 'number' ? 'num' : null });
+        if (c.links && c.links.length && c.values[r] != null) {
+          var lk = c.links[0];
+          td.appendChild(h('a', { href: '#', class: 'cell-link', title: lk.title || '', text: txt,
+            onclick: function (e) { e.preventDefault(); applyDataLink(lk, frame, r); } }));
+        } else {
+          td.textContent = txt;
+          if (txt.length > 28) td.title = txt;
+        }
+        tr.appendChild(td);
+      });
+      frag.appendChild(tr);
+    });
+    tbody.appendChild(frag);
+    var wrap = h('div', { class: 'tbl-wrap' }, h('table', { class: 'tbl' + (raw ? ' raw' : '') }, h('thead', null, trh), tbody));
+    body.appendChild(wrap);
+    if (!idx.length) wrap.appendChild(h('div', { class: 'no-data small', text: 'No rows match the column filter' }));
+  }
+  function openFilter(it, ts, c, anchor) {
+    var input = h('input', { type: 'text', class: 'menu-search', placeholder: 'Contains…', value: ts.filters[c.label] || '', 'aria-label': 'Filter ' + c.label });
+    function apply() { var v = input.value.trim(); if (v) ts.filters[c.label] = v; else delete ts.filters[c.label]; closeMenus(); renderItem(it); }
+    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') apply(); });
+    var menu = h('div', { class: 'menu filter-menu', role: 'dialog', 'aria-label': 'Filter ' + c.label },
+      h('div', { class: 'menu-title', text: 'Filter ' + c.label }), input,
+      h('div', { class: 'menu-actions' },
+        h('button', { type: 'button', class: 'btn-small', text: 'Clear', onclick: function () { delete ts.filters[c.label]; closeMenus(); renderItem(it); } }),
+        h('button', { type: 'button', class: 'btn-small primary', text: 'Apply', onclick: apply })));
+    openMenu(menu, anchor);
+    input.focus();
+  }
+  // Data links: interpret the JSON link URL (var-* params, viewPanel) inside the preview.
+  function applyDataLink(link, frame, row) {
+    var url = String(link.url || ''), qs = url.indexOf('?') >= 0 ? url.slice(url.indexOf('?') + 1) : '', viewPanel = null;
+    qs.split('&').forEach(function (part) {
+      var eq = part.indexOf('='), k = eq < 0 ? part : part.slice(0, eq), v = eq < 0 ? '' : part.slice(eq + 1);
+      if (k === 'viewPanel') { viewPanel = parseInt(v, 10); return; }
+      var m = /^var-(\w+)$/.exec(k);
+      if (!m || !Object.prototype.hasOwnProperty.call(state.vars, m[1])) return;
+      if (v === '%24__all' || v === '$__all') { state.vars[m[1]] = null; return; }
+      var fm = /\$\{__data\.fields\.(\w+)(?::\w+)?\}/.exec(v);
+      if (fm) {
+        var f = frame.fields.find(function (ff) { return ff.name === fm[1]; });
+        if (f && f.values[row] != null) state.vars[m[1]] = new Set([String(f.values[row])]);
+      }
+    });
+    refreshAll();
+    if (viewPanel != null) focusPanel(viewPanel);
+  }
+  function focusPanel(id) {
+    var it = BY_ID[id];
+    if (!it || !it.el) return;
+    if (it.row && state.collapsed[it.row.id]) {
+      state.collapsed[it.row.id] = false;
+      var rowIt = BY_ID[it.row.id];
+      if (rowIt && rowIt.el) { rowIt.el.classList.remove('collapsed'); rowIt.el.querySelector('.row-toggle').setAttribute('aria-expanded', 'true'); }
+      layout(); renderAll();
+    }
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    it.el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+    it.el.classList.remove('flash');
+    void it.el.offsetWidth;
+    it.el.classList.add('flash');
+  }
+
+  // ---- SQL view
+  var KW = new Set(('SELECT FROM WHERE AND OR NOT IN IS NULL AS GROUP BY ORDER HAVING LIMIT UNION ALL DISTINCT COUNT COUNTIF SUM AVG MIN MAX ' +
+    'IFNULL COALESCE SAFE_CAST SAFE_DIVIDE CAST JSON_VALUE UNNEST ARRAY STRING INT64 ENDS_WITH UPPER LOGICAL_OR STRING_AGG ' +
+    'TIMESTAMP_DIFF SECOND APPROX_QUANTILES OFFSET DESC ASC IF CONCAT TRUE FALSE CASE WHEN THEN ELSE END ON JOIN LEFT WITH').split(' '));
+  var SQL_RE = /(--[^\n]*)|('(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*")|(`[^`]*`)|(\$\{[^}]*\}|\$__\w+(?:\([^()]*\))?)|(\b\d+(?:\.\d+)?(?:e\d+)?\b)|([A-Za-z_][A-Za-z0-9_]*)/g;
+  function highlightSql(sql) {
+    var code = h('code'), last = 0, m;
+    SQL_RE.lastIndex = 0;
+    while ((m = SQL_RE.exec(sql))) {
+      if (m.index > last) code.appendChild(document.createTextNode(sql.slice(last, m.index)));
+      var cls = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'b' : m[4] ? 'm' : m[5] ? 'n' : (m[6] && KW.has(m[6].toUpperCase()) ? 'k' : null);
+      if (cls) code.appendChild(h('span', { class: 't-' + cls, text: m[0] }));
+      else code.appendChild(document.createTextNode(m[0]));
+      last = SQL_RE.lastIndex;
+    }
+    if (last < sql.length) code.appendChild(document.createTextNode(sql.slice(last)));
+    return h('pre', { class: 'sql' }, code);
+  }
+  function fmtName(f) { return f === 1 ? 'table' : f === 0 ? 'time series' : String(f); }
+  function varsLine() {
+    var parts = CONST_VARS.map(function (v) { return v.name + ' = ' + constValue(v.name); });
+    QUERY_VARS.forEach(function (v) {
+      var sel = state.vars[v.name];
+      parts.push(v.name + ':json = ' + (sel == null ? (v.allValue || 'All') : JSON.stringify(Array.from(sel))));
+    });
+    return h('div', { class: 'sql-vars' }, h('strong', { text: 'Variable values in this preview: ' }), parts.join(' · '));
+  }
+  function renderSql(it) {
+    var p = it.panel, t = target(p) || {}, body = it.body, src = sourceOf(p);
+    body.classList.add('sql-body');
+    var box = h('div', { class: 'sql-wrap' });
+    if (src != null) {
+      var sp = BY_ID[src] && BY_ID[src].panel;
+      var ro = p.options && p.options.reduceOptions;
+      box.appendChild(h('div', { class: 'sql-note' + (prChange(p) ? ' pr' : '') }, 'Data source ', h('code', { text: '-- Dashboard --' }),
+        ': reuses the query result of panel ' + src + ' (' + titleOf(src) + '). This panel sends no SQL of its own and starts no BigQuery job' +
+        (ro && ro.fields ? '; it reads the field ' + ro.fields + '.' : '.')));
+      if (sp && hasSql(sp)) {
+        box.appendChild(h('div', { class: 'sql-meta', text: 'Source query · panel ' + src + ' · refId ' + (target(sp).refId || 'A') + ' · format ' + fmtName(target(sp).format) }));
+        box.appendChild(highlightSql(target(sp).rawSql));
+      }
+    } else if (t.rawSql != null) {
+      box.appendChild(h('div', { class: 'sql-meta', text: 'refId ' + (t.refId || 'A') + ' · format ' + fmtName(t.format) + ' · data source ${datasource} (BigQuery)' }));
+      box.appendChild(highlightSql(t.rawSql));
+    } else box.appendChild(h('div', { class: 'no-data', text: 'This panel has no query.' }));
+    box.appendChild(varsLine());
+    body.appendChild(box);
+  }
+  function renderUnsupported(it) {
+    noData(it, 'The preview has no renderer for the “' + it.panel.type + '” panel type. Use the Table or SQL view.');
+  }
+
+  // ---------------------------------------------------------------- footer + verification
+  function countJsonPanels() {
+    var n = 0;
+    (DASH.panels || []).forEach(function (p) { n++; if (p.type === 'row' && p.panels) n += p.panels.length; });
+    return n;
+  }
+  function counts() {
+    var rendered = grid.querySelectorAll('[data-panel-id]').length;
+    var rows = grid.querySelectorAll('[data-panel-type="row"]').length;
+    return { panelsInJson: countJsonPanels(), panelsRendered: rendered, rows: rows, visualizations: rendered - rows,
+      vizRenderedOk: grid.querySelectorAll('.panel[data-rendered="ok"]').length, renderErrors: state.renderErrors.length,
+      panelQueries: panelQueryCount(), mainDashboardPanelQueries: META.mainPanelQueries,
+      fixtureEvents: fixture ? fixture.events.length : 0 };
+  }
+  function updateFooter() {
+    var c = counts(), f = document.getElementById('foot-stats');
+    if (!f) return;
+    var dt = new Date(state.lastRefresh);
+    f.textContent = 'Rendered ' + c.panelsRendered + ' of ' + c.panelsInJson + ' dashboard panels (' + c.visualizations +
+      ' visualizations + ' + c.rows + ' rows). ' + c.panelQueries + ' panel queries per refresh in this trial (bqaa-dashboard.json: ' +
+      c.mainDashboardPanelQueries + '). Synthetic fixture: ' + c.fixtureEvents.toLocaleString('en-US') +
+      ' agent_events rows over 7 days, seed ' + fixture.seed + ', generated in this browser. Last refreshed ' +
+      C.pad2(dt.getHours()) + ':' + C.pad2(dt.getMinutes()) + ':' + C.pad2(dt.getSeconds()) + ' (browser time zone).';
+  }
+  function setVerification() {
+    var c = counts(), ds = document.documentElement.dataset;
+    ds.panelsJson = c.panelsInJson; ds.panelsRendered = c.panelsRendered; ds.rowsRendered = c.rows;
+    ds.vizRenderedOk = c.vizRenderedOk; ds.renderErrors = c.renderErrors; ds.panelQueries = c.panelQueries;
+    ds.fixtureEvents = c.fixtureEvents;
+    window.__bqaaDemo = c;
+  }
+  function refreshAll() {
+    runQueries();
+    renderAll();
+  }
+  function initPrStrip() {
+    var el = document.getElementById('pr-jobs');
+    if (el) el.textContent = panelQueryCount() + ' panel queries per refresh here vs ' + META.mainPanelQueries + ' in bqaa-dashboard.json';
+    var btn = document.getElementById('pr-show');
+    if (btn) btn.addEventListener('click', function () {
+      var root = null;
+      ITEMS.forEach(function (it) { if (root == null && feedsPr(it.panel)) root = it.panel.id; });
+      if (root == null) return;
+      var ids = [root].concat(CONSUMERS[root] || []);
+      focusPanel(root);
+      setLinked(ids, true);
+      setTimeout(function () { setLinked(ids, false); }, 2600);
+    });
+  }
+
+  function init() {
+    document.getElementById('dash-title').textContent = DASH.title;
+    buildToolbar();
+    buildGrid();
+    initPrStrip();
+    runQueries();
+    layout();
+    renderAll();
+    setRefresh(state.refresh);
+    var rt = 0;
+    window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { layout(); renderAll(); }, 150); });
+  }
+  try { init(); } catch (err) {
+    document.documentElement.dataset.fatal = String(err && err.message);
+    grid.textContent = '';
+    grid.appendChild(h('div', { class: 'panel-error', text: 'The preview failed to start: ' + (err && err.message) }));
+    if (window.console) console.error(err);
+  }
+})();
+
+</script>
+</body>
+</html>
