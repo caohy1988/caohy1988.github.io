@@ -8,7 +8,7 @@
   var nav = bar.querySelector(".site-nav");
   var toggle = bar.querySelector(".site-nav-toggle");
   var folders = Array.prototype.slice.call(bar.querySelectorAll(".site-nav-folder"));
-  var mobile = window.matchMedia("(max-width: 860px)");
+  var mobile = window.matchMedia("(max-width: 1100px)"); // same collapse point as assets/site-nav.css
   bar.classList.add("site-nav-js");
 
   // Pages generated elsewhere may ship without aria-current; mark the exact match for this location.

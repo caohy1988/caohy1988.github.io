@@ -33,6 +33,7 @@ export const NAV = [
   { label: "Jev", href: "/research/jev/" },
   { label: "Durable", href: "/research/durable-agents/" },
   { label: "Leadership", href: "/research/tl-agent-era/" },
+  { label: "Profile", href: "/research/profile/" },
   { label: "Builds", id: "builds", items: [
     { label: "RFC", href: "/rfc/" },
     { label: "Detailed RFC", href: "/rfc/detailed-rfc/" },
@@ -57,6 +58,7 @@ export const PAGES = {
   "/research/jev/": "research/jev/index.html",
   "/research/durable-agents/": "research/durable-agents/index.html",
   "/research/tl-agent-era/": "research/tl-agent-era/index.html",
+  "/research/profile/": "research/profile/index.html",
   "/rfc/": "rfc/index.html",
   "/rfc/detailed-rfc/": "rfc/detailed-rfc/index.html",
   "/rfc/demo/": "rfc/demo/index.html",
@@ -64,13 +66,31 @@ export const PAGES = {
   "/rfc/e2e/": "rfc/e2e/index.html",
   "/evalbench/": "evalbench/index.html",
   "/research/builds/mcp-apps-feature-matrix/": "research/builds/mcp-apps-feature-matrix/index.html",
+  // Pages that are not nav entries themselves (added 2026-11-11; they carried a pasted copy of the block before).
+  "/research/harness/core/": "research/harness/core/index.html",
+  "/research/harness/installation/": "research/harness/installation/index.html",
+  "/research/harness/cases/": "research/harness/cases/index.html",
+  "/research/coding-agent-mod-bqaa/": "research/coding-agent-mod-bqaa/index.html",
+  "/research/bqaa-permission-model/": "research/bqaa-permission-model/index.html",
+  "/research/foundry-insights-vs-bqaa/": "research/foundry-insights-vs-bqaa/index.html",
+  "/research/smithdb-vs-bqaa/": "research/smithdb-vs-bqaa/index.html",
 };
 
 // Which nav entry is "current" for a page. Demos live under the RFC (that is what their old nav said).
-export const CURRENT = { "/rfc/demo/": "/rfc/", "/rfc/full-demo/": "/rfc/", "/rfc/e2e/": "/rfc/" };
+// The three harness sub-pages marked Harness before they were listed here. The three studies and the build note
+// are reached from the Research hub's own link strip, so they mark Research.
+export const CURRENT = {
+  "/rfc/demo/": "/rfc/", "/rfc/full-demo/": "/rfc/", "/rfc/e2e/": "/rfc/",
+  "/research/harness/core/": "/research/harness/", "/research/harness/installation/": "/research/harness/", "/research/harness/cases/": "/research/harness/",
+  "/research/coding-agent-mod-bqaa/": "/research/", "/research/bqaa-permission-model/": "/research/",
+  "/research/foundry-insights-vs-bqaa/": "/research/", "/research/smithdb-vs-bqaa/": "/research/",
+};
 
 // Long single-page documents keep the bar pinned (they did before the shared chrome).
-export const STICKY = new Set(["/rfc/detailed-rfc/", "/rfc/demo/", "/rfc/full-demo/", "/rfc/e2e/", "/research/harness/", "/research/jev/", "/research/durable-agents/", "/research/tl-agent-era/"]);
+export const STICKY = new Set(["/rfc/detailed-rfc/", "/rfc/demo/", "/rfc/full-demo/", "/rfc/e2e/", "/research/harness/", "/research/jev/", "/research/durable-agents/", "/research/tl-agent-era/",
+  // pinned in their pasted blocks before they were listed here
+  "/research/harness/core/", "/research/harness/installation/", "/research/harness/cases/", "/research/coding-agent-mod-bqaa/",
+  "/research/bqaa-permission-model/", "/research/foundry-insights-vs-bqaa/", "/research/smithdb-vs-bqaa/"]);
 
 const START = "<!-- site-nav:start -->";
 const END = "<!-- site-nav:end -->";

@@ -149,7 +149,10 @@
 .site-topbar:not(.site-nav-js) .site-nav-folder:hover > .site-nav-menu,
 .site-topbar:not(.site-nav-js) .site-nav-folder:focus-within > .site-nav-menu { display: flex; }
 
-@media (max-width: 860px) {
+/* Collapse point. With 12 top-level items the desktop bar needs a viewport of about 1074px (IBM Plex Sans pages)
+   to 1098px (system-font pages); below that it scrolled sideways. Keep this number equal to the one in
+   assets/site-nav.js, and re-measure both when a top-level item is added (research/site-nav-spec.md). */
+@media (max-width: 1100px) {
   .site-topbar-inner { flex-wrap: wrap; gap: 12px 20px; }
   .site-nav-toggle { display: inline-flex; }
   .site-nav {
