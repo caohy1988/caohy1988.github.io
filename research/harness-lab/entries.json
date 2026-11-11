@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-11T07:38:50Z",
+  "updatedAt": "2026-11-11T09:52:10Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
@@ -5432,12 +5432,12 @@
         "EM",
         "backlog"
       ],
-      "appliedToPlaybook": false,
+      "appliedToPlaybook": true,
       "plainTitle": "regista: no commit without an independent review of that exact change",
       "whatItIs": "A build harness for two coding CLIs that enforces its rules with hooks: a commit is blocked unless an independent reviewer approved that exact change, a test may go only with the user's approval and proof it is redundant, and context is compacted at 65%, its author's setting.",
-      "whyItMatters": "Our reviewers' verdicts already count only for the exact commit they read, a check done by hand after the push. A test of its commit hook on a mock repository is only proposed, not installed; only adopting the hook in our loop would move review before the commit, and any change needs Haiyuan.",
-      "status": "not-adopted",
-      "statusNote": "A Lab proposal only: no commit hook checks for a review, and verdicts still count only on the reviewed head commit under the manual verdict-line rule (#review-verdict-line)."
+      "whyItMatters": "Our reviewers' verdicts already count only for the exact commit they read, a check done by hand after the push. Its diff fingerprint is now a report-only script the EM must check, by rule, before any dual approval; its commit hook is not installed, and adopting that needs Haiyuan.",
+      "status": "partial",
+      "statusNote": "Adopted 2026-11-10: the report-only script regista-verdict-bind is installed at head 4a3ef92, wired by a rule in the dual-LGTM step with no run record yet; no commit hook is installed (#lab-adopted-tools)."
     },
     {
       "id": "context-tax-2026-11-02",
@@ -5478,12 +5478,12 @@
         "routines",
         "backlog"
       ],
-      "appliedToPlaybook": false,
+      "appliedToPlaybook": true,
       "plainTitle": "memrot: a checker for dead paths, apparent contradictions and stale time words",
       "whatItIs": "A small offline checker for the instruction and memory files of coding agents. It flags file paths that no longer exist, run commands missing from a project's scripts, rules that a simple pattern match reads as contradictory, and time words such as today that go stale.",
-      "whyItMatters": "Our rule that a cited vault path must exist is applied by hand, and no tool of ours checks it. A read-only, offline run over the shared notes vault is only proposed, not installed or run; its fix mode would delete lines, and any change needs Haiyuan.",
-      "status": "not-adopted",
-      "statusNote": "A Lab proposal only: no tool checks the vault's notes for dead paths or stale wording, and cited paths are still checked by hand under the pointer rule (#pointer-check)."
+      "whyItMatters": "Our rule that a cited vault path must exist is still applied by hand. A read-only scan of the vault's shared rules, agent cards and contracts is now installed and set as a step in our weekly check, which has not run yet; its fix mode is not adopted, and any change needs Haiyuan.",
+      "status": "partial",
+      "statusNote": "Adopted 2026-11-10: memrot-scan is installed at 870b9f2, report-only, wired as a Monday Lab step with no run yet; first run 2026-11-16, ledger due 2026-11-24 (#lab-adopted-tools; ~/bin/memrot-scan)."
     },
     {
       "id": "hookjack-2026-11-03",
@@ -5682,15 +5682,14 @@
         "hooks",
         "concurrency",
         "routines",
-        "tmux",
-        "backlog"
+        "tmux"
       ],
-      "appliedToPlaybook": false,
+      "appliedToPlaybook": true,
       "plainTitle": "agent-load-brake: unattended agent runs wait their turn when the Mac is busy",
       "whatItIs": "A hook that checks load, memory, swap and free disk before an unattended agent session makes its first model call, and holds the session in a queue until there is room. Per its author, interactive sessions are never held, and a session that waits too long stops cleanly before any spend.",
-      "whyItMatters": "Per the collection notes, our coding agents on the Mac start runs that can overlap, and nothing today holds a launch back on load or memory. A dry run and one simulated hold are only proposed, not installed; the queue limits are the author's, and any change needs Haiyuan.",
-      "status": "not-adopted",
-      "statusNote": "A Lab proposal only: no launch waits on host load, and the nearest control is the manual hold on long launches below 15 GB free, a disk floor rather than a load gate (#launch; #controls-inventory)."
+      "whyItMatters": "Per the collection notes, our coding agents on the Mac start runs that can overlap. Per the launcher's help text, before a headless launch it now looks at the one-minute load, memory pressure and running agent sessions, and when the host is busy the launch waits in a local first-in-first-out queue.",
+      "status": "in-harness",
+      "statusNote": "Adopted 2026-11-10: installed in the launcher at reviewed head ab0a19e, pull request not merged; per the launcher's --help, a headless launch on a busy host waits in a local first-in-first-out queue (#lab-adopted-tools)."
     },
     {
       "id": "rufix-2026-11-05",
@@ -5823,12 +5822,12 @@
         "EM",
         "backlog"
       ],
-      "appliedToPlaybook": false,
+      "appliedToPlaybook": true,
       "plainTitle": "claimtrace: check each claim in an agent's report against its session log",
       "whatItIs": "A tool that checks claims in an agent's report, like files opened or tests run, against its session log, marking each verified, unverified or contradicted with the log line; a cut-off log leaves all unverified. Unparseable claims are marked unparsed, so an oddly worded real claim can go unchecked.",
-      "whyItMatters": "Our rule that a done claim must match the session record is applied by hand, and per the collection notes our receipts are written by the agents themselves. Nothing is installed, no trial is named, and it would need a converter for our logs; any change needs Haiyuan.",
-      "status": "not-adopted",
-      "statusNote": "A Lab proposal only: the playbook names no tool that checks a report's claims against its log, and done claims still rest on the manual rule that the session record must back them (#claim-vs-record)."
+      "whyItMatters": "Our rule that a done claim must match the session record is applied by hand, and per the collection notes our receipts are written by the agents themselves. It is now installed and a rule runs it at each run's close, with no real run yet; plain-text logs are a gap, and any change needs Haiyuan.",
+      "status": "partial",
+      "statusNote": "Adopted 2026-11-10: claimtrace is installed at head e17d119, report-only, and its wiring is a rule in the closeout of every Mac kick with no run record yet (#lab-adopted-tools; ~/bin/claimtrace)."
     },
     {
       "id": "Parrhesia-2026-11-07",
@@ -5846,12 +5845,12 @@
         "EM",
         "backlog"
       ],
-      "appliedToPlaybook": false,
+      "appliedToPlaybook": true,
       "plainTitle": "Parrhesia: one review for overclaiming, one for underclaiming, then one judge",
       "whatItIs": "A review plugin that splits checking evidence into three roles: one reviewer looks for claims stronger than the evidence, another for findings weakened without cause, and a single judge rules on each item with no voting or averaging. Too little evidence is its own verdict.",
-      "whyItMatters": "Our reviews test unsupported claims, but per the collection notes nothing catches a solid finding hedged into unconfirmed. It is a pilot with Chinese-first docs and clinical examples; nothing is installed, no trial is named, and any change needs Haiyuan.",
-      "status": "not-adopted",
-      "statusNote": "A Lab proposal only: the playbook names no underclaim pass or single adjudicator, and reviews still rest on blind disproof with a verdict line on the head commit (#disproof-review; #review-verdict-line)."
+      "whyItMatters": "Our reviews test unsupported claims, but per the collection notes nothing catches a solid finding hedged into unconfirmed. It is a pilot with Chinese-first docs and clinical examples; its plugin is not installed, a text-only form is on trial in docs and drafts reviews, and any change needs Haiyuan.",
+      "status": "trial",
+      "statusNote": "Final 2026-11-09: docs/drafts block trial, no tool or code reviews; review after 2026-12-08 or first Monday kill review after 10 docs-lane reviews (#lab-adopted-tools; Maps/Decisions/2026-11-08-parrhesia-trial.md)."
     },
     {
       "id": "signoff-cli-2026-11-07",
