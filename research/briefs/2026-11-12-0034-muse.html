@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-12-0034: Table retrieval without an LLM in the loop matches LLM schema linking on readable catalogs — and shows exactly where it stops</title>
+  <meta name="description" content="Field Brief 2026-11-12-0034: Table retrieval without an LLM in the loop matches LLM schema linking on readable catalogs — and shows exactly where it stops">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-12-0034-muse.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 AM PT · Thu Nov 12, 2026 · Muse</p>
+    <article>
+<h1>Field Brief — 2026-11-12-0034: Table retrieval without an LLM in the loop matches LLM schema linking on readable catalogs — and shows exactly where it stops</h1>
+<p><strong>Writer: Muse (<code>muse-wonder-full-1.0</code>, high)</strong>
+Delivery: Markdown handoff only; Collection owns HTML, catalog and push.
+Window: since the 2026-11-11-1234 brief (~12:40 PT Wed Nov 11) to launch (~00:50 PT Thu Nov 12), ~12h. arXiv: Thursday Nov 12 batch <strong>not listed</strong> at 00:44 PT (listing header still reads Wednesday, 11 November 2026; abs probes above 2611.14519 return 404; newest cs.AI via export API is 2611.14519). Verified ceiling stays <strong>2611.14519</strong>; 0 new Thursday ids screened — gap recorded under Unconfirmed, catch-up owed. Academy rank below is a <strong>reserve promotion</strong> from the Nov 11 batch because the Thursday batch is absent. Effort: high. Path: fresh (packs=0, collectors paused; writer's own sweep is the only source).</p>
+<h2>Read this first</h2>
+<p>One decision-relevant item, from the reserve queue: <strong>FERN</strong> shows a learned ranker over frozen retrievers — no generative LLM call in the retrieval path — comes within one point of published LLM-based schema linking (RASL) at five tables on Spider and on BIRD-with-evidence, at ~0.2s/question with nothing leaving the building. The same paper is equally clear about the boundary: without per-question evidence hints the gap at five tables is 8.2 points, and on an opaque financial schema (Fiben) it falls far short. For BQAA the actionable split is: schema-linking quality on readable catalogs is now a ranking problem you can solve locally and cheaply; the LLM earns its keep where names are opaque or hints are absent. Industry shipped nothing product-level in-window; the registry movers are framework minors and patch trains, noted in one line each.</p>
+<h2>Industry</h2>
+<p>No NEW ranks. No material Progress.</p>
+<p>One-line mentions (verified via PyPI/npm JSON and GitHub release notes; window start 2026-11-11T20:45Z):</p>
+<ul><li>pydantic-ai 2.68.0 (Nov 12, 02:30Z) — in-run approvals/answers via <code>RequestInput</code>, <code>OutputTokenLimitExceeded</code> with model fallback, harness event renames behind deprecated aliases; framework minor, no new analytics surface.
+</li><li>@langchain/core 1.4.0 (Nov 11, 22:09Z) — JS core minor above 1.3.7; no product-level capability identified.
+</li><li>litellm 1.109.1 stable plus 1.106.9/1.108.6 backfills and 1.110.0rc2 (Nov 12) — patch train + prerelease; RC is NOTE at most by rule.
+</li><li>@mastra/core 1.83.0-alpha.9–.11 — prereleases only; stable stays 1.82.0.
+</li><li>@letta-ai/letta-code 0.34.53–0.34.56 — patch train.
+</li><li>AWS ML Blog (Nov 11, 23:13Z): "Introducing the Web Search API on Amazon Bedrock AgentCore" — direct <code>InvokeWebSearch</code> data-plane operation, SigV4/IAM-gated, CloudTrail data-event logging; this is the dated primary the 1234 slot lacked, but it is an agent tool primitive, not an analytics/observability move, so it stays a mention. The post does not use the words "generally available" in the sections read; treat GA wording as not asserted here.
+</li><li>AWS ML Blog (Nov 11, 23:35Z): a third-party coding agent becomes callable on Amazon Bedrock (title paraphrased per vendor-title rule) — model/coding-agent availability, not agent analytics; mention only.
+</li><li>Langfuse changelog (Nov 11): AI Gateway custom base URL, decision-model and embeddings routes through the gateway, default evaluation model + batch evaluations via MCP — incremental gateway/eval plumbing; mention only.
+</li></ul>
+<p>Everything else tracked was unchanged above the 11-11 12:45 PT registry tops (openai-agents, langchain-core Py, agno, arize-phoenix, braintrust Py/JS, weave, opik, inspect-ai, livekit-agents, langfuse Py, google-adk, <code>ai</code>, promptfoo, claude-code): registry JSON lookups succeeded and reached current tops, so "no in-window release" is a confirmed-negative for those packages only.</p>
+<h2>Academy</h2>
+<h3>1. <a href="https://arxiv.org/abs/2611.14477">FERN: Cross-Benchmark Table Retrieval for Text-to-SQL with Frozen Retrievers and Learned Ranking</a> — reserve promotion, full PDF read</h3>
+<p>Full PDF read: yes — pdftotext of the complete v1 PDF (20 pp. incl. appendices), read in full including methods (§4), protocol (§5), results (§6, Tables 5–11), discussion (§7), limitations (§8) and Appendices A–B. SAP authors; cs.IR, 10 Nov 2026. Not in catalog (grep: 0 hits). Promoted from the Nov 11 reserve queue because the Thursday batch had not listed (see Unconfirmed).</p>
+<p>What it does: three frozen retrievers (BM25, Qwen3-Embedding-0.6B, BGE-large) fuse into a 100-table candidate pool over pooled multi-database catalogs (no target database given); each candidate gets up to 120 hand-built features (retrieval scores/agreement, database support, lexical overlap, value matches, join-graph, question type); LightGBM lambdarank rankers fitted <strong>once</strong> on 9,394 BIRD training questions order the pool. Zero generative-model calls per question (Table 2).</p>
+<p>Key numbers (Table 5, vs RASL's published LLM-linking recall; point differences only — RASL per-question data unavailable, no interval on the gap):</p>
+<ul><li>Spider (never fitted on, cleanest comparison): recall@5 96.7 vs RASL 97.0 (−0.3); @15 99.1 vs 98.0 (+1.1). The frozen pool alone already hits 98.0 @15; the ranker's real contribution is complete table sets at small budgets — complete@5 83.9% → 95.6% (Table 6).
+</li><li>BIRD with evidence hints: @5 96.6 vs 97.5 (−0.9). <strong>Without evidence: 89.3, i.e. −8.2 @5</strong> — the question-only row is the deployment-relevant one (§6.1).
+</li><li>BEAVER enterprise (121 real log questions, no BEAVER fitting): recall@15 82.1 sits between two BEAVER-trained retrievers (80.8, 84.5), but complete@15 49.6 trails both (54.5, 62.0) — with ~4 gold tables/question, recall flatters; complete-set recovery is the metric that decides whether the SQL can be right (Table 8, §6.2).
+</li><li>Fiben (opaque run-together names, single DB): @15 54.2 vs RASL 69.2 on different question sets (298 vs 279; bounded 51.1–57.9 either way) — both candidate retrieval and small-budget ranking break (§7).
+</li><li>Cost: median 208 ms/question on one A100, indexes precomputed, no hosted calls, schema never leaves the system (Table 11, §6.4). Feature ablation: non-retrieval features add +7.7 complete@5 over retrieval signals alone on BIRD-ev (Table 9); only database-support and join-graph families individually clear zero (Table 10).
+</li></ul>
+<p>Why BQAA cares: (1) BQAA's table-retrieval stage can treat "LLM picks the tables" as the fallback, not the default — a local ranker is auditable, deterministic (the paper re-ran its pipeline and reproduced every number exactly), and keeps customer schema on-prem. (2) Report <strong>complete@k</strong> next to recall@k in BQAA retrieval evals; FERN's BEAVER split is the cautionary example that recall hides missing-table failures. (3) The evidence-hint delta (7.3 points @5) prices what curated column/value descriptions and query hints are worth — a direct input to metadata-enrichment ROI.</p>
+<p>Limits the authors state themselves (§8): comparison is against published numbers, not a RASL re-run; 9,394 labeled BIRD questions is far more supervision than RASL's 200/question-set calibration — FERN avoids <em>target-domain</em> fitting, not supervision; BIRD dev and BEAVER each informed one documented design exception (§5), so Spider is the only fully clean transfer; retrieval only, no end-to-end SQL accuracy; code/rankers promised on journal publication, not yet released.</p>
+<p>Scouted, not ranked (reserve queue, abstract-level only — do not carry as screened-and-rejected at full-text depth): 2611.12953 agent-architecture cost-success trade-offs (single agent is the efficient default; coordinated arms cost 1.4–4.7× tokens — strong ADK relevance, first in line if the Thursday batch is thin again); 2611.13140 failure-taxonomy measurement limits (category shares are classifier-order artifacts, κ=0.093 on the category vs 0.932 on correctness — relevant to BQAA error dashboards); 2611.13396 token-spend case study (404 engineers; spend measures agent use, not output — interesting, below the bar for a rank this slot). None are in the catalog.</p>
+<h2>Six-week EV</h2>
+<ul><li>FERN pattern (frozen pool + learned ranker + complete@k reporting): high EV, low cost — a BQAA retrieval-eval change (add complete@k) is days of work; a local-ranker prototype against the current LLM linker on readable public catalogs is a 2–3 week experiment with a clear kill criterion (complete@5 parity). EV drops sharply for opaque enterprise schemas — budget the LLM fallback there.
+</li><li>Thursday arXiv catch-up: owed next slot; expect the usual full batch above 2611.14519. Reserve 2611.12953 should be full-read first if that batch is thin.
+</li><li>Industry: nothing in-window changes any six-week plan. The AgentCore direct web-search primitive slightly lowers the cost of giving ADK-on-AWS agents cited web access, but it is a tool, not a competitive analytics move.
+</li></ul>
+<h2>TL;DRs for BQAA</h2>
+<ul><li>FERN (2611.14477): local learned ranking matches LLM schema linking within a point on readable catalogs at 0.2s/question — prototype it, and start reporting complete@k beside recall@k; keep LLM linking for opaque schemas and hint-free questions.
+</li><li>Registry: pydantic-ai 2.68.0, @langchain/core 1.4.0, litellm patch train — routine dependency hygiene only, no action.
+</li><li>AgentCore Web Search API now has a dated primary (Nov 11) — noted, no BQAA action.
+</li></ul>
+<h2>Unconfirmed</h2>
+<ul><li>gap: arXiv Thursday Nov 12 batch not listed at 00:44 PT Thu — <code>/list/cs.AI/new</code> header still reads "Wednesday, 11 November 2026" (HTTP 200, lookup succeeded); abs probes 2611.14520/14600/14700/14800/15000/15500 all 404; export API newest cs.AI = 2611.14519. Verified ceiling unchanged at 2611.14519; 0 Thursday ids screened. Collection owes a catch-up scout when the batch lists.
+</li><li>Model-vendor office suite (from 1234, re-checked once): still secondary-only. Anthropic news index fetched (HTTP 200); no office-suite announcement among listed items. Not asserted.
+</li><li>Datadog coding-agent monitoring (from 1234, re-checked once): Datadog blog index fetched; no dated in-window primary found. Not asserted.
+</li><li>AgentCore InvokeWebSearch (from 1234, re-checked): dated primary now exists (AWS ML Blog, Nov 11 23:13Z) and is mentioned above; "generally available" wording not found in the sections read, so GA status is not asserted.
+</li><li>Databricks per-feature GA/preview split and vendor-run benchmark (from 1234): no new dated primary found in this sweep; no Progress to <code>databricks-genie-autonomous-coworker</code>.
+</li><li>OpenAI news: gap: OpenAI news 403 (curl to openai.com/news returned 403 again) — no OpenAI in-window claim is made either way.
+</li></ul>
+<h2>Housekeeping</h2>
+<ul><li>Packs used: none. Fresh list <code>_runs/fb-2026-11-12-0034/fresh-items.md</code>: packs=0, fresh=0 (collectors paused per Haiyuan's 2026-10-22 order — disclosed gap, not a failure). Agy/DSH/Muse hourly collects Wed 12:32 PT → Thu 00:32 PT and extra seats paused; LinkedIn authwall; X/Reddit not collected; HN dropped 2026-09-27; Medium scouting paused.
+</li><li>Writer's own sweep (only source this slot): PyPI/npm registry JSON for all tracked SDKs via <code>_runs/muse-brief-0034-thu20261112/registry_check.py</code> (window ≥2026-11-11T20:45Z); GitHub release notes for pydantic-ai v2.68.0; AWS ML Blog index + RSS (in-window posts identified by pubDate); Langfuse changelog index; Anthropic news index; Datadog blog index; web search for vendor launches (results were aggregator/secondary and were used as leads only, never cited). Catalog greps run for every candidate (685 items / 205 briefs / 207 runs confirmed live; 2611.14477, 2611.12953, 2611.13140, 2611.13396 all absent; priority pin 2609.02702 intact, not re-carded).
+</li><li>arXiv verification: listing header + abs probes + export API, three independent routes agree the Thursday batch is absent and 2611.14519 is still the ceiling. Batch ids screened this slot: 0 (batch not listed); reserve promotion full-PDF-read instead (1 paper, within the ≤3 cap). Fetched PDF/txt under the run dir deleted after reading.
+</li><li>Negative claims: "no in-window release" asserted only where the registry lookup succeeded and returned current tops; OpenAI (403) and the arXiv Thursday batch are recorded as gaps, not quiet.
+</li></ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>arxiv-2611-14477-fern-table-retrieval</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> FERN: Cross-Benchmark Table Retrieval for Text-to-SQL with Frozen Retrievers and Learned Ranking
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.14477">https://arxiv.org/abs/2611.14477</a>
+</li><li><strong>card text:</strong> Reserve promotion (Nov 11 batch; Thursday batch unlisted). A LightGBM ranker over three frozen retrievers, fitted once on BIRD, matches published LLM schema linking within a point at five tables on Spider/BIRD-with-evidence at ~0.2s/question with no hosted calls — but trails by 8.2 points without evidence hints and fails on opaque Fiben schemas. Report complete@k beside recall@k: on real BEAVER questions its recall@15 matched target-trained retrievers while complete@15 trailed both.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<p>None.</p>
+<p><strong>Headline claims</strong></p>
+<ul><li>A locally-run learned ranker with no generative LLM in the retrieval path reaches recall@5 96.7 on Spider vs 97.0 for published LLM schema linking, and lifts complete@5 from 83.9% to 95.6% (<a href="https://arxiv.org/abs/2611.14477">https://arxiv.org/abs/2611.14477</a>, 2026-11-10).
+</li><li>The same ranker falls 8.2 points behind at five tables when per-question evidence hints are removed, pricing metadata/hint enrichment for text-to-SQL retrieval (<a href="https://arxiv.org/abs/2611.14477">https://arxiv.org/abs/2611.14477</a>, 2026-11-10).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Thu Nov 12, 2026 · 12:34 AM PT · Muse</span>
+    </div>
+  </footer>
+</body>
+</html>
