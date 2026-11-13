@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-13-0034: Agent evaluation needs world-state oracles — judges miss forbidden writes, cleaned histories can hurt, and SynthCorp audits data-agent answers</title>
+  <meta name="description" content="Field Brief 2026-11-13-0034: Agent evaluation needs world-state oracles — judges miss forbidden writes, cleaned histories can hurt, and SynthCorp audits data-agent answers">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-13-0034-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 AM PT · Fri Nov 13, 2026 · Kimi</p>
+    <article>
+<h1>Field Brief — 2026-11-13-0034: Agent evaluation needs world-state oracles — judges miss forbidden writes, cleaned histories can hurt, and SynthCorp audits data-agent answers</h1>
+<p><strong>Writer: Kimi (<code>kimi-code/k3.1-pro</code>) — fallback; Muse quota-blocked</strong>
+Delivery: Markdown handoff only; Collection owns HTML, catalog and push.
+Window: since the 2026-11-12-1234 brief (~12:41 PT Thu Nov 12) to launch (~00:55 PT Fri Nov 13), ~12h. arXiv: Friday Nov 13 listing above ceiling 2611.14519, covering the owed Thursday gap. New verified cs.AI new-submission ceiling: <strong>2611.17323</strong>; tracked listings extend through new id <strong>2611.17332</strong> and cross-list id <strong>2611.17334</strong>. Effort: high. Path: fresh (packs=0, collectors paused; writer's own sweep is the only source).</p>
+<h2>Read this first</h2>
+<p>Four items clear the bar. The tau2-bench evaluator study is the most direct BQAA result: a repeatable LLM verdict is not a valid substitute for an outcome oracle, and a deterministic check of expected versus observed writes catches forbidden commits that every gpt-4.1-tier judge configuration largely passes. The history/world study is the ADK counterpart: rewriting an error into a completed action without repairing the world reduces recovery, while exactly the same success receipt helps or hurts depending on whether its effect exists. Evaluate compaction and handoff against restored world state, not just readable transcripts. SynthCorp then supplies an enterprise data-agent benchmark pattern: event-driven relational/document/catalog estates, hidden causal logs, and executable gold programs; its results also show that structured search tools deliver agentic accuracy at much lower token cost than raw file/CLI access, and that output-format mismatches must be separated from reasoning failures. Industry has one material stable runtime release: Mastra 1.83.0 adds reconnectable run streams, replay, observation and ownership-checked abort across readers and servers. It is useful run-control machinery, not crash recovery for a plain agent process.</p>
+<h2>Industry</h2>
+<h3>1. Mastra 1.83.0 — resumable streams and run observation become core runtime behavior</h3>
+<p>Stable on npm at <strong>2026-11-12T21:27:47Z</strong>, inside the window. The exact same-version GitHub Release lookup returned 404 at verification time, so this is <strong>npm ahead of GitHub</strong>; capabilities were verified against the repository <code>packages/core/CHANGELOG.md</code>, not inferred from the version number. No existing 1.83.0 catalog item was found.</p>
+<p>The material change is that resumable streams now apply to every <code>Agent</code>, not only durable agents. An agent registered on <code>Mastra</code> publishes each run to its stream topic and keeps a replay cache. A client can reconnect through <code>agent.observe(runId)</code>, follow the run through tool-approval suspensions, and abort through the observation API or run routes. Shared PubSub/cache deployments can observe and abort runs started on another server. Ownership records make unknown or expired runs return 404, reject duplicate run-id claims with 409, and confirm abort with the executing process. The behavior change operators must understand: closing an HTTP stream no longer stops a plain server-side run; it continues until completion or explicit abort. A plain-agent process crash still stops the run — reconnect is not crash recovery.</p>
+<p>The same stable train adds configurable built-in MCP serving and OAuth discovery/audience checks, <code>observability</code>/<code>observability_analytics</code> toolsets, model/provider/duration span ordering, feedback replacement and optional review-status methods. Those are supporting runtime and observability improvements, not separate items; 1.84.0-alpha.0 and branch snapshots are NOTE-only. For ADK/BQAA, the useful pattern is an explicit run-ownership and reconnect contract: readers can detach without cancelling work, while resume, duplicate-claim and abort semantics stay deterministic.</p>
+<h3>One-line mentions</h3>
+<ul><li>AWS ML Blog (Nov 12, 20:51–22:03Z): request-level Bedrock inference-cost guidance, a Natera lab-operations architecture case study, and public SGLang-Neuron Deep Learning Container availability — respectively guidance, customer evidence and model-serving infrastructure, not agent-analytics launches.
+</li><li><code>google-adk</code> 2.14.1 (Nov 12, 21:32Z) — in-window release, but NOTE-only by standing rule.
+</li><li><code>litellm</code> 1.111.0.dev1 (Nov 13, 03:38Z), <code>ai</code> 7.0.172 (05:59Z), and <code>@letta-ai/letta-code</code> 0.34.57–0.34.59 (00:42–06:10Z) — prerelease or patch train only.
+</li><li><code>@mastra/core</code> 1.84.0-alpha.0 and snapshot builds — prereleases in the same monorepo train as the stable 1.83.0 item above, not additional ranks.
+</li></ul>
+<p>No other tracked SDK moved in-window: pydantic-ai, openai-agents, langchain-core (PyPI and npm), agno, arize-phoenix, braintrust (PyPI/npm), weave, opik, inspect-ai, livekit-agents, langfuse Py, promptfoo and @anthropic-ai/claude-code. PyPI/npm JSON lookups succeeded and reached the current release metadata for each package; this is a confirmed negative only for those tracked packages, not a claim that every vendor was quiet.</p>
+<h2>Academy</h2>
+<h3>1. <a href="https://arxiv.org/abs/2611.14581">When Evaluators of AI Agents Disagree: An Empirical Study of Native Scoring, LLM Judges, and Commit-Boundary Checks on tau2-bench</a> — full PDF read</h3>
+<p>Full PDF read: yes — complete 38-page v1 PDF, including §§1–9, Tables 1–7, Figures 1–3, Declarations, Appendices A–B (Tables A1–A3, B1), and references. cs.SE; submitted 10 Nov 2026. Not in catalog (grep: 0 hits).</p>
+<p>What it does: 90 airline/retail tasks × two agent models × four cumulative gate conditions × three repetitions produce 2,160 episodes. Every episode is scored by native gold-state scoring, an LLM judge, the judge with the policy, and a deterministic boundary evaluator that compares whether a write was expected with whether one committed. Two annotators independently label 120 episodes for task correctness (A1), policy compliance (A2) and commitment correctness (A3), with adjudication and sampling weights (§§4.4–4.6).</p>
+<p>Key findings:</p>
+<ul><li><strong>Reliability is not validity (Table 4, §5.1).</strong> The main judge repeats itself on 98.2% of episodes but agrees with native scoring on only 56.2%. Native scoring fails 1,007 episodes; the judge passes 929 of them (92.3%). The disagreement is systematic, not sampling jitter.
+</li><li><strong>Forbidden commits expose the oracle gap (Tables 5–6, §§5.2–5.3).</strong> Humans confirm 11 premature commitments. The main judge and policy-aware judge pass all 11; with untruncated input the main judge passes 10 and the policy judge still passes 11. The stronger no-policy judge passes 6. The deterministic boundary check catches all 11, and no tested judge significantly exceeds it on A1/A3. Giving the strongest judge the policy catches all 11 but also fails 40 of 55 fully correct episodes — sensitivity is not discrimination.
+</li><li><strong>The boundary check is necessary but incomplete (§5.2).</strong> It catches 24 of 53 human A3 failures, versus 40 for native scoring. It cannot see a write that was expected and occurred but had wrong content or timing, and it still needs one item of gold information: whether this request type should write. On policy compliance, no automatic evaluator beats the always-“compliant” baseline (0.688); human agreement is weakest there too.
+</li><li><strong>Gates need their own evaluation (Tables 7, Figure 3, §6).</strong> Without gates, 60/540 episodes (11.1%) commit prematurely: 58/300 airline (19.3%) versus 2/240 retail (0.8%). Verification, correction and safe-termination gates show no significant reduction after Holm correction. Trace analysis finds the implemented verifier's digest dropping order status or customer authentication through an 800-character cut or a shrunken message window, causing valid requests to be rejected. This is evidence for measuring gate evidence quality, not proof that gates as a class cannot work.
+</li></ul>
+<p>Why BQAA/ADK care: store a commit event for every state-changing tool call and annotate request types with <code>expected_write</code>; compute <code>correct_action</code>, <code>missed_action</code>, <code>premature_commitment</code>, and <code>correct_refusal</code> beside any LLM score. Keep task success, policy compliance and commitment correctness as separate constructs. Do not use a judge alone as a release gate, and include the gate's own evidence digest in trace review.</p>
+<p>Limits (§8 and appendices): two customer-service domains, two agent models from one family and judges from one vendor; the boundary evaluator cannot judge write content and needs its partial oracle; one annotator is the author and the other a colleague; gate results include the identified implementation defect. Frequencies should not be exported directly to other workloads.</p>
+<h3>2. <a href="https://arxiv.org/abs/2611.14654">Cleaning an Agent's History Hurts When the World Still Holds the Error</a> — full PDF read</h3>
+<p>Full PDF read: yes — complete 23-page v1 PDF, including §§1–7, Tables 1 and B–F results, Figures 1–4/S1–S2, limitations, references, and Appendices A–K. Salesforce AI Research; cs.AI; submitted 10 Nov 2026. Not in catalog (grep: 0 hits).</p>
+<p>What it does: two controlled continuation experiments separate the agent's record from the executable world. On AgentCE-Bench, 319 frozen states where a wrong value is already committed are restored under four record arms, with two receivers and 2,552 continuations. On AppWorld, receipt success/failure is crossed independently with the database effect being absent/present: 65 task families, 1,040 primary continuations, then an eight-receiver expansion. Restoration and endpoint replay checks are described in §4 and Appendices C–H.</p>
+<p>Key findings:</p>
+<ul><li><strong>The same correct value has opposite effects by record form (§5.1, Figure 2, Appendix B).</strong> With the world still wrong, a truthful note beside the preserved error raises recovery from 50.57% under a matched neutral note to 65.78% (+15.20 pp [12.46, 18.00]). Rewriting the agent's own call into a completed correct action lowers recovery from 50.13% under the unedited record to 43.70% (−6.43 pp [−8.88, −3.97]). The prespecified difference of contrasts is +21.63 pp [18.21, 25.08], positive in both receivers. Merely exposing the answer cannot explain the reversal.
+</li><li><strong>The same success receipt flips sign with world state (§5.4, Figure 3, Appendix C).</strong> When the write's effect is absent, whole-task success is 28.46% with a success receipt versus 45.38% with a failure receipt (−16.92 pp). When the effect is present, it is 48.85% versus 38.46% (+10.38 pp). Their interaction is +27.31 pp [14.23, 41.54] at 97.5%, positive in six of eight receivers at 97.5% and seven at 95% (§5.5, Appendix D).
+</li><li><strong>Process evidence supports the world-account reading (§5.4, Appendix C.3).</strong> Under a success receipt, re-issuing the focal request falls from 52.69% when the effect is absent to 10.38% when present. A false failure receipt also produces duplicate inserted rows in some receivers. The compatible explanation is that the record acts as a map of remaining work, although truth, channel and implied work are not fully separated.
+</li></ul>
+<p>Why BQAA/ADK care: a trace is not the world. Compaction, repair and handoff should preserve unresolved errors and their external effects rather than manufacture a clean-looking success narrative. Evaluate those policies from frozen <code>(record, world)</code> checkpoints and score the final world; BQAA should retain enough causal provenance to distinguish “receipt says success,” “effect exists,” and “remaining work.”</p>
+<p>Limits (§6 and Appendix H): the truthful note and falsified action differ in role, position, visibility and implied remaining work as well as truth; AppWorld receipts differ in content; step budgets bind unevenly; only two receivers carry the AgentCE primary; closed-model versions and author-selected edits limit prevalence claims. The sealed AppWorld analysis and preregistered targeted-control estimator never ran; independent reimplementations and replay checks are disclosed instead, and the targeted control is incomplete. These are controlled interventions, not an evaluation of a production compaction policy.</p>
+<h3>3. <a href="https://arxiv.org/abs/2611.14765">SynthCorp: A Platform for Creating Benchmarks for Data Agents</a> — full PDF read</h3>
+<p>Full PDF read: yes — complete 32-page v1 PDF, including §§1–7, Tables 1–8, Figures 1–2, limitations/future work, references, and Appendices A–D (Tables 9–12). Google authors; cs.AI/cs.DB; submitted 10 Nov 2026. Not in catalog (grep: 0 hits).</p>
+<p>What it does: a scenario and requested complexities become routine/disruption event types, compiled into programs over 12 simulation primitives and scheduled on a virtual calendar. Execution materializes relational databases, documents and an incomplete catalog while recording a hidden causal simulation log. The generator uses that log to make answerable tasks, derive executable gold programs, audit table lineage/business rules, and compose multi-event tasks. Seven estates yield 256 tasks across retail, music, banking, logistics and insurance, with Retail-1000 reaching 1K operational tables (Table 4).</p>
+<p>Key findings:</p>
+<ul><li><strong>Provenance makes hard answers auditable (§§3.5, 4.4, 5.5).</strong> Atomic gold fragments are checked against logged writes, authoritative-table lineage, generation rules and independence from frozen copies; composite tasks are ablated to ensure every complexity matters. In one Retail-1000 case, the log disproves the plausible current-tier gold answer: the point-in-time historical join gives 826 Bronze members versus 880 in the current table, and all 12 Opus and all 12 DeepSeek runs choose the latter. On 11 multi-rule Retail-1000 composites, S3 accuracy is 91%/76%/33% for Opus/DeepSeek/Gemma.
+</li><li><strong>The generated contexts separate models and interfaces (Table 7).</strong> Overall execution accuracy for Gemma is 33.3% schema-only, 42.3% with one document, 54.6% with structured agent search and 47.1% with files/CLI; DeepSeek is 41.9/56.2/76.6/77.7; Opus is 54.6/71.2/86.6/88.8. One retrieved document is the cheapest gain; structured search and raw-file access reach similar accuracy for the stronger models.
+</li><li><strong>Raw files cost much more per correct answer (§5.5, cost analysis).</strong> S3 uses 102K input tokens per correct answer for Opus and 360K for DeepSeek; S4 rises to 226K and 934K — 2.2× and 2.6× the S3 cost. Paged, purpose-built search tools are therefore not merely an accuracy choice.
+</li><li><strong>Grading must separate format from reasoning (§5.5).</strong> Format differences account for 56% of Opus and 61% of DeepSeek failed S4 runs; format-tolerant review lifts accuracy to 94% and 90%. Treating those as reasoning failures would overstate the benchmark's difficulty, while treating every format mismatch as success would erase the output contract; report both explicitly.
+</li><li><strong>Correctness claims need the error breakdown (Tables 5, 10).</strong> The six smaller estates pass all nine deterministic checks, and Retail-1000 passes static program/calendar checks but has 33/15.7K runtime database failures (0.2%). Semantic compilation errors remain: cross-column/row dependency violations affect 12.7% of specified dependencies overall, and operator-contract violations 3.6% on the smaller estates and 7.1% on Retail-1000. “Near-zero” applies to specific deterministic/runtime checks, not every semantic property.
+</li></ul>
+<p>Why BQAA cares: this is a concrete way to build fresh enterprise analytics evals without manual gold annotation: simulate business events, keep the causal log hidden from the agent, and require executable, provenance-audited answers. It also supplies two immediate evaluation rules — compare structured retrieval against CLI on cost per correct answer, and split output-shape mismatches from retrieval/reasoning failures.</p>
+<p>Limits (§6–7 and appendices): complexity is primarily metadata-level; row distributions are not ground truth for operational business decisions and differ from real references on several stylized facts. Three development and four held-out scenarios is still a small domain set; many generated tasks are easy for frontier models; and log-verified synthetic correctness is not production correctness.</p>
+<p>Scouted, not ranked (Friday batch, abstract-level only): <a href="https://arxiv.org/abs/2611.15223">2611.15223</a> guardscope measures which action paths runtime controls actually check against kernel ground truth; <a href="https://arxiv.org/abs/2611.14960">2611.14960</a> quantifies post-solution “termination lag” in coding agents; <a href="https://arxiv.org/abs/2611.15543">2611.15543</a> introduces a deterministic oracle for silent information loss across LLM API translations; <a href="https://arxiv.org/abs/2611.16143">2611.16143</a> shows a migration agent's apparent memory gain disappears under leak-free audits; <a href="https://arxiv.org/abs/2611.17304">2611.17304</a> is an eight-incident field observation arguing production access, not reasoning alone, limits database debugging; <a href="https://arxiv.org/abs/2611.15268">2611.15268</a> separates policy knowledge in harness skills from reliability trained into weights; <a href="https://arxiv.org/abs/2611.16803">2611.16803</a> evaluates whether monitors warn before failure onset rather than merely detect it afterward; <a href="https://arxiv.org/abs/2611.17161">2611.17161</a> uses counterfactual substitution to distinguish retrieved from parametric provenance. These were not full-text rejection decisions.</p>
+<p>The new batch was not thin, so reserve ids 2611.13140 and 2611.13396 were not promoted. Already-carded/below-bar ids named in the kick were not re-screened.</p>
+<h2>Six-week EV</h2>
+<ul><li><strong>Commit-boundary evaluator (high EV, days).</strong> Add expected-write annotations for common BQAA request types and compute the four boundary labels from stored traces. Seed forbidden/missed writes in evals and route label changes to human review; do not replace native outcome scoring or validated judges, and do not claim content correctness from the boundary bit.
+</li><li><strong>World-aware compaction/handoff replay (high EV, 2–3 weeks).</strong> Build several frozen <code>(trace, actual state)</code> checkpoints, then compare unedited history, truthful annotation and cleaned-history arms on final-world success. Ship no compaction policy that underperforms the unedited control; preserve unresolved error/effect provenance in ADK handoffs.
+</li><li><strong>Event-sourced data-agent eval (high EV, 4–6 weeks for a narrow prototype).</strong> Generate one small analytics estate with schema drift, stale snapshots and policy documents, then derive executable answers from its hidden event log. Compare structured search with file/CLI on cost per correct answer and report format-only failures separately. Kill it if gold answers cannot be independently audited against the log.
+</li><li><strong>Run reconnect/ownership contract (medium EV, one-week design spike).</strong> Prototype detach/reconnect, duplicate-run rejection and explicit abort semantics against ADK's existing run model. Treat plain-process crash recovery as a separate durability problem; Mastra is evidence of a useful contract, not a drop-in BQAA dependency.
+</li></ul>
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>2611.14581:</strong> log expected versus actual writes and score commit correctness deterministically; the main LLM judges pass nearly all 11 forbidden commits while the simple boundary check catches every one.
+</li><li><strong>2611.14654:</strong> do not clean an agent's history without repairing/checking the world — the cleaned record lowers recovery, and the same success receipt flips from harmful to helpful when the effect exists.
+</li><li><strong>2611.14765:</strong> event logs can verify executable enterprise analytics gold answers; structured search roughly matches file/CLI accuracy at a fraction of the token cost, and format-only failures need their own bucket.
+</li><li><strong>Mastra 1.83.0:</strong> resumable run streams, replay, cross-reader observation and ownership-checked abort are now stable; adopt the contract ideas, not the mistaken idea that disconnect or crash semantics are the same.
+</li><li><strong>Registry/AWS:</strong> ADK 2.14.1 is NOTE-only; other movers are patches/prereleases, while the AWS items are cost guidance, a customer architecture and serving infrastructure — no immediate BQAA action.
+</li></ul>
+<h2>Unconfirmed</h2>
+<ul><li>Model-vendor office suite (carried, re-checked once): Anthropic's news index returned HTTP 200; no office-suite announcement appears among the returned items. Still secondary-only; not asserted.
+</li><li>Datadog coding-agent monitoring (carried, re-checked once): Datadog's blog index and LLM Observability docs returned HTTP 200; no dated coding-agent-monitoring primary was found in the returned pages. Not asserted.
+</li><li>AgentCore Web Search API GA wording (carried, re-checked once): the AWS ML Blog primary was fetched and contains <code>InvokeWebSearch</code>, but the exact phrase “generally available” was not found. GA status is not asserted either way.
+</li><li>Databricks Genie One per-feature GA/preview split (carried, re-checked once): Genie One and Genie-in-Slack primaries plus product release notes were checked. Slack GA is already carded; Genie Migrate for SQL conversion was already GA in October, and its Nov 12 blog RSS timestamp (18:26Z) is before this window. The remaining Genie One feature-by-feature split still lacks a new dated primary; not asserted.
+</li><li>Date-only candidates not admitted: Langfuse's Nov 12 entry about additional Azure/AI Studio model providers in its gateway and OpenAI's “Securing persistent agents like OpenClaw at OpenAI” engineering post are both dated Nov 12, but no publication timestamp was found in the fetched pages. Their placement inside this 12h window is unconfirmed, so neither is ranked or counted as an in-window mention.
+</li><li>gap: OpenAI <code>/news/</code> returned 403. The alternate official RSS feed succeeded and contained zero items with <code>pubDate</code> in the window (latest: Amplitude customer story, 20:00Z, before window start); the separate developer post above remains date-only. No broader OpenAI quiet claim is made.
+</li><li>gap: Snowflake blog returned 403 (release notes succeeded); Splunk blog returned 403; Galileo changelog failed DNS resolution and its blog URL redirected to a Splunk product page; Honeycomb release-notes URLs returned 404 (the blog index succeeded). No quiet/no-release claim is made for those blocked surfaces.
+</li><li>gap: Databricks' Genie Migrate full-post URL returned 404. The official blog index/RSS and October product release notes succeeded, establishing the earlier GA and pre-window blog time; no in-window rank resulted.
+</li></ul>
+<h2>Housekeeping</h2>
+<ul><li>Packs used: none. Fresh list <code>_runs/fb-2026-11-13-0034/fresh-items.md</code>: <code>packs=0 raw=0 unique=0 fresh=0 (cand=0 low=0)</code>. Agy/DSH/Muse hourly collects Thu 12:32 PT → Fri 00:32 PT and extra seats are paused per Haiyuan's 2026-10-22 20:50 PT order (collectors paused, not a failure). LinkedIn authwall; X/Reddit not collected; HN dropped 2026-09-27; Medium scouting paused. The writer's own sweep is the only source; no pack file was opened.
+</li><li>arXiv: all nine <code>/list/&lt;cat&gt;/new?skip=0&amp;show=2000</code> fetches returned HTTP 200 and reached every declared section end. Screened <strong>741 unique</strong> new/cross-list records above 2611.14519 (1,022 category occurrences: 531 new + 491 cross): cs.AI 113 new + 207 cross; cs.CL 86 + 49; cs.LG 186 + 150; cs.SE 39 + 16; cs.DB 16 + 7; cs.MA 7 + 11; cs.IR 17 + 13; cs.DC 23 + 12; cs.CR 44 + 26. Five category occurrences at/below the old ceiling were excluded; replacements were not counted. Every title/subject was screened and abstracts were inspected for 54 agent/data/evaluation candidates. Verified cs.AI new ceiling <strong>2611.17323</strong>; maximum new id in a tracked category <strong>2611.17332</strong> (cs.CL) and maximum cross-list id <strong>2611.17334</strong> (cs.LG), all with resolving abs pages. <strong>catch-up arXiv 2026-11-12: covered by Friday listing.</strong> Full PDF reads: 3, within the cap; no reserve promotion.
+</li><li>Verification method: PyPI/npm registry JSON through <code>_runs/kimi-brief-0034-fri20261113/registry_check.py</code> (window ≥2026-11-12T20:45Z); Mastra npm version metadata + repository changelog + exact GitHub Release-tag lookup (404); vendor primary blogs/changelogs/release notes/RSS including LangChain/LangSmith, Langfuse, Arize/Phoenix, Braintrust, W&amp;B Weave, Datadog, Comet Opik, OpenAI, Anthropic, Vertex AI, AWS, Microsoft Foundry, Databricks, Snowflake, Vercel, Grafana, CrowdStrike, Cloudflare, Honeycomb, New Relic, Dynatrace and Cisco/Splunk. Web search was used for leads and corrected URLs, never as a ranked citation. New Relic Autopilot Kubernetes Agent (Nov 10 public preview) and ScienceLogic Skylar AI 2.8 (Oct 31) were confirmed out of window; Cloudflare Kitesurf's RSS timestamp (Nov 12 00:00Z) is also before this window and the product remains experimental.
+</li><li>Catalog: live baseline confirmed <strong>687 items / 207 briefs / 209 runs</strong>, max brief/run <code>2026-11-12T1234</code>. Greps covered every shortlisted arXiv id and Industry candidate name/URL; no existing entries for the four NEW ids. Priority pin <code>arxiv-2609-02702-trace-as-state</code> is intact and was not re-carded. No Progress item was assigned.
+</li><li>Negative claims are limited to successful registry/index/RSS reads; blocked or unresolved sources are listed under Unconfirmed rather than called quiet. Fetched PDF and text scratch under <code>_runs/kimi-brief-0034-fri20261113/</code> was deleted after the complete reads.
+</li></ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>mastra-core-1-83-0-resumable-streams-run-observation</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Mastra 1.83.0 — resumable agent streams, replay and ownership-checked observation/abort (npm ahead of GitHub)
+</li><li><strong>url:</strong> <a href="https://www.npmjs.com/package/@mastra/core/v/1.83.0">https://www.npmjs.com/package/@mastra/core/v/1.83.0</a> (2026-11-12, stable)
+</li><li><strong>card text:</strong> Stable on npm 2026-11-12T21:27:47Z; no same-version GitHub Release at lookup, capabilities verified in the repository CHANGELOG. Every registered Agent can publish a replayable run stream for reconnecting readers, with observation through approval suspensions, shared-PubSub/cache observation and abort across servers, 404s for unknown runs and 409s for duplicate claims. Disconnecting HTTP no longer aborts a plain server-side run, but a plain-process crash still stops it; the release also adds MCP/OAuth and observability query controls, while 1.84.0 alphas/snapshots remain NOTE-only.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-14581-evaluator-disagreement-commit-boundary</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> When Evaluators of AI Agents Disagree: Native Scoring, LLM Judges, and Commit-Boundary Checks on tau2-bench
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.14581">https://arxiv.org/abs/2611.14581</a>
+</li><li><strong>card text:</strong> Full PDF read. Across 2,160 tau2-bench episodes, an LLM judge agrees with itself 98.2% but with native scoring only 56.2%; it passes 92.3% of native-failed episodes. Main judge configurations pass 10–11 of 11 human-confirmed premature commits and a stronger no-policy judge passes 6, while a deterministic expected-write/observed-write check catches all 11; the strongest policy-aware judge catches them only by also failing 40/55 fully correct episodes. Record commit boundaries and evaluate gates separately: no gate effect survives correction, and trace analysis locates evidence-digest losses.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-14654-history-world-error-recovery</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Cleaning an Agent's History Hurts When the World Still Holds the Error
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.14654">https://arxiv.org/abs/2611.14654</a>
+</li><li><strong>card text:</strong> Full PDF read. Restored-state interventions show that a truthful note preserving an error raises recovery by 15.20 points over a neutral note, while rewriting the same correct value as the agent's completed action lowers recovery by 6.43 points below the unedited record. On AppWorld, a success receipt changes success by −16.92 points when its effect is absent and +10.38 when present (+27.31-point interaction). Evaluate compaction and handoff against final world state; channel/content confounds and incomplete preregistered analyses bound the result.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-14765-synthcorp-data-agent-benchmarks</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> SynthCorp: A Platform for Creating Benchmarks for Data Agents
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.14765">https://arxiv.org/abs/2611.14765</a>
+</li><li><strong>card text:</strong> Full PDF read. SynthCorp simulates business events into relational/document/catalog estates and uses a hidden causal log to derive and audit executable gold programs across seven estates and 256 tasks. Structured agent search approaches raw file/CLI accuracy at much lower token cost per correct answer, point-in-time composite tasks expose wrong-but-plausible gold answers, and format differences account for 56%/61% of Opus/DeepSeek S4 failures. Deterministic checks are strong but semantic compilation errors and synthetic-data realism limits remain.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<p>None.</p>
+<p><strong>Headline claims</strong></p>
+<ul><li>On 2,160 tau2-bench episodes, an LLM judge's 98.2% self-agreement coexists with only 56.2% agreement with native scoring, and a deterministic commit-boundary check catches all 11 human-confirmed forbidden writes that the main judges largely pass (<a href="https://arxiv.org/abs/2611.14581">https://arxiv.org/abs/2611.14581</a>, 2026-11-10).
+</li><li>Controlled restored-state experiments show that cleaning an agent's history can reduce recovery when the world still holds the error, while the same success receipt changes from a 16.92-point penalty to a 10.38-point gain depending on whether its effect exists (<a href="https://arxiv.org/abs/2611.14654">https://arxiv.org/abs/2611.14654</a>, 2026-11-10).
+</li><li>SynthCorp generates seven enterprise data estates and 256 tasks with hidden-log-audited executable answers; for the two stronger evaluated models, raw file/CLI access costs 2.2–2.6× as many input tokens per correct answer as structured search at similar accuracy (<a href="https://arxiv.org/abs/2611.14765">https://arxiv.org/abs/2611.14765</a>, 2026-11-10).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Fri Nov 13, 2026 · 12:34 AM PT · Kimi</span>
+    </div>
+  </footer>
+</body>
+</html>
