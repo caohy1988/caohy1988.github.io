@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "id": "aws-agentcore-runtime-v2-snapshot-session-start-overhead-latency",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Amazon Bedrock AgentCore runtime V2 — snapshot/restore session start, build hooks, and a platform-owned split of agent latency into `Latency` vs `OverheadLatency`",
+      "html": " <a href=\"https://aws.amazon.com/blogs/machine-learning/architecture-patterns-for-fast-session-startup-on-amazon-bedrock-agentcore-runtime/\">Launch page</a> (2026-11-13T22:02:39Z, stable) — AgentCore runtime with <code>platformVersion=\"V2\"</code> prepares a container once, snapshots the microVM after the first healthy <code>GET /ping</code>, and restores that snapshot per session, so init work leaves the request path entirely and every create/update takes a few minutes instead. The measurement change matters most: the platform publishes <code>Latency</code> (time to first byte) and <code>OverheadLatency</code> (its own share — microVM start plus snapshot restore) as CloudWatch metrics in the <code>AWS/Bedrock-AgentCore</code> namespace, making your code's time the difference, with init deliberately in neither metric. AWS pairs the split with interpretation rules — report P90/P99 or a trimmed mean TM90 rather than a plain average, and compare only runs with a similar new-session mix because <code>OverheadLatency</code> covers warm-session requests too — plus new V2-only build hooks (<code>hooksConfiguration</code>, two POSTs per build distinguished by the <code>X-Amzn-Bedrock-AgentCore-Runtime-Warmup-Type</code> header as <code>memory</code> then <code>disk</code>, sharing one 120-second budget with no retry) for priming files a process cannot hold in memory. <a href=\"/research/briefs/2026-11-14-0034-qwen.html\">Full brief</a>.",
+      "added": "2026-11-14T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2611-15543-isloss-conversation-preservation-translation",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "`isloss` — a deterministic oracle proving the translation layer silently rewrites conversations: 127/685 (18.5%) of completed translations pass static target checks while losing avoidable prompt/role/tool information",
+      "html": " <a href=\"https://arxiv.org/abs/2611.15543\">abs</a> — <code>isloss</code> maps source and translated LLM API payloads into a shared representation (ConvIR) and applies 27 deterministic preservation rules, separating *avoidable* information loss from target-API limitation and recording whether the translator warned the caller — no model call, no reference translation. Across 685 completed translations from six configurations of five codebases (LiteLLM, Vercel AI SDK v5/v7, LLM-Rosetta, <code>@musistudio/llms</code>, <code>claude-code-proxy</code>), 127 (18.5%, CI 15.01–22.06%) pass the static target contract while silently changing prompt, role or tool information the target could have preserved; the checker itself detects 95/125 planted faults (76.0%) with 2/100 false alarms (2.0%), and human review confirms 23/24 agreed avoidable candidates as real defects (95.8%) against only 6/16 unavoidable ones. Nine of ten mechanisms tested live change model behaviour — dropping a tool-result <code>is_error</code> flag takes compliance 30/30 → 0/30 on both tested Gemini models — while a 100-item GSM8K control shows no detectable drop, so the effects are real but task-dependent; 203/558 (36.4%) translated reply streams also break or silently corrupt in an official OpenAI SDK, and the findings persist across 50 consecutive LiteLLM releases (95.8% of flagged cells still flagged in later snapshots), with 7 of 26 upstream issues fixed. Deployment probes found gateways returning HTTP 200 while routing to a different provider, forwarding auth headers on fallback, and closing mid-stream errors with 200 <strong>and billing them as completed</strong> — so an HTTP 200 is not evidence the conversation survived, nor that the request completed. <a href=\"/research/briefs/2026-11-14-0034-qwen.html\">Full brief</a>.",
+      "added": "2026-11-14T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "arxiv-2611-16803-prewarn-onset-aligned-early-warning",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "`PREWARN` — detection is not early warning: a length-only rule reaches AUROC ≈ 0.999 with an early-warning rate of exactly 0.000, and selecting monitors by AUROC picks one 3.4× worse at warning",
+      "html": " <a href=\"https://arxiv.org/abs/2611.16803\">abs</a> — Response-level metrics such as AUROC score *whether* a response failed, never *when* a monitor fired, so they cannot separate a monitor that prevents a failure from one that only reports it afterwards. <code>PREWARN</code> fixes that by calibrating each monitor's threshold on validation data to a chosen error budget β, running it, and scoring every alarm against an annotated onset across three tasks — response classification, failure detection, and early warning in the W = 256-token window before onset — reporting <code>Warn256</code>, <code>Early</code>, <code>Lead</code> (median first-alarm-minus-onset), <code>Post</code>, <code>FA</code> and a random-alarms chance reference. Applied to repetitive degeneration in three open-weight models, a rule reading only the response length scores AUROC 0.9988–0.9995 with <code>Detection</code> 1.00 yet <code>Warn256</code> and <code>Early</code> both 0.000 and <code>Lead</code> +2958 to +3688 tokens, because its single flag is the last token of a capped response; AUROC stays above 0.96 at every layer while warning coverage varies 7×, and two transforms of a real probe hold its AUROC exactly while moving <code>Warn256</code> from 0.000 to 0.627. Ranking 27 probe strategies by validation AUROC predicts test warning coverage only at Kendall's τ = 0.33 (validation <code>Warn256</code>: τ = 0.94), so AUROC selection picks a probe with 3.4× lower coverage. Frozen activation probes warn before onset on most loops of two of three models (<code>Early</code> 0.658 and 0.594, <code>Lead</code> −172 and −137 tokens) but not the third (<code>Early</code> 0.262, <code>Lead</code> +108, detection still 0.99 — a detector, not a warning); rank-16 LoRA adaptation more than doubles <code>Warn256</code> on every model while barely raising <code>Early</code>, and none of six untrained baselines warns much more often than random alarms. <a href=\"/research/briefs/2026-11-14-0034-qwen.html\">Full brief</a>.",
+      "added": "2026-11-14T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
       "id": "cloudflare-spend-management-hard-caps-audit-log",
       "tag": "Industry",
       "kind": "rank",
@@ -8605,6 +8635,20 @@
   ],
   "runs": [
     {
+      "id": "2026-11-14T0034",
+      "date": "2026-11-14",
+      "display": "12:34 AM PT",
+      "href": "/research/briefs/2026-11-14-0034-qwen.html",
+      "analyzer": "Qwen",
+      "added": [
+        "aws-agentcore-runtime-v2-snapshot-session-start-overhead-latency",
+        "arxiv-2611-15543-isloss-conversation-preservation-translation",
+        "arxiv-2611-16803-prewarn-onset-aligned-early-warning"
+      ],
+      "updated": [],
+      "note": "PUBLISH (Qwen qwen3.8-max backup writer — Muse quota 429 until 2026-11-16T00:00Z, Kimi weekly limit re-probed 00:45 PT Sat; fresh path, fresh=0 with collectors paused): 1 Industry NEW — Amazon Bedrock AgentCore runtime V2 snapshot/restore session start with platform-split Latency vs OverheadLatency CloudWatch metrics and build hooks. 2 Academy NEW (reserve promotions, full PDF read): 2611.15543 isloss conversation-preservation oracle for LLM API translators/gateways, 2611.16803 PREWARN onset-aligned early-warning evaluation. arXiv: no new listing since the 2026-11-13-0034 screen (ceiling 2611.17323). Unconfirmed: Phoenix connect fail, Weave gated, Langfuse/LangSmith/Opik/Braintrust undated, New Relic/Anthropic RSS/Splunk RSS/Datadog blog feed/Databricks RSS 404s, Snowflake/OpenAI/Galileo 403s, Foundry stale, carried office-suite/AgentCore Web Search GA/Genie One items."
+    },
+    {
       "id": "2026-11-13T1234",
       "date": "2026-11-13",
       "display": "12:34 PM PT",
@@ -11813,6 +11857,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-11-14T0034",
+      "date": "2026-11-14",
+      "display": "12:34 AM PT",
+      "href": "/research/briefs/2026-11-14-0034-qwen.html",
+      "analyzer": "Qwen",
+      "title": "AWS splits agent latency into platform overhead vs your code, and two papers show the measurement layer itself is lying to you"
+    },
     {
       "id": "2026-11-13T1234",
       "date": "2026-11-13",
