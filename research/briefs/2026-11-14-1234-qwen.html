@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-14-1234: A quiet Saturday window, and a reserve paper showing a &quot;dominant failure mode&quot; can be a classifier artifact</title>
+  <meta name="description" content="Field Brief 2026-11-14-1234: A quiet Saturday window, and a reserve paper showing a &quot;dominant failure mode&quot; can be a classifier artifact">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-14-1234-qwen.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 PM PT · Sat Nov 14, 2026 · Qwen</p>
+    <article>
+<h1>Field Brief — 2026-11-14-1234: A quiet Saturday window, and a reserve paper showing a "dominant failure mode" can be a classifier artifact</h1>
+<p><strong>Writer: Qwen (<code>qwen3.8-max</code>) — backup; Muse and Kimi quota-blocked</strong>
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push.
+<strong>For:</strong> Haiyuan Cao, TL of BQAA (BigQuery Agent Analytics) + ADK
+<strong>Window:</strong> since the 2026-11-14-0034 brief (launched ~00:42 PT Sat = <strong>2026-11-14T08:42Z</strong>) through launch (~12:45 PT Sat = <strong>2026-11-14T20:45Z</strong>); ~12h. Saturday US morning + Asia Saturday evening.
+<strong>arXiv:</strong> listing status = <strong>still the Friday Nov 13 listing</strong>; verified ceiling <strong>2611.17323</strong>, unchanged from the 2026-11-13-0034 screen. No new ids above the ceiling to screen. Next listing expected Sunday evening PT.
+<strong>Effort:</strong> high. <strong>Path:</strong> fresh (FRESH-LIST PATH).</p>
+<hr />
+<h2>Read this first</h2>
+<p>This is a genuinely thin slot and it is thin for a checkable reason, not because the sweep was short.</p>
+<ol><li><strong>Industry: nothing in the window cleared the bar.</strong> Zero product-level releases or launch posts published between 08:42Z and 20:45Z on Saturday Nov 14. I swept ~30 vendor feeds/pages/changelogs, 25 GitHub repos' releases, 13 PyPI packages and 7 npm packages. The only in-window registry activity anywhere was <code>@mastra/core@1.84.0-alpha.2</code> and two <code>0.0.0-factory-health-metrics-*</code> snapshot builds — prerelease/alpha, so NOTE at most by rule, and the 1.84 alpha line was already NOTEd in prior briefs.
+</li><li><strong>Academy: no new arXiv listing exists</strong>, so the only rankable Academy item this slot is a <strong>reserve promotion</strong> from the queue: <code>arXiv:2611.13140</code>. I full-PDF-read it (all 12 pages) and it is clearly distinct from the carded <code>2611.14581</code>. It is the one substantive thing in this brief.
+</li><li><strong>Two build-stamp traps were live this slot and both are called out below</strong> (Braintrust <code>dateModified</code>, Elastic channel-level <code>&lt;pubDate&gt;</code>). Neither is an entry date. A reader skimming raw HTML would have "found" an in-window item in each. I did not.
+</li><li><strong>Verdict: PUBLISH</strong>, on the strength of the single Academy reserve promotion. There is no Industry NEW and no Progress note, and I am not manufacturing one.
+</li></ol>
+<p>The reserve paper matters to BQAA directly: it shows that a reported <strong>failure-mode share</strong> — the exact shape of number an agent-analytics dashboard renders as a breakdown chart — can be almost entirely a property of the order in which the classifier tests its categories.</p>
+<hr />
+<h2>Industry</h2>
+<h3>NEW ranks</h3>
+<p>None. No product-level industry item was published inside 2026-11-14T08:42Z → 2026-11-14T20:45Z on any source that returned dated content.</p>
+<h3>Progress notes</h3>
+<p>None. No existing catalog card picked up a dated in-window primary.</p>
+<p>Specifically, re-checking the prior slots' Unconfirmed list once each: none of them gained a dated in-window primary, so none is carded or progressed.</p>
+<ul><li>Datadog coding-agent monitoring — <code>/feed/</code> works (97 items, real <code>pubDate</code>s) but its newest item is 2026-11-13; no in-window Datadog item of any kind. Still unconfirmed.
+</li><li>AgentCore Web Search API GA wording — Bedrock AgentCore doc-history page's newest dated row is July 2026 (stale page); AWS What's New feed newest is 2026-11-13T16:00Z. Still unconfirmed.
+</li><li>Databricks Genie One per-feature split — <code>databricks.com/blog</code> index carries readable dates and its newest is November 13, 2026; nothing on Nov 14. Still unconfirmed.
+</li><li>Model-vendor office suite — no source located; Anthropic <code>rss.xml</code> is 404 and <code>/news</code> is client-rendered with zero extractable dates; OpenAI news RSS newest is 2026-11-13T15:00Z. Still unconfirmed (gap, not quiet).
+</li><li>ChatGPT Wallet — title and date confirmed via OpenAI news RSS (<code>Introducing ChatGPT Wallet</code>, 2026-11-13T15:00Z, out of window). Re-checked the post page <code>openai.com/index/introducing-chatgpt-wallet/</code> → <strong>403</strong>; body still gated.
+</li></ul>
+<h3>One-line mentions (NOTE-level)</h3>
+<ul><li><code>@mastra/core@1.84.0-alpha.2</code> published to npm 2026-11-14T18:39:13Z — in-window but an <strong>alpha</strong>, so NOTE only; latest stable remains <code>1.83.0</code> (2026-11-12T21:27Z), already carded as <code>mastra-core-1-83-0-resumable-streams-run-observation</code>. Two <code>0.0.0-factory-health-metrics-20261114170028</code> / <code>-20261114195514</code> CI snapshot builds also landed in-window; these are not releases.
+</li><li><code>langchain-ai/langgraph</code> 1.2.22 published 2026-11-14T01:43:55Z — a patch bump <strong>before</strong> the window start (08:42Z) and patch-level regardless; not a mover.
+</li><li>litellm: PyPI <code>info.version</code> reports 1.109.1 while the most recent <em>upload</em> is <code>1.106.10</code> at 2026-11-14T00:29:04Z (pre-window, and already mentioned at 2026-11-14-0034); newest GitHub release is <code>v1.111.0-dev.2</code> (2026-11-13T19:05Z), a dev prerelease. Nothing in-window.
+</li><li>Cloudflare developers changelog: newest entries are Nov 13, 2026 (Workers/Durable Objects spending limits; <code>filter.namespace</code> removal on <code>cloudflare_ai_search_instance</code>) — already covered at 2026-11-14-0034. The single <code>2026-11-14</code> string on that page is not an entry date.
+</li><li>Google Cloud blog RSS newest is 2026-11-13T17:00Z, "New AI agent observability and governance across BigQuery and Looker" — <strong>first-party BQAA, excluded by rule</strong>, noted only so the exclusion is visible.
+</li></ul>
+<hr />
+<h2>Academy</h2>
+<h3>NEW ranks</h3>
+<h4>1. <a href="https://arxiv.org/abs/2611.13140">arXiv:2611.13140</a> — Agreeing on the Answer but Not the Reason: Measurement Limits of LLM Reasoning Failure Taxonomies</h4>
+<p><strong>Reserve promotion</strong> (from the slot's reserve queue, abstract-level; full-PDF-read before ranking, as required). Submitted Mon 9 Nov 2026; cs.AI (primary), cs.CL. Single author, Madhu Sudhan Rao Beesetty (PayPal, San Jose). <strong>Full PDF read</strong> — all 12 pages: Abstract, §I Introduction, §II Related Work, §III Method (A Data, B Pipeline, C Taxonomy and Its Tie-Break, D Model Panel and Its Confounds), §IV Results (A The Construct as Measured, B The Plurality Is Set by the Tie-Break, C Raters Agree on the Answer Not the Reason, D Benchmark Translation Defects), §V Discussion, §VI Limitations, §VII Conclusion, Acknowledgment and AI Disclosure, References [1]–[26], Appendix A Inspector Instrument, Appendix B Generation Configuration, Appendix C Data Availability. Tables I–IV all read.</p>
+<p><strong>Why it ranks.</strong> The authors set out to publish a familiar result — a named reasoning failure mode ("Compositional Collapse": the model notices a required sub-part, then drops or misapplies it) dominating across twelve models and eleven languages on mGSM-Symbolic — and then found the result did not survive verification. The paper reports the verification failure instead. Three findings, each with a number I checked against the tables:</p>
+<ol><li><strong>The reported plurality is set by the classifier's test order (§IV-B, Table I).</strong> Evidence fields are populated independently, so <strong>50.1% of failures (775 of 1,546)</strong> carry evidence for more than one category, and the overlap is almost entirely one pair (761 of 775 are Collapse + Drift). The classifier assigns one label per item via ordered tests returning on first match. Re-running with Drift tested first, changing nothing else, <strong>moves the nominal plurality in eleven of twelve models</strong> (Table I). Sweeping all orderings — 4! = 24 permutations collapse to 3! = 6 distinct classifiers because the residual category cannot move — <strong>Collapse's share of failures spans 26.4% to 76.4%</strong> and Drift's spans 14.9% to 64.7%, roughly fifty-point swings; Collapse wins the plurality under exactly three of the six. The authors' own summary: "Collapse is the dominant failure mode" is close to a restatement of "we tested Collapse first." They withdraw the ordered claim and report the ordering-invariant quantity instead (share of failures carrying Collapse evidence at all: 50.0%–90.2%).
+</li><li><strong>Raters agree on the answer, not on the reason (§IV-C, Tables II and III).</strong> On the identical 179-item sample, native speakers of all eleven languages agree with the fixed inspector at <strong>κ = 0.932 on answer correctness but κ = 0.093 on the category</strong>; the two model judges land at κ = 0.348 (DeepSeek-V4-Pro) and κ = 0.049 (Qwen2.5-32b) on correctness-vs-category splits of the same shape (answer κ 0.917 / 0.854). The low κ is not a marginals artifact: raw agreement is 50.7% against 45.7% expected by chance, and PABAK = 0.014 and Gwet's AC1 = 0.015 both agree. A <strong>second independent native speaker per language</strong> re-rated the 142 categorisable items blind; on the 121 determinate pairs the two humans agree with each other at <strong>κ = 0.659</strong> (83.5% raw; bootstrap 95% CI [0.514, 0.785]) while each agrees with the inspector at <strong>κ ≤ 0.094</strong>. So the construct is <em>not</em> intrinsically unusable — what fails to reproduce is one automated instrument's application of it. Recoding the 21 "Unclear" responses does not change this (all-No → κ = 0.650; all-Yes → 0.467).
+</li><li><strong>The cause is the prompt, not the model (§IV-C).</strong> Re-grading the same 142 items with the <strong>identical model</strong> (Claude Sonnet 5) but the human instructions verbatim raises agreement with Human 2 from <strong>κ = 0.147 to κ = 0.636</strong> on the 106 pairs it labels determinately — approaching the human–human reference of 0.659 — and its collapse rate matches the humans' (44.3% against 40.5–42.1%), with the directional over-attribution gone. Yet this re-prompted inspector agrees with the original inspector at only κ = 0.197 despite being the same model. The gap is attributable to four identifiable prompt asymmetries (§VI): the inspector's definition adds "or invented"; it is asked to search for evidence of <em>every</em> mode on <em>every</em> transcript while humans answered one yes/no question conditioned on a prior incorrectness judgement; humans got an illustrative example and the inspector did not; and the inspector was told to judge against the reference answer.
+</li></ol>
+<p>The paper's best single lesson is a worked case of a <strong>benchmark defect laundered into a failure-mode statistic</strong> (§IV-C, §IV-D, Table IV). Chasing the directional gap (inspector labels Collapse 1.81× as often as native speakers pooled) and stratifying it by round showed the factor is <strong>1.17 outside one two-problem round and 4.18 inside it</strong>. Inspecting that round found that the English clause "13 puppies <strong>with spots</strong>" — the clause that places all 702 of Ibrahim's puppies in the numerator — is <strong>deleted from the Bengali and Chinese translations</strong> of both items, leaving a question and a reference answer that are mutually incompatible: the reference requires 801/900 = 89%, the corrupted text supports 99/900 = 11%, and both languages score 0.0% on that round across all twelve models. The second reviewer, unprompted, reconstructed the defect exactly in a free-text note. Across the 32 Bengali/Chinese instances the inspector assigns Collapse in 27; the two human rounds assign it in 4 and 8. Three further translation defects are documented (Chinese apartment-vacancy item changing the answer from 40 to 500; Thai dropping the "than the other N combined" comparison clause on both items; Chinese Round 1 duplicating a rate clause), plus the honest limit of their detector: numeric-token multiset comparison catches deleted and duplicated <em>quantities</em> but <strong>cannot catch a deleted attribute attached to a quantity</strong>, because the numbers survive — and two language-agnostic extensions they tried were unusable.</p>
+<p><strong>The four cheap checks the paper recommends (§V)</strong>, in its own ordering, each with its stated cost:</p>
+<ol><li><strong>Permute the tie-break</strong> — if categories are assigned by ordered tests, re-run with the order reversed; if the plurality moves, report the ordering-invariant quantity instead. Cost: one pass over existing verdicts.
+</li><li><strong>Report the co-occurrence rate</strong> — the fraction of items carrying multiple labels bounds how much a single-label distribution can mean. Cost: none.
+</li><li><strong>Obtain a human sample, and cover the hard cases</strong> — coverage matters as much as size: their own six-language interim sample gave κ = 0.280 with nearly matching marginals (62.1% inspector vs 58.6% human) and <strong>no directional gap at all</strong>, purely because the languages that returned first were the ones models performed best on.
+</li><li><strong>Trace a directional gap to its items before reporting it as a rate</strong> — cost: one stratified split of an agreement table. Their words: "Had we reported the pooled figure alone we would have published a benchmark defect as a property of LLM judges."
+</li></ol>
+<p><strong>Distinctness from the carded <code>arxiv-2611-14581-evaluator-disagreement-commit-boundary</code></strong> (checked by grep before ranking; <code>2611.13140</code> appears nowhere in the live catalog). 2611.14581 asks <em>which evaluator catches forbidden writes in agent episodes</em> on tau2-bench and finds a minimal rule-based commit-boundary check beats LLM judges. 2611.13140 asks a prior, different question: <em>whether a reported failure-mode share is measurable at all</em>, and finds it is largely an artifact of classifier test order plus an unreproduced instrument. Different construct (aggregate taxonomy statistics vs per-episode outcome verification), different domain (multilingual grade-school math transcripts vs agent tool-write episodes), different failure (label assignment not reproducing across raters vs judges passing forbidden writes). I also checked the crowded adjacent space in the catalog — <code>arxiv-2610-30491-trace-label-behavioral-detector-audit</code>, <code>arxiv-2610-13303-rubric-clarification-judge-consensus-not-human-agreement</code>, <code>arxiv-2609-22512-agreement-overstates-evidence-judge-consensus</code>, <code>arxiv-2611-04507-signals-agent-diagnostics</code>, <code>arxiv-2608-30391-autotracegt-grounded-theory-trajectory-codebooks</code> — and none makes the tie-break-order point.</p>
+<p><strong>Limits I am flagging rather than smoothing over (§VI, Appendix B, Appendix C — all read).</strong> Single author, no venue, and <strong>code and data are not yet public</strong>: Appendix C says they "will be released publicly" and are "available from the author on request in the meantime" (the 179-item sample is SHA-256 content-hashed, digest prefix <code>e75fd481</code>). The panel is a self-described convenience sample and is confounded: API and local models are perfectly separated by accuracy (lowest API 67.18% &gt; highest local 54.04%), parameter count does not predict accuracy (r = 0.025, p = 0.95), local quantisation was not recorded, and reasoning post-training tracks accuracy far better than scale (43.0% vs 10.1% mean). <strong>Self-inspection:</strong> the fixed inspector (Claude Sonnet 5) is itself a panel model — 195 of the graded records are its own generations — and it is the only model whose plurality survives the tie-break permutation, with a dual-evidence rate of 10.9% against 30.5–72.3% elsewhere; a second panel model shares its vendor family. Reviewer and language are perfectly confounded (one reviewer per language per round), Telugu was reviewed by the author, and the Round-2 blind-ID key was lost and reconstructed by content matching against transcripts (with a script that aborts unless the rebuild reproduces the original statistics exactly — it does). There is <strong>no monolingual English control</strong>: English was never run through the twelve models, so the paper cannot establish these failures are specific to cross-lingual transfer. Breadth is narrow — eight problem structures, all grade-school math word problems, one self-defined category, one inspector instrument. No seed was set, so traces are not bit-reproducible. And critically, the authors themselves scope the transfer: "The general lesson that reported failure distributions can be artifacts of measurement procedure is <strong>a hypothesis for other taxonomies, not a demonstrated fact</strong>." An AI Disclosure states the author used Anthropic's Claude and Moonshot AI's Kimi to help draft and edit post-submission revisions, write analysis scripts, format the LaTeX, and check reported numbers against analysis outputs.</p>
+<h3>Scouted not ranked</h3>
+<ul><li><strong><code>arXiv:2611.14581</code></strong> — already carded (<code>arxiv-2611-14581-evaluator-disagreement-commit-boundary</code>); re-read the abstract this slot only to establish distinctness against the reserve promotion. Not re-ranked.
+</li><li>No other Academy candidate exists this slot: there is no new arXiv listing to screen (see Housekeeping for the two independent verifications of the ceiling).
+</li></ul>
+<hr />
+<h2>Six-week EV</h2>
+<p><strong><code>arXiv:2611.13140</code> — high EV for BQAA over six weeks, and the cheapest kind of high EV: it is a checklist, not a system.</strong></p>
+<p>If BQAA ever renders a <strong>failure-mode breakdown</strong> for agents — "X% tool-selection errors, Y% reasoning errors, Z% format errors" per model or per agent — this paper says that chart's shares are suspect by default, in two specific and separately fixable ways. First, if the categoriser tests categories in a fixed order and returns on the first match, and if categories can co-occur (they will — 50.1% here), then the reported plurality is close to a restatement of the test order, and the honest quantity is the ordering-invariant "carries evidence for this mode at all." Second, a low judge–human agreement coefficient on a <em>category</em> is ambiguous evidence: it can mean the category is unusable or that your instrument is an outlier, and <strong>it takes a second independent human rater to tell those apart</strong>. That second distinction is the one most teams will skip, because a single human round looks sufficient and here it would have produced exactly the wrong conclusion — the authors say so explicitly: "without it we would have concluded that the construct itself was the problem."</p>
+<p>Two further items with durable value inside six weeks:</p>
+<ul><li><strong>A directional judge–human gap is a lead, not a finding.</strong> Their 1.81× over-attribution became 1.17× once a single two-problem round was removed, and that round contained a deleted translation clause. Any BQAA eval that reports "the judge over-flags X by N×" should stratify before publishing the number, because the stratification cost here was one split of an agreement table and it converted a claimed judge bias into a data defect. This is the same shape of error the catalog already tracks in <code>arxiv-2610-30491-trace-label-behavioral-detector-audit</code> ("audit the detector behind the score") — the two reinforce each other.
+</li><li><strong>Sample coverage beats sample size for the human validation round.</strong> Their six-language interim sample looked clean (κ = 0.280, marginals 62.1% vs 58.6%, no directional gap) purely because the languages that returned first were the ones models did best on. For BQAA that maps directly onto validating an LLM judge on whichever agent traces came back first — which will be the fast, successful ones.
+</li></ul>
+<p>Discount for the limits: single author, no venue, artifacts not yet released, narrow domain (grade-school math, one taxonomy, one instrument), confounded panel, self-inspection unresolved, no English control. The authors scope the generalisation as a hypothesis. So the EV is in the <strong>four checks as a process change</strong> — each cheap, none requiring you to accept the paper's domain claims — not in adopting its numbers.</p>
+<hr />
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong><code>arXiv:2611.13140</code> (Academy NEW, reserve promotion):</strong> a reported failure-mode share can be a classifier artifact — categories co-occurred on 50.1% of failures and reversing two tests moved the "dominant" mode in 11 of 12 models, swinging its share from 26.4% to 76.4% across the six orderings.
+</li><li><strong>Same paper, reliability:</strong> raters agreed on answer correctness at κ = 0.932 and on the failure category at κ = 0.093 — but two independent humans agreed with <em>each other</em> at κ = 0.659, so the category is reproducible and the instrument was the outlier.
+</li><li><strong>Same paper, diagnosis:</strong> re-prompting the <em>same</em> model with the human instructions verbatim moved κ against Human 2 from 0.147 to 0.636 — the gap was the prompt, not the model. Four prompt asymmetries are enumerated in §VI.
+</li><li><strong>Same paper, data-vs-judge:</strong> a 1.81× judge over-attribution became 1.17× after one stratified split, and that split exposed a deleted clause in two translations that made the question and the reference answer mutually incompatible. Stratify before you publish a judge-bias number.
+</li><li><strong>Same paper, action for BQAA:</strong> adopt the four cheap checks (permute the tie-break; report co-occurrence; get a human sample that covers the hard cases; trace any directional gap to its items) before any failure-mode rate is compared across models or agents.
+</li><li><strong>Industry:</strong> nothing to act on. Saturday window, zero in-window product releases; the only in-window registry movement was a Mastra alpha and two CI snapshot builds.
+</li></ul>
+<hr />
+<h2>Unconfirmed</h2>
+<p>Every line below is a lookup that failed, returned no extractable dates, or returned stale content — reported as a gap, never as "quiet" or "no release." Each was re-checked once this slot.</p>
+<p><strong>Blocked / bot-walled (no content retrievable):</strong></p>
+<ul><li>gap: Anthropic <code>anthropic.com/rss.xml</code> → <strong>404</strong> (82 KB error page, 0 <code>&lt;item&gt;</code>s); <code>anthropic.com/news</code> → 200 but <strong>client-rendered, zero extractable dates</strong>. No Anthropic signal either way.
+</li><li>gap: Splunk <code>splunk.com/en_us/blog</code> → <strong>403 access denied</strong> (386-byte body).
+</li><li>gap: Snowflake <code>snowflake.com/en/blog/</code> → <strong>403</strong> (5.7 KB block page). The docs release-notes page is the working alternate and <em>is</em> dated — see "Confirmed quiet."
+</li><li>gap: Galileo <code>www.galileo.ai/blog</code> → <strong>403</strong> (427 bytes). (<code>galileo.dev</code> was DNS SERVFAIL in prior slots; not re-resolved this slot.)
+</li><li>gap: W&amp;B Weave <code>weave-docs.wandb.ai/changelog/</code> → 200 but the body is a CoreWeave Docs <strong>"Access Restricted" login page</strong>; zero dates.
+</li><li>gap: Braintrust <code>braintrust.dev/changelog</code> → served an <strong>access-denied</strong> page shell; the only dates present are <code>dateModified</code> / <code>lastModified</code> = <code>2026-11-14T01:13:15.876Z</code>, which is a <strong>build stamp, not an entry date</strong> (and is pre-window regardless). <code>braintrust.dev/blog</code> → 200 but its newest dated post is <strong>Mar 16, 2026</strong>. No usable Braintrust signal.
+</li><li>gap: OpenAI <code>openai.com/index/introducing-chatgpt-wallet/</code> → <strong>403</strong>; the news RSS confirms title and date (2026-11-13T15:00Z, out of window) but the body remains gated. The prior slots' "OpenAI persistent-agents" engineering post is likewise body-gated; <code>openai.com/engineering/rss.xml</code> → <strong>404</strong> this slot.
+</li><li>gap: Vertex AI product feed <code>cloud.google.com/blog/products/ai-machine-learning/rss</code> → 200 but a <strong>captcha</strong> page, zero dates. (<code>cloudblog.withgoogle.com/rss/</code> works and is dated — see below.)
+</li><li>gap: Meta AI <code>ai.meta.com/blog/rss/</code> → <strong>400</strong>; Mistral <code>mistral.ai/feed.xml</code> → <strong>404</strong>; Cohere <code>cohere.com/blog/feed.xml</code> → <strong>404</strong>.
+</li><li>gap: New Relic <code>newrelic.com/changelog</code> → <strong>404</strong>, zero dates. Honeycomb <code>honeycomb.io/changelog</code> → <strong>404</strong>. Arize Phoenix <code>arize.com/docs/phoenix/changelog</code> → <strong>404</strong>. Vercel <code>vercel.com/docs/changelog</code> → <strong>404</strong> (the <code>vercel.com/atom</code> feed does work and is dated).
+</li></ul>
+<p><strong>Reached but undated or stale (cannot support a quiet claim):</strong></p>
+<ul><li>gap: Langfuse <code>langfuse.com/changelog</code> → 200, 245 date strings, but the <strong>newest is October 7, 2026</strong> — a changelog page cannot be six weeks behind in mid-November. Same defect as prior slots.
+</li><li>gap: Comet Opik <code>comet.com/docs/opik/changelog</code> → 200 but newest date <strong>Oct 26, 2026</strong>.
+</li><li>gap: Dynatrace <code>dynatrace.com/news/blog/</code> → 200 but newest date <strong>October 29, 2026</strong>.
+</li><li>gap: Microsoft Foundry <code>learn.microsoft.com/.../whats-new-azure-ai-foundry</code> → 200 but newest dates <strong>2026-10-30 / 2026-11-05</strong>. The <code>azurecomcdn.azureedge.net/en-us/updates/feed/</code> alternate returns 200 with <strong>0 dated items</strong> (17 KB). <code>azure.microsoft.com/en-us/blog/feed/</code> works but its newest item is 2026-11-06. No in-window Foundry signal.
+</li><li>gap: AWS Bedrock AgentCore <code>docs.aws.amazon.com/bedrock-agentcore/latest/devguide/doc-history.html</code> → 200 but newest dated row is <strong>July 2026</strong> — stale page, cannot confirm or deny recent AgentCore changes. This is why "AgentCore Web Search API GA wording" stays unconfirmed.
+</li></ul>
+<p><strong>Carried forward, still unconfirmed (no dated in-window primary exists):</strong></p>
+<ul><li>Datadog coding-agent monitoring; Databricks Genie One per-feature GA split; model-vendor office suite. For each, the relevant <em>working</em> source was re-read and is dated — Datadog <code>/feed/</code> newest 2026-11-13, Databricks blog index newest November 13, 2026 — so these are unconfirmed rather than gaps, but no in-window primary appeared, so none is carded or progressed.
+</li></ul>
+<p><strong>Recovered, not a gap:</strong></p>
+<ul><li>The arXiv API first attempt over <code>http://export.arxiv.org/api/query</code> returned <strong>0 bytes</strong>; one retry over <strong><code>https://</code></strong> succeeded (25.5 KB, 10 entries, <code>totalResults</code> 212,730). Recorded here because the failure and the fix are both worth knowing; the ceiling claim below rests on the successful https call plus the listing page.
+</li></ul>
+<p><strong>Not attempted (out of scope / no access):</strong> LinkedIn (authwall), X/Reddit (not collected), Hacker News (dropped 2026-09-27), Medium (scouting paused).</p>
+<hr />
+<h2>Housekeeping</h2>
+<p><strong>Decision:</strong> <code>PUBLISH</code> — one Academy NEW (reserve promotion), zero Industry NEW, zero Progress. Deliberately thin; not inflated.</p>
+<p><strong>Packs used: 0.</strong> Collectors are paused per Haiyuan's 2026-10-22 20:50 PT order, so no packs landed in this window and the fresh list is empty by design. Verified from <code>_runs/fb-2026-11-14-1234/fresh-items.md</code> / <code>.json</code>: <code>packs=[]</code>, Candidates section empty, "Dropped as already known (0) — none"; <code>FB_MERGE slot=2026-11-14-1234 packs=0 raw=0 unique=0 drop_catalog=0 drop_seen=0 drop_both=0 fresh=0 (cand=0 low=0)</code>; <code>catalog_links=919</code>, <code>seen_links=13152</code>, <code>seen_bad_lines=0</code>. No pack file under <code>packs/</code> was opened, in full or in part — there was nothing in-window to open. <strong>My own web / registry / GitHub / arXiv sweep was the only source this slot.</strong></p>
+<p><strong>Path:</strong> FRESH-LIST PATH, as instructed.</p>
+<p><strong>Gaps disclosed:</strong></p>
+<ul><li>Extra seats: paused (10-22 20:50 PT order) — a policy pause, not a failure.
+</li><li>Agy / DSH / Muse hourly collects Sat 00:32 → Sat 12:32 PT: paused under the same order.
+</li><li>arXiv: no weekend listing exists; the Friday Nov 13 listing was fully screened at 2026-11-13-0034. Re-checked once this slot (details below).
+</li><li>LinkedIn authwall; X and Reddit not collected; HN dropped 2026-09-27; Medium scouting paused.
+</li><li>Vendor sources that failed or returned undated/stale content are itemised under <strong>Unconfirmed</strong> — 24 gap lines. None of them is reported as "no release."
+</li></ul>
+<p><strong>arXiv verification (ceiling 2611.17323) — two independent methods, both succeeded:</strong></p>
+<ol><li><strong>Listing page.</strong> <code>arxiv.org/list/cs.AI/new</code> fetched 200 (1,776,734 bytes) and states <strong>"New submissions — Friday, 13 November 2026"</strong>. It contains <strong>364 unique <code>2611.*</code> ids</strong>; the maximum is <strong>2611.17323</strong> (then 2611.17316, 2611.17313, 2611.17309, 2611.17298). An explicit filter for any <code>2611.*</code> id numerically above 17323 returned <strong>zero</strong> matches. (The page also carries older cross-list ids — 2609.38372, 2610.38694, 2610.39100 — which are replacements/cross-lists, not new submissions, and are below the ceiling by month.)
+</li><li><strong>arXiv API.</strong> <code>https://export.arxiv.org/api/query?search_query=cat:cs.AI&amp;sortBy=submittedDate&amp;sortOrder=descending&amp;max_results=10</code> → newest submission is <strong><code>2611.17323v1</code>, published 2026-11-12T18:59:06Z</strong> ("AgentSSL: Can MLE Agents Leverage Unlabeled Data?"), <code>totalResults</code> 212,730. No submission anywhere in cs.AI is newer than the ceiling.
+</li></ol>
+<p><strong>Batch ids screened this slot: 0 new</strong> — there are no ids above 2611.17323 to screen, in cs.AI or any other category, because arXiv posts no weekend announcements and no newer listing exists. The reads above reached the end of the listing and of the API result set, so this is a verified negative, not a truncated one. arXiv in one line for the record: <strong>no new listing since the 2026-11-13-0034 screen (still Friday Nov 13).</strong></p>
+<p><strong>Reserve promotion accounting:</strong> <code>arXiv:2611.13140</code> was promoted from the slot's reserve queue. Grepped the live catalog (<code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code>, <strong>699 items</strong> confirmed) for <code>13140</code> before ranking → <strong>0 occurrences</strong>, not previously carded. Also grepped the overlap-adjacent vocabulary (<code>taxonom</code>, <code>failure mode</code>, <code>failure-mode</code>, <code>kappa</code>, <code>co-occurrence</code>, <code>tie-break</code>, <code>inter-annotator</code>, <code>inter-rater</code>, <code>agreement</code>) → 55 hits, all read at id/title level; none makes the tie-break-order or taxonomy-reliability claim, and the nearest neighbour <code>arxiv-2611-14581-evaluator-disagreement-commit-boundary</code> is distinct on construct, domain and failure mode (argued in the card above). Full PDF read before ranking, as required. <strong>One</strong> paper full-PDF-read this slot, well inside the cap of 3.</p>
+<p><strong>Verification method:</strong></p>
+<ul><li>All HTTP via <code>curl -sL</code> with a desktop Chrome User-Agent, explicit <code>-m</code> timeouts, and <code>%{http_code}</code> captured per request so a 200-with-block-page is distinguishable from a real 200 (that is how the Splunk 403, Braintrust access-denied shell and Weave login wall were caught rather than read as content).
+</li><li><strong>RSS dates parsed only from inside <code>&lt;item&gt;</code> / <code>&lt;entry&gt;</code> blocks</strong>, never from channel-level tags. This mattered twice: the Elastic Observability Labs feed carries a <strong>channel-level <code>&lt;pubDate&gt;</code> equal to <code>&lt;lastBuildDate&gt;</code> = Sat, 14 Nov 2026 20:53:44 GMT</strong> which a naive scan reads as a brand-new in-window post — it is not an entry (41 <code>&lt;pubDate&gt;</code> tags = 1 channel + 40 items; the newest real item is <code>Tue, 10 Nov 2026</code>, "Elastic Stack 8.19.25 released"). Braintrust's <code>dateModified</code> build stamp was the same trap in JSON-LD form.
+</li><li>Feeds confirmed to carry real <code>pubDate</code>s and parsed to their newest item (so "quiet" is a positive finding, not an absence of data): <code>blog.cloudflare.com/rss/</code> (newest 2026-11-13T20:20Z), <code>aws.amazon.com/blogs/aws/feed/</code> (2026-11-11T19:00Z), <code>aws.amazon.com/blogs/machine-learning/feed/</code> (2026-11-13T23:22Z), <code>aws.amazon.com/about-aws/whats-new/recent/feed/</code> (100 items, newest 2026-11-13T16:00Z), <code>grafana.com/blog/index.xml</code> (2026-11-13T17:14Z), <code>openai.com/news/rss.xml</code> (1,387 items, newest 2026-11-13T15:00Z), <code>datadoghq.com/feed/</code> (97 items, newest 2026-11-13), <code>cloudblog.withgoogle.com/rss/</code> (2026-11-13T17:00Z), <code>azure.microsoft.com/en-us/blog/feed/</code> (2026-11-06T19:08Z), <code>vercel.com/atom</code> (100 items, newest 2026-11-13T22:24Z), <code>huggingface.co/blog/feed.xml</code> (907 items, newest 2026-11-13T18:00Z), <code>blogs.nvidia.com/feed/</code> (2026-11-13T13:00Z), <code>deepmind.google/blog/rss.xml</code> (100 items, newest 2026-11-12T18:00Z).
+</li><li>Dated HTML pages that returned readable dates (quiet, verified): <code>developers.cloudflare.com/changelog/</code> (newest Nov 13, 2026), <code>databricks.com/blog</code> index (newest November 13, 2026), <code>crowdstrike.com/en-us/blog/</code> (newest November 13, 2026), <code>docs.snowflake.com/en/release-notes/new-features</code> (newest ISO date 2026-11-13), <code>blog.langchain.com</code> index (newest post November 9, 2026), <code>docs.langchain.com/langsmith/changelog</code> (newest weekly block "November 2-9, 2026" — weekly cadence, so a fresh build stamp does not imply new content).
+</li><li><strong>Registries:</strong> PyPI JSON <code>releases[*].upload_time_iso_8601</code> for 13 packages (<code>pydantic-ai</code>, <code>openai-agents</code>, <code>langchain-core</code>, <code>agno</code>, <code>arize-phoenix</code>, <code>braintrust</code>, <code>weave</code>, <code>opik</code>, <code>inspect-ai</code>, <code>litellm</code>, <code>livekit-agents</code>, <code>langfuse</code>, <code>google-adk</code>) and npm <code>time</code> for 7 (<code>@langchain/core</code>, <code>ai</code>, <code>@mastra/core</code>, <code>braintrust</code>, <code>promptfoo</code>, <code>@anthropic-ai/claude-code</code>, <code>@letta-ai/letta-code</code>), filtered against window start 2026-11-14T08:42Z. Only in-window hits anywhere: <code>@mastra/core</code> 1.84.0-alpha.2 (2026-11-14T18:39:13Z) plus two <code>0.0.0-factory-health-metrics-*</code> CI snapshots. Every fetch returned valid JSON — no <code>FETCH_FAIL</code>.
+</li><li><strong>GitHub Releases API</strong> (<code>api.github.com/repos/&lt;o&gt;/&lt;r&gt;/releases?per_page=6</code>, <code>published_at</code> vs window start) for 25 repos: <code>cloudflare/kitesurf</code> (no releases), <code>cloudflare/workers-sdk</code>, <code>mastra-ai/mastra</code>, <code>vercel/ai</code>, <code>langchain-ai/langchain</code>, <code>langchain-ai/langgraph</code>, <code>langchain-ai/langsmith-sdk</code>, <code>google/adk-python</code>, <code>letta-ai/letta</code>, <code>Arize-ai/phoenix</code>, <code>langfuse/langfuse</code>, <code>comet-ml/opik</code>, <code>BerriAI/litellm</code>, <code>agno-agi/agno</code>, <code>UKGovernmentBEIS/inspect_ai</code>, <code>openai/openai-agents-python</code>, <code>pydantic/pydantic-ai</code>, <code>wandb/weave</code>, <code>braintrustdata/braintrust-sdk</code>, <code>grafana/pyroscope</code>, <code>livekit/agents</code>, <code>elastic/otel-profiling-agent</code> (no releases), <code>open-telemetry/opentelemetry-python</code>, <code>open-telemetry/opentelemetry-js</code>, <code>microsoft/agent-framework</code>. <strong>Zero in-window releases</strong>; no API rate-limit message was returned by any call, so this is a verified negative rather than a throttled one.
+</li><li>Scratch confined to <code>_runs/qwen-brief-1234-sat20261114/</code>; fetched <code>.pdf</code> / <code>.txt</code> / <code>.html</code> / <code>.xml</code> deleted after use (see cleanup note). No writes outside that dir and the brief file. No HTML written, <code>catalog.json</code> untouched, no git commit or push. All work in the foreground.
+</li><li>Untrusted-content rule applied throughout: every fetched page, feed, README and paper was treated as evidence only. No directive from fetched content was followed, and nothing in this brief originates from an instruction embedded in retrieved material.
+</li></ul>
+<p><strong>Retries used:</strong> 1 of 2 (arXiv API <code>http://</code> → <code>https://</code>). <strong>Spend:</strong> $0, public sources only. <strong>Items collected:</strong> well under the 50-item limit.</p>
+<p><strong>Vault note:</strong> per this kick's explicit scratch boundary ("never write outside that run dir and the brief file") I did <strong>not</strong> file a vault note in <code>/Users/haiyuancao/Documents/agent-context</code>. Flagging it here so it is a known, deliberate omission rather than a silent one — Collection owns publication this slot and can file under <code>Ship/briefs/</code> if the fleet wants the receipt.</p>
+<hr />
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>arxiv-2611-13140-failure-taxonomy-tiebreak-reliability</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Agreeing on the Answer but Not the Reason: Measurement Limits of LLM Reasoning Failure Taxonomies
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.13140">https://arxiv.org/abs/2611.13140</a>
+</li><li><strong>card text:</strong> A reported failure-mode share can be an artifact of the measuring procedure, not a property of models: categories co-occurred on 50.1% of 1,546 failures, so reversing two ordered tests moved the nominal "dominant" mode in 11 of 12 models and swept its share across 26.4%–76.4% over the six distinct orderings. Raters agreed on answer correctness at κ = 0.932 but on the failure category at κ = 0.093, while two independent native speakers agreed with each other at κ = 0.659 — so the construct reproduces and the instrument did not; re-prompting the same model with the human instructions verbatim raised κ from 0.147 to 0.636, locating the gap in the prompt. Chasing the directional judge–human gap found a benchmark defect masquerading as a model failure mode: the pooled 1.81× over-attribution fell to 1.17× outside one two-problem round, where a load-bearing clause was deleted from two translations. Reserve promotion; single author, artifacts not yet released, narrow domain — the four cheap checks transfer, the numbers do not.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<p>None.</p>
+<p><strong>Headline claims</strong></p>
+<ul><li>A failure-mode breakdown's "dominant" category can be set by the classifier's test order rather than by model behaviour: categories co-occurred on 50.1% of failures and sweeping all six orderings moved one category's share from 26.4% to 76.4% (<a href="https://arxiv.org/abs/2611.13140">https://arxiv.org/abs/2611.13140</a>, submitted 9 Nov 2026, §IV-B and Table I).
+</li><li>Raters agreed near-perfectly on answer correctness (κ = 0.932) but near-chance on the failure category (κ = 0.093), while two independent humans agreed with each other at κ = 0.659 — the instrument, not the construct, failed to reproduce (<a href="https://arxiv.org/abs/2611.13140">https://arxiv.org/abs/2611.13140</a>, submitted 9 Nov 2026, §IV-C and Tables II–III).
+</li><li>A directional judge–human gap traced to its items turned out to be a benchmark defect: the pooled 1.81× over-attribution became 1.17× once a single round with a deleted translation clause was excluded (<a href="https://arxiv.org/abs/2611.13140">https://arxiv.org/abs/2611.13140</a>, submitted 9 Nov 2026, §IV-C/§IV-D and Table IV).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Sat Nov 14, 2026 · 12:34 PM PT · Qwen</span>
+    </div>
+  </footer>
+</body>
+</html>
