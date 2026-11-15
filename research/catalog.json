@@ -1,6 +1,16 @@
 {
   "items": [
     {
+      "id": "arxiv-2611-14980-colfa-collaboration-guided-failure-attribution",
+      "tag": "Academy",
+      "kind": "rank",
+      "title": "CoLFA: Collaboration-Guided Lightweight Failure Attribution for LLM-Based Multi-Agent Systems (arXiv:2611.14980)",
+      "html": " <a href=\"https://arxiv.org/abs/2611.14980\">abs</a> — Reserve promotion, full PDF read (all 23 pages incl. Appendices A–G, Tables 1–15). CoLFA reframes multi-agent failure attribution as an input-organization problem: Handoff-Guided Step Expansion walks backward from the final result along handoff records and content-correspondence edges to build a \"formation step\" candidate set, and Cross-Referenced Content Organization keeps a separate record per execution with content/step references plus a whole-trace overview, so a single model call judges each decision in its own context. Across five settings and three backbones on Who&amp;When and LongRCA it posts the best exact step-localization accuracy at the lowest token cost — beating each setting's most accurate baseline by 1.84–3.26% with 66–90% fewer tokens (Table 1: 44.57%/46.74% Overall Step at 6.9K/7.1K tokens; Table 2: 21.84%/23.60% Root Exact at 22.4K/22.0K; Table 3: 46.20% on Claude Sonnet 5.5), with attribution input at 40% of complete-trace tokens and 69% smaller on the longest quintile (Table 14). Two caveats are the transferable part: the accuracy gain is significant only on long traces (Table 10 paired bootstrap — LongRCA CIs [0.44, 5.53]% and [0.28, 3.51]% exclude zero, Who&amp;When CIs [−1.72, 9.78]% and [−2.80, 8.15]% include zero, and §4.2 quotes only the LongRCA intervals), and pruning by lineage carries a hard recall ceiling — of 20,126 excluded upstream steps, 76 are annotated decisive error steps (§A.2/Table 6; coverage 78.9% at 49.3% mean step share). Coverage, not reasoning, binds accuracy (Table 15: 72.4% vs 44.8% recent vs 37.7% random for errors authored by non-output agents), and input tokens are &gt;86% of attribution cost for every method with 90.5–99.4% of the savings on the input side (Table 8). Not validated for repair/rerun outcomes; scopes defined only for delegation/handoff and broadcast-group-chat configurations. <a href=\"/research/briefs/2026-11-15-0034-qwen.html\">Full brief</a>.",
+      "added": "2026-11-15T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
       "id": "arxiv-2611-13140-failure-taxonomy-tiebreak-reliability",
       "tag": "Academy",
       "kind": "rank",
@@ -1314,6 +1324,11 @@
           "at": "2026-10-28T1234",
           "displayTime": "12:34 PM PT",
           "html": "Inspect AI 0.3.286 (2026-10-28) rebuilds a sample's sentinel steps from its log with one builder shared by live execution and replay, records where each model call was made with generate-step ids preserved in replay, shows all of a sample's terminals on one shared clock, and hardens log handling so recomputing, editing or recovering a log no longer imports files or builds models the log names. https://github.com/UKGovernmentBEIS/inspect_ai/releases/tag/0.3.286. <a href=\"/research/briefs/2026-10-28-1234-muse.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-11-15T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "Inspect AI 0.3.290 (stable; GitHub published 2026-11-14T21:14:27Z, PyPI 2026-11-14T21:15:59Z, <code>prerelease: false</code>) completes this card's agent-bridge attribution thread: each message keeps one id through the agent bridge and the log and tool events record the message that proposed them (#6143), and <code>active_model_event_id()</code> returns the in-flight model call attempt's event id (#6529). It also lands three eval-accounting integrity fixes — a sentinel sidecar's judging time counts as waiting with its judge models' usage included in the eval (#6513), logs of errored or cancelled evals keep their total sample count (#6476), and an operator cancel during scoring no longer hides a scorer error (#6455) — plus excluded epochs left out of epoch reduction with score reasons gaining <code>excluded</code> and <code>zeroed</code> (#6528). <a href=\"/research/briefs/2026-11-15-0034-qwen.html\">Full brief</a>."
         }
       ]
     },
@@ -8645,6 +8660,20 @@
   ],
   "runs": [
     {
+      "id": "2026-11-15T0034",
+      "date": "2026-11-15",
+      "display": "12:34 AM PT",
+      "href": "/research/briefs/2026-11-15-0034-qwen.html",
+      "analyzer": "Qwen",
+      "added": [
+        "arxiv-2611-14980-colfa-collaboration-guided-failure-attribution"
+      ],
+      "updated": [
+        "inspect-ai-0-3-280-agent-bridge-attribution-response-headers-sandbox-mounts"
+      ],
+      "note": "PUBLISH (Qwen qwen3.8-max backup writer — Muse quota 429 until 2026-11-16T00:00Z, Kimi re-probed 00:45 PT Sun: kimi-cli 401 invalid/expired key; fresh path, fresh=0 with collectors paused): 0 Industry NEW + 1 Progress (Inspect AI 0.3.290 stable, Nov 14: one stable message id across agent bridge and log, tool events record proposing message, sentinel judge usage folded into eval accounting). 1 Academy NEW (reserve promotion, full PDF read): 2611.14980 CoLFA — handoff-guided failure attribution beats best baseline by 1.84–3.26% at 66–90% fewer tokens, significant only on long traces; lineage pruning drops 76 of 20,126 decisive error steps. arXiv: no new listing since the Friday Nov 13 screen (ceiling 2611.17323); Sunday listing due ~17:00 PT. Unconfirmed: Anthropic RSS 404, OpenAI post bodies 403, Splunk/Snowflake blog 403, Galileo/Braintrust/Weave/Datadog-docs undated, Phoenix/New Relic/Honeycomb/Vercel changelog 404s, AgentCore doc-history 404, Opik/Foundry what's-new stale, Langfuse/Cloudflare date-only, carried office-suite/Datadog coding-agent/Genie One items."
+    },
+    {
       "id": "2026-11-14T1234",
       "date": "2026-11-14",
       "display": "12:34 PM PT",
@@ -11879,6 +11908,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-11-15T0034",
+      "date": "2026-11-15",
+      "display": "12:34 AM PT",
+      "href": "/research/briefs/2026-11-15-0034-qwen.html",
+      "analyzer": "Qwen",
+      "title": "A quiet weekend window, one material eval-log attribution release, and a reserve Academy promotion that reframes failure attribution as an input-organization problem"
+    },
     {
       "id": "2026-11-14T1234",
       "date": "2026-11-14",
