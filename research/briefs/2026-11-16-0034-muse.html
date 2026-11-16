@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-16-0034: Verifier judgments break at abstraction boundaries; suite means hide regressions</title>
+  <meta name="description" content="Field Brief 2026-11-16-0034: Verifier judgments break at abstraction boundaries; suite means hide regressions">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-16-0034-muse.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 AM PT · Mon Nov 16, 2026 · Muse</p>
+    <article>
+<h1>Field Brief — 2026-11-16-0034: Verifier judgments break at abstraction boundaries; suite means hide regressions</h1>
+<p><strong>Writer: Muse (<code>muse-wonder-full-1.0</code>, high)</strong></p>
+<p><strong>For:</strong> Haiyuan Cao, TL of BQAA (BigQuery Agent Analytics) + ADK
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push.
+<strong>Window:</strong> since the 2026-11-15-1234 brief (~12:50 PT Sun, 2026-11-15T20:50Z) to launch (~00:55 PT Mon, 2026-11-16T08:55Z), approximately 12 hours.
+<strong>arXiv:</strong> Monday Nov 16 listing screened above 2611.17334; verified ceiling <strong>2611.18563</strong>.
+<strong>Effort:</strong> high. <strong>Path:</strong> fresh.</p>
+<h2>Read this first</h2>
+<p><strong>PUBLISH: three Academy NEW from the Monday arXiv listing; zero Industry NEW and zero Progress.</strong> The through-line is representation: what the evaluator sees changes what it concludes, even when the underlying execution does not change. Verification Transport (<a href="https://arxiv.org/abs/2611.18471">arXiv:2611.18471</a>) shows native-correct verifier judgments failing at about 31% when the same frozen execution is viewed through macro or delegation boundaries, with exact provenance restoration recovering 85.5% of those failures. The generated-suites study (<a href="https://arxiv.org/abs/2611.17632">arXiv:2611.17632</a>) shows a complementary trap: a suite mean can report a total tool breakage as an improvement, because baseline coverage already caps what the mean can move. The behavioral-trajectory study (<a href="https://arxiv.org/abs/2611.17440">arXiv:2611.17440</a>) gives BQAA a concrete normalization pattern: 143,209 coding-agent trajectories mapped to shared actions, where matched solve rates still conceal reproducible workflow differences.</p>
+<p>Industry produced no rankable product launch in the window. The verified movers are a LangChain partner-package train, an OpenAI Agents SDK alpha, and patch/canary registry entries — all NOTE-level under the standing rules. Accessible vendor feeds and changelogs supplied no other dated in-window candidate; gated, undated and future-dated surfaces are listed as gaps, not as quiet.</p>
+<h2>Industry</h2>
+<h3>NEW ranks</h3>
+<p>None.</p>
+<h3>Progress notes</h3>
+<p>None. No existing card received a material, dated in-window move. In particular, the Databricks Genie skills guide listed Nov 16 is a how-to for an existing feature with a JSON-LD timestamp after this slot's cutoff (see Unconfirmed); it does not progress <code>databricks-genie-autonomous-coworker</code>.</p>
+<h3>One-line mentions</h3>
+<ul><li><strong>LangChain partner train — NOTE (one item):</strong> <code>langchain-xai==1.4.0</code> (2026-11-15T21:35:20Z, stable), <code>langchain-groq==1.2.0</code>, <code>langchain-deepseek==1.2.0</code> and <code>langchain-mistralai==1.2.0</code> the same evening; the xai body routes <code>ChatXAI</code> through the LangSmith gateway plus dependency/profile chores. Gateway routing for one partner client, not a new product capability. <a href="https://github.com/langchain-ai/langchain/releases/tag/langchain-xai%3D%3D1.4.0">xai release</a>.
+</li><li><strong>OpenAI Agents SDK v0.24.0-alpha.8 — NOTE:</strong> GitHub prerelease 2026-11-16T04:39:19Z; highlights include approving Python tool calls before they run. Prerelease, so NOTE at most by rule; re-evaluate at stable. <a href="https://github.com/openai/openai-agents-python/releases/tag/v0.24.0-alpha.8">Release</a>.
+</li><li><strong>Registry patches/canaries — NOTE:</strong> <code>@letta-ai/letta-code</code> 0.34.63 (2026-11-15T21:17:20Z, patch); <code>@mastra/core</code> two <code>0.0.0-*</code> canary tags Nov 16 with <code>latest</code> still 1.83.0. No other tracked PyPI/npm SDK published in-window (full histories checked; see Housekeeping).
+</li><li><strong>In-window but out of scope:</strong> OpenAI science-blog items Nov 15 22:00Z (lattice Standard Model; new science blog) are not agent-analytics product news. Google Cloud Nov 16 08:05Z Dedicated/Data Boundary posts are first-party Google and not BQAA cards. Vercel's Qwen4-Max AI Gateway listing is stamped 2026-11-15T20:00Z, before this window opens, and is a model listing in any case.
+</li></ul>
+<h2>Academy</h2>
+<h3>NEW ranks</h3>
+<h4><a href="https://arxiv.org/abs/2611.18471">arXiv:2611.18471 — Do Verifier Judgments Survive Abstraction? Measuring Verification Transport for LLM Agent Evaluation</a></h4>
+<p>Disha Sheshanarayana and Sai Linisha Reddy Goli (Manipal University Jaipur); arXiv v1 submitted <strong>Nov 13, 2026</strong>; NeurIPS 2026 workshop paper. Catalog searches for the exact id and title found no existing item.</p>
+<p><strong>Full PDF read:</strong> all <strong>29 pages</strong>, extracted with <code>pdftotext -layout</code> and read completely in chunks: abstract; §§1–7; references; Appendices A–G including construction algorithm, metric definitions, full prompt templates, failure decomposition, diagnostics, bootstrap analysis and limitations; Tables 1–5 and Figures 1–6 captions. <a href="https://arxiv.org/pdf/2611.18471">Full paper</a>.</p>
+<p><strong>What it contributes.</strong> Verification Transport asks a narrow, well-controlled question: if a verifier is correct on the native view of a frozen execution, does it stay correct when only the verifier-visible representation changes? Task, trajectory, outcome, ground truth, criterion and verifier are held fixed (§3). Three boundaries are tested — macro abstraction (composed operations behind one boundary), delegation (a block behind an agent boundary, constructed without rerunning any worker), and history compaction (earlier evidence compacted, recent pair retained) — each with a paired restoration that reintroduces the exact stored provenance (§3.3, Appendix B, Table 3). Four protocols span direct judgment (V-LLM), evidence-sufficiency gating (V-EVIDENCE), provenance requesting (V-AGENTIC), and a second-stage audit of a frozen first judgment (V-DELIBERATIVE) (§3.4). Scale: 250 AgentProcessBench + 758 ATBench + 441 PlanRewardBench + 754 AgentDojo eligible instances, seven verifier backbones, temperature 0 (§4).</p>
+<p><strong>Results worth acting on:</strong></p>
+<ol><li><strong>Transport failure is large and boundary-dependent.</strong> Denominator-weighted VTFR (share of native-correct judgments lost) is <strong>31.0% macro, 30.9% delegation, 20.3% compaction</strong> (§5.1, Tables 1–2). Per-benchmark macro/delegation ranges are 25.5–32.2% / 26.1–32.9% versus 16.2–24.7% for compaction. Native-view accuracy alone therefore overstates deployed verifier reliability whenever traces cross composition or delegation boundaries — the normal BQAA case.
+</li><li><strong>Lower VTFR can mean more confident error, not more reliability.</strong> Under macro abstraction, V-LLM fails as <strong>15.8% wrong verdict + 0.7% no verdict</strong>; V-EVIDENCE as <strong>10.6% + 24.0%</strong>; V-DELIBERATIVE as <strong>9.4% + 39.9%</strong> (Appendix E.1, Table 4). Aggregate VTFR by protocol (macro/delegation/compaction): V-LLM 16.4/17.3/14.1%, V-AGENTIC 25.0/23.6/18.2%, V-EVIDENCE 34.5/34.0/18.7%, V-DELIBERATIVE 49.3/50.2/30.7% (§5.1). On binary benchmarks V-LLM also has the highest false-certification rate, <strong>41.3%</strong> (Table 5). Report wrong-verdict and coverage separately; a forced-choice judge that never abstains will look "robust" while certifying bad executions.
+</li><li><strong>Provenance fidelity, not re-asking, drives recovery.</strong> Exact restoration recovers <strong>85.5%</strong> of transport failures overall while degrading <strong>5.2%</strong> of survivors; macro RRR 87.9%, delegation 86.9%, compaction 79.8% (§5.1). The fidelity ablation is monotone Requery &lt; Lossy &lt; Exact in all four model–benchmark cells — e.g. APB/Gemini <strong>22.5% → 42.8% → 80.0%</strong> (§5.2, Figure 4). Lossy restoration there means ordered tool identities without arguments, observations or text. For BQAA: keep boundary-linked, selectively restorable provenance (arguments + observations), not just span names.
+</li><li><strong>Deliberation without new evidence hurts.</strong> The V-DELIBERATIVE audit repairs <strong>8.7%</strong> of initially wrong/non-operational judgments but degrades <strong>28.5%</strong> of initially correct ones under abstraction (Appendix E.2, Table 5); coverage falls 94.6% → 67.3%. A second look at the same impoverished view is not a substitute for fetching the missing child trace. V-AGENTIC requests provenance in 37.4% of abstracted cases (43.3% macro, 44.5% delegation, 24.3% compaction) and retains 93.3% coverage.
+</li></ol>
+<p><strong>Limits.</strong> Transformations are synthetic views of frozen trajectories, not live system abstractions; restoration assumes original provenance is retained and reintroducible (Appendix G). VTFR conditions on native-correct subsets, which differ by protocol, so cross-protocol VTFR gaps mix robustness with subset composition (§5.1). Severity ablation endpoints rise consistently (e.g. APB 24.3%→31.4%) but the A50 midpoint is not always monotone (§5.2). <strong>BQAA interpretation (proposed, not demonstrated in BQAA/ADK):</strong> add a transport check to evaluator qualification — same sessions scored from full trace, composed-tool view, delegate-collapsed view and compacted view — and store verdict, coverage/abstain and provenance-restored verdict as separate fields.</p>
+<h4><a href="https://arxiv.org/abs/2611.17632">arXiv:2611.17632 — Generated Evaluation Suites as Diversity-Driven Search for Real Agent Regressions</a></h4>
+<p>Pulkit Yadav (independent); arXiv v1 submitted <strong>Nov 13, 2026</strong>; NeurIPS 2026 workshop paper. Catalog searches for the exact id and title found no existing item.</p>
+<p><strong>Full PDF read:</strong> all <strong>9 pages</strong>, extracted with <code>pdftotext -layout</code> and read completely: abstract; §§1–6; references; Appendices A–G (operators, grader validity, full airline/retail tables, ablation protocol, threshold sensitivity, run configuration); Tables 1–6. <a href="https://arxiv.org/pdf/2611.17632">Full paper</a>.</p>
+<p><strong>What it contributes.</strong> A generated suite is an archive indexed by requirement × persona × scenario-kind; scoring it by mean pass rate discards the index (§§2–3). The paper's reusable object is the <strong>coverage ceiling</strong>: if a defect's traced footprint contains <code>b</code> baseline-passing scenarios in a suite of <code>N</code>, its within-footprint contribution to the suite drop is at most <code>b/N</code> — computable from baseline runs before any defect exists (§3.3). Detection is pre-specified as Δ &gt; θ = 0.10 with a 2,000-sample paired-bootstrap interval excluding zero. Setup: τ²-bench airline (90 generated scenarios, 30×3 grid; 50 hand-authored) plus a retail replication for two operators; 7 single-instance defects (delete/invert policy clause, remove/rename tool, always-escalate, truncate policy/history); one model family as agent, simulator and judge (§3, Appendix G).</p>
+<p><strong>Results worth acting on:</strong></p>
+<ol><li><strong>The ceiling binds before the defect is run.</strong> The generated suite detects <strong>1 of 7</strong> airline defects and the hand-authored suite <strong>0 of 7</strong> under the specified score; <strong>4 of 5</strong> traceable defects have ceilings at or below θ on both suites (§4.1, Table 1). R1 (deleted 24-hour cancellation clause) has generated-suite coverage <strong>0/90, ceiling 0.00</strong> — a hole the archive can report about itself. The ceiling count is θ-sensitive (only R1 bound at θ=0.05; Appendix F, Table 6), so publish the ceiling curve, not a single threshold verdict.
+</li><li><strong>A saturated breakage can read as an improvement.</strong> Removing <code>cancel_reservation</code> (T1) fails every covered baseline-passing hand-authored task (<strong>3/3</strong> airline, <strong>6/6</strong> retail — exactly its ceiling), yet whole-suite pass counts move <strong>25→27 of 50</strong> and <strong>20→21 of 48</strong> (§4.1). Scoped (per-footprint) scoring recovers it: <strong>Δ +0.43</strong> airline S1, <strong>+0.67</strong> airline S3, <strong>+0.43</strong> retail S1, all intervals excluding zero (Table 1) — with a rerun caveat below. Averaging does not merely dilute; it inverts sign.
+</li><li><strong>Two regimes need two units of scoring.</strong> Trace-aligned defects (requirement/tool-shaped) need per-cell scores; trace-orthogonal defects (behavioural, e.g. always-escalate O1: transfer share <strong>36%→84%</strong>) can be detected whole-suite even at traced coverage <strong>zero</strong> (retail O1 <strong>Δ +0.17 [+0.04, +0.31]</strong>), while programmatic end-state grading misses O1 and the transcript judge sees it (<strong>+0.22 / +0.20</strong>) (§4.2). Judge–checker agreement is only <strong>75%, κ=0.21</strong> airline (Appendix B), and judge strictness concentrates exactly on O1 — disagreement itself is a cheap missing-cell pointer (§5, unevaluated proposal). Kind diversity helps where it aligns: at fixed size 30, happy-path-only detects <strong>0/7</strong>; kind-diverse draws detect O1 in <strong>5 of 20</strong> (§4.3, Table 5). Persona count is confounded with size and claimed as no curve.
+</li></ol>
+<p><strong>Limits.</strong> Pilot scale by the author's own framing: one instance per operator per domain, one rollout per configuration, same model as agent/simulator/judge, S1 intervals about ±0.15 (§6). Scoped scores, grading views and ablations are post hoc; T1's three-rerun diagnostic shrinks scoped Δ to <strong>0.14</strong> (mutant 0/21, baseline only 3/21) (§4.2). Retail covers 2 of 7 operators, run after airline results were known (Appendix D). <strong>BQAA interpretation (proposed):</strong> store requirement/tool/behaviour descriptors per eval scenario, publish per-cell Δ and the <code>b/N</code> ceiling alongside any suite mean, and treat a zero-coverage cell as a finding, not a pass.</p>
+<h4><a href="https://arxiv.org/abs/2611.17440">arXiv:2611.17440 — Interpreting Coding Agents Through Their Behavioral Trajectories</a></h4>
+<p>Ibragim Badertdinov and Alexander Golubev (Nebius); arXiv v1 submitted <strong>Nov 12, 2026</strong>. Catalog searches for the exact id and title found no existing item.</p>
+<p><strong>Full PDF read:</strong> all <strong>18 pages</strong>, extracted with <code>pdftotext -layout</code> and read completely in chunks: abstract; §§1–6; references; Appendices A–F (codebook and metric dictionary, consensus-audit scope, split-half null, retrieval features/ablations, paired case studies, effort decomposition, compute); Tables 1–12 and Figures 1–2. <a href="https://arxiv.org/pdf/2611.17440">Full paper</a>.</p>
+<p><strong>What it contributes.</strong> A deterministic rule-based parser normalizes heterogeneous coding-agent traces into shared actions (primary operation among ten categories, plus target-file role, mutation type, read mode/scope) and six workflow metrics, applied to <strong>143,209 trajectories</strong> (134,329 Python + 8,880 multilingual) from <strong>125 configurations / 117 models</strong> on SWE-rebench (§3). Parser, pipeline and an annotated subset are released (§1; §3 fn.2). Reasoning text is explicitly not inspected; claims are about observable tool behaviour (§3).</p>
+<p><strong>Results worth acting on:</strong></p>
+<ol><li><strong>Matched outcomes hide different workflows — calibrated against a null.</strong> All <strong>60/60</strong> scaffold-matched pairs within 1.0pp solve rate (≥50 shared tasks) separate on ≥2 of six metrics; <strong>58/60 (96.7%)</strong> on ≥3, versus <strong>0.78%</strong> of same-stack split-half null replicates (12,000 splits) separating on ≥3 (§4.1, Tables 1–2, Appendix B). A solve-rate tie is not behavioural equivalence; BQAA comparisons need an A/A null before calling two stacks "the same."
+</li><li><strong>Stack = model + scaffold + effort, measurably.</strong> Higher configured effort buys exploration and post-write inspection, not more tests: Opus 4.8 in Claude Code, Low→xHigh, total actions <strong>31.3→54.4</strong>, exploration/read <strong>+12.71</strong>, post-write inspection <strong>12.7%→66.8%</strong> of rollouts, formal tests flat (<strong>+0.71</strong>, CI includes zero), unproductive tail unchanged (<strong>−0.50</strong>) (§4.2, Table 3; Appendix E, Table 12). Scaffold dominates interface mechanics (native-edit share 37.0% generic vs 92.4% in the displayed Claude Code stack, Table 4). Attribute behaviour to the deployed stack, never to the model name alone.
+</li><li><strong>Behavioural profiles retrieve the stack without outcomes or tool names.</strong> An 8-feature profile (action shares + entropy/switch/inspection/unverified-termination; outcomes, token counts, action magnitudes and native tool names excluded) retrieves the exact stack across disjoint repository halves at <strong>85.1% Top-1 / 96.8% Top-3</strong> (111 stacks, chance 0.9%), and a 12-feature profile across languages at <strong>90.3% / 98.8%</strong> (16 stacks, chance 6.25%) (§4.3, Table 5; Appendices C.2–C.3, Tables 7–8). Action composition carries most signal (87.5% Top-1 alone multilingual). Useful for drift/attribution dashboards — and a privacy/governance warning the authors flag themselves (§5).
+</li></ol>
+<p><strong>Limits.</strong> The parser audit is a six-LLM consensus (≥5/6) on 500 events, not human labels: primary-operation agreement <strong>82.4%</strong>, target-role <strong>77.0%</strong>, mutation <strong>68.8%</strong>, read mode <strong>96.6%</strong> (§3.3/§4.1, Table 1; Appendix A.3) — path/mutation-derived metrics are diagnostic proxies, and sequence metrics (repeated failures, tail) are not validated by the audit. Cross-repository retrieval does not fully control task composition, so it does not prove task-independent signatures (§4.3); worst multilingual split Top-1 is <strong>56.3%</strong> (Table 8). Single benchmark regime; taxonomy is SWE-specific (§5). <strong>BQAA interpretation (proposed):</strong> adopt the pattern, not the taxonomy verbatim — a versioned action codebook over BQAA spans, outcome-matched stack comparisons with a split-half null, and profile-drift monitoring keyed by full stack identity.</p>
+<h3>Scouted, not ranked</h3>
+<p>Abstract-screened only (no full-PDF claim); reserve candidates are flagged for the next slot in Housekeeping.</p>
+<ul><li><strong><a href="https://arxiv.org/abs/2611.17939">arXiv:2611.17939</a> — Can You Trust Your Finance Agent? (reserve candidate).</strong> Shipped-agent drift/audit case study: abstract reports seven identical runs passing 105–123 of 149 rubric criteria with bill varying up to 17%. Directly on-theme; held as reserve because this slot's three full-read slots went to broader-method papers.
+</li><li><strong><a href="https://arxiv.org/abs/2611.17662">arXiv:2611.17662</a> — Learn then Bet (reserve candidate).</strong> Interpretable learned rules for runtime agent intervention versus turn-limit/keyword monitors. Relevant to BQAA alerting; abstract-screened only.
+</li><li><strong>Also screened, not shortlisted for full read:</strong> <a href="https://arxiv.org/abs/2611.18067">arXiv:2611.18067</a> Agent-as-a-Judge (judge framing; needs full read to separate survey from new method), <a href="https://arxiv.org/abs/2611.17696">arXiv:2611.17696</a> Co-Sight Harness (deterministic enforcement for long-horizon business agents), <a href="https://arxiv.org/abs/2611.17880">arXiv:2611.17880</a> Soteria (verified planning with runtime enforcement), <a href="https://arxiv.org/abs/2611.17955">arXiv:2611.17955</a> WebArena-Pro (web-agent benchmark), <a href="https://arxiv.org/abs/2611.17338">arXiv:2611.17338</a> memory-filtering under resolver errors. Domain benchmarks and model-training papers dominating the rest of the batch were rejected on fit at title/abstract screen.
+</li></ul>
+<h2>Six-week EV</h2>
+<p><strong>Highest expected value: one evaluator-qualification experiment combining all three papers, not three separate projects.</strong> This is a proposed plan, not work performed:</p>
+<ul><li><strong>Weeks 1–2:</strong> freeze a paired session set with known outcomes; define a versioned BQAA action codebook (per 2611.17440's pattern) and per-scenario descriptors (requirement, tool, behaviour) for the eval suite (per 2611.17632). Publish baseline coverage and <code>b/N</code> ceilings per cell.
+</li><li><strong>Weeks 3–4:</strong> score the same sessions under four views — full trace, composed-tool, delegate-collapsed, compacted — with direct vs evidence-gated vs provenance-requesting judges (per 2611.18471). Report wrong-verdict, abstain/coverage, per-cell Δ and restored verdict separately, each against a split-half same-stack null.
+</li><li><strong>Weeks 5–6:</strong> keep only what survives: a judge/view combination whose transport failure and false-certification stay inside a predeclared budget at acceptable provenance-fetch cost; otherwise fix capture/provenance first and re-qualify. Kill criterion: if per-cell scoring and exact provenance do not change any shipping decision on the paired set, stop and keep the simpler judge.
+</li></ul>
+<p>Payoff: evaluator changes stop being confounded with trace-representation changes. Risk: synthetic view transforms may not match production compaction/delegation; validate on naturally occurring delegate spans before generalizing.</p>
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>Verification Transport (2611.18471):</strong> qualify judges across trace views; keep exact, boundary-linked provenance restorable; never merge wrong-verdict and abstain into one accuracy number.
+</li><li><strong>Generated suites ceiling (2611.17632):</strong> publish per-cell deltas and the baseline <code>b/N</code> ceiling with every suite mean; a zero-coverage requirement cell is a finding.
+</li><li><strong>Behavioral trajectories (2611.17440):</strong> compare full stacks (model+scaffold+effort) on normalized action profiles with an A/A null; solve-rate ties prove nothing about behaviour.
+</li><li><strong>Industry:</strong> no response warranted; watch the OpenAI Agents tool-approval alpha only at stable.
+</li></ul>
+<h2>Unconfirmed</h2>
+<p>All ranked paper claims are confirmed against full PDFs; the following discovery limits remain (each carried item re-checked once this slot):</p>
+<ul><li><strong>gap: OpenAI Wallet body HTTP 403</strong> at the <a href="https://openai.com/index/introducing-chatgpt-wallet">primary URL</a>; the <a href="https://openai.com/news/rss.xml">news RSS</a> (HTTP 200, read to end) dates it Nov 13, outside this window. No body-level claim admitted.
+</li><li><strong>gap: Anthropic RSS HTTP 404</strong> at <a href="https://www.anthropic.com/rss.xml">rss.xml</a>. The <a href="https://www.anthropic.com/news">newsroom</a> (HTTP 200) carries a page-level "Latest news November 16, 2026" stamp over an older featured item; no dated in-window announcement established, including for the carried office-suite lead (title paraphrased; no primary found).
+</li><li><strong>gap: Weave access-code gate</strong> (HTTP 200 with gate) at its <a href="https://docs.wandb.ai/weave/reference/changelog">changelog</a>. <strong>Braintrust <a href="https://www.braintrust.dev/changelog">changelog</a></strong> loads (HTTP 200) with page <code>dateModified</code> 2026-11-14 but no per-entry dates sufficient to place an entry in-window. <strong>Opik <a href="https://www.comet.com/docs/opik/changelog">changelog</a></strong> newest extractable date remains 2026-10-26. Undated surfaces establish neither launch nor quiet.
+</li><li><strong>Databricks Genie skills guide:</strong> blog index lists Nov 16 and the <a href="https://www.databricks.com/blog/teach-genie-one-your-workflows-ultimate-guide-skills-genie-one">post</a> loads (HTTP 200), but JSON-LD <code>datePublished</code> is <strong>2026-11-16T17:00:00Z</strong>, after this slot's ~08:55Z cutoff, and the content is a usage guide for existing skills. No in-window capability or per-feature GA change confirmed; no Progress inferred. Revisit next slot only if a dated capability primary appears.
+</li><li><strong>AgentCore:</strong> <a href="https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/release-notes.html">release notes</a> (HTTP 200) remain month-grouped (November: Runtime Instances in six more Regions; no exact date). Web Search GA wording still not established from a dated primary; no Progress inferred.
+</li><li><strong>gap: Snowflake blog HTTP 403</strong>; <a href="https://docs.snowflake.com/en/release-notes/new-features">feature notes</a> (HTTP 200) show dates through Nov 13 only. <strong>gap: Honeycomb changelog HTTP 404</strong>; its <a href="https://www.honeycomb.io/blog">blog</a> <code>dateModified</code> is fetch-day chrome, newest post dates Nov 10 or earlier. <strong>gap: Splunk feed HTTP 404</strong>; <a href="https://www.splunk.com/en_us/blog">blog index</a> loads without a dated in-window launch. <strong>Foundry:</strong> <a href="https://devblogs.microsoft.com/foundry/">blog</a> newest visible Nov 11 (old what's-new gap unchanged). <strong>Vertex:</strong> <a href="https://cloud.google.com/vertex-ai/generative-ai/docs/release-notes">legacy notes</a> remain the reachable surface; no current dated product-notes primary established. <strong>Datadog coding-agent monitoring:</strong> <a href="https://docs.datadoghq.com/llm_observability/monitoring/">docs</a> load (HTTP 200) without a launch date; the dated <a href="https://www.datadoghq.com/feed/">feed</a> newest item is Nov 13.
+</li><li><strong>LangChain blog "Nov 16" resolved as chrome:</strong> the string is the site <code>Last Published</code> build stamp (Mon Nov 16 2026 01:53:37 GMT); newest post dates on the index are Nov 14. No in-window LangChain/LangSmith launch post confirmed.
+</li><li><strong>Coverage boundary:</strong> eight RSS/Atom feeds were parsed within item blocks to their final entries; HTML changelogs were checked for extractable dates, not exhausted as archives. No "nothing shipped anywhere" claim is made. Social sources were not collected (collectors paused). Paper experiments were not reproduced here.
+</li></ul>
+<h2>Housekeeping</h2>
+<p><strong>Packs used: 0; collectors paused.</strong> Fresh list <code>_runs/fb-2026-11-16-0034/fresh-items.md</code> is empty as expected (<code>packs=0 raw=0 unique=0 fresh=0</code>); no pack was opened. Evidence came from the writer's own arXiv, registry, GitHub-release and vendor-page sweep. Agy/DSH/Muse hourly collects and extra seats remain paused under the Oct 22 order (paused, not failed). LinkedIn authwall; X/Reddit not collected; HN dropped; Medium scouting paused (lead-only in any case; no Medium source used).</p>
+<p><strong>arXiv: Monday Nov 16 listing fully screened.</strong> Fetched <code>https://arxiv.org/list/&lt;cat&gt;/new?skip=0&amp;show=2000</code> for cs.AI/CL/LG/SE/DB/MA/IR/DC/CR; all HTTP 200, each single-page to the end ("Showing new listings for Monday, 16 November 2026"; totals AI 276, CL 117, LG 291, SE 44, DB 15, MA 20, IR 15, DC 20, CR 44 = <strong>842 entries including cross-lists and replacements</strong>). Parsed <strong>600 unique papers</strong>; <strong>353 unique ids above 2611.17334</strong> were title+abstract screened. <strong>Verified ceiling 2611.18563</strong> (cs.LG/cs.CR; cs.AI maximum 2611.18553). No arXiv lookup error occurred. <strong>Full PDF read: 3</strong> (2611.18471, 29pp; 2611.17632, 9pp; 2611.17440, 18pp). <strong>Reserve candidates for next slot (abstract-screened, not ranked): arXiv:2611.17939 (finance-agent drift/audit) and arXiv:2611.17662 (Learn then Bet intervention rules).</strong></p>
+<p><strong>Verification method.</strong> Curl with HTTP status for every fetch. Registry check via the run-dir helper (<code>registry_check.py</code>, window 2026-11-15T20:50Z) over complete PyPI/npm histories for 13 PyPI + 7 npm tracked SDKs; GitHub releases via API for 25 repos (newest 6 each) — absence claims are limited to those surfaces. Vendor sweep: 8 dated feeds (OpenAI, Datadog, AWS What's New, AWS ML, Vercel, Grafana, Cloudflare, Google Cloud) plus direct pages for Anthropic, LangChain, Langfuse, Phoenix, Braintrust, Weave, Galileo, Opik, AgentCore, Foundry, Databricks, Snowflake, Honeycomb, New Relic, Dynatrace, Splunk, Vertex, CrowdStrike and Datadog LLM monitoring. Page-build stamps, <code>dateModified</code> and month-grouped notes were never promoted to launch dates. Newest dated items on accessible changelog surfaces: Langfuse Nov 13, Galileo Nov 12, Phoenix Nov 4 (page-extractable), Dynatrace Nov 13, CrowdStrike Nov 13 — none in-window.</p>
+<p><strong>Catalog:</strong> live-hub baseline verified <strong>702 items / 213 briefs / 215 runs</strong>, max brief <code>2026-11-15T1234</code>. Every candidate id/title was grepped against <code>/Users/haiyuancao/caohy1988.github.io/research/catalog.json</code> before ranking; all three Academy ids absent. Priority pin <code>arxiv-2609-02702-trace-as-state</code> intact, not re-carded. No first-party BQAA card; Google ADK not ranked (no in-window release in any case); no GTM content. Writes confined to this brief and <code>_runs/muse-brief-0034-mon20261116/</code>; fetched PDF/text scratch deleted after verification. No HTML, catalog edit, commit or push performed. <strong>Fresh path used.</strong></p>
+<p><strong>Recall applied:</strong> prior slots' ceiling-correction and stamp-vs-entry-date lessons (build stamps and <code>dateModified</code> rejected as launch dates three times this slot: LangChain, Honeycomb, Braintrust); otherwise <code>none applied</code> beyond the kick's own already-carded list.</p>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>arxiv-2611-18471-verification-transport-abstraction</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Do Verifier Judgments Survive Abstraction? Measuring Verification Transport for LLM Agent Evaluation
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.18471">https://arxiv.org/abs/2611.18471</a>
+</li><li><strong>card text:</strong> Holding execution, outcome and verifier fixed, 31.0% of native-correct judgments fail under macro abstraction and 30.9% under delegation (20.3% compaction) across 4 benchmarks, 7 backbones and 4 protocols. Direct judges fail by wrong verdicts while evidence-gated/deliberative judges fail by abstaining; exact provenance restoration recovers 85.5% of failures. Qualify evaluators across trace views and keep boundary-linked provenance restorable.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-17632-generated-suites-coverage-ceiling</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Generated Evaluation Suites as Diversity-Driven Search for Real Agent Regressions
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.17632">https://arxiv.org/abs/2611.17632</a>
+</li><li><strong>card text:</strong> A generated suite's mean pass rate is capped by baseline coverage: a defect reaching b baseline-passing scenarios of N can move the mean by at most b/N, computable before the defect runs. In τ²-bench mutation tests a total tool removal saturated its ceiling yet read as a suite-level improvement; per-cell scoring recovered it. Publish per-cell deltas and coverage ceilings alongside any suite mean.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-17440-behavioral-trajectories-coding-agents</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Interpreting Coding Agents Through Their Behavioral Trajectories
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.17440">https://arxiv.org/abs/2611.17440</a>
+</li><li><strong>card text:</strong> A released deterministic parser normalizes 143,209 coding-agent trajectories (125 stacks, 117 models) into shared actions. All 60 outcome-matched pairs separate behaviourally against a 0.78% same-stack null, and outcome-free behavioural profiles retrieve the exact deployed stack at 85.1% Top-1 across repositories. Compare full stacks on normalized profiles, not solve rate alone.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<p>None.</p>
+<p><strong>Headline claims</strong></p>
+<ul><li>Native-correct verifier judgments fail 31.0% under macro abstraction and 30.9% under delegation with execution held fixed; exact provenance restoration recovers 85.5% (<a href="https://arxiv.org/abs/2611.18471">https://arxiv.org/abs/2611.18471</a>, submitted Nov 13, 2026).
+</li><li>A total tool-removal defect that fails every covered baseline-passing task can still raise the whole-suite pass count; baseline coverage b/N caps what a suite mean can detect (<a href="https://arxiv.org/abs/2611.17632">https://arxiv.org/abs/2611.17632</a>, submitted Nov 13, 2026).
+</li><li>Across 143,209 trajectories, all 60 solve-rate-matched stack pairs differ behaviourally (96.7% on ≥3 metrics vs 0.78% same-stack null) (<a href="https://arxiv.org/abs/2611.17440">https://arxiv.org/abs/2611.17440</a>, submitted Nov 12, 2026).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Mon Nov 16, 2026 · 12:34 AM PT · Muse</span>
+    </div>
+  </footer>
+</body>
+</html>
