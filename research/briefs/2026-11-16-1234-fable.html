@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-16-1234: LangChain&#x27;s eval-driven development loop for agents (add-on)</title>
+  <meta name="description" content="Field Brief 2026-11-16-1234: LangChain&#x27;s eval-driven development loop for agents (add-on)">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-16-1234-fable.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 PM PT · add-on · Mon Nov 16, 2026 · Fable</p>
+    <article>
+<h1>Field Brief — 2026-11-16-1234: LangChain's eval-driven development loop for agents (add-on)</h1>
+<p><strong>Writer: Fable (<code>claude-fable-5-2</code>)</strong>
+<strong>For:</strong> Haiyuan Cao, TL of BQAA (BigQuery Agent Analytics) + ADK
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push to <a href="https://caohy1988.github.io/research/">https://caohy1988.github.io/research/</a>.
+<strong>Scope:</strong> user-requested add-on (Haiyuan, 13:47 PT Mon Nov 16, 2026) to the 2026-11-16-1234 Muse brief; one Industry card.</p>
+<h2>Read this first</h2>
+<ul><li>LangChain published a method post, not a release: eval-driven development (EDD) as a three-step loop, each step tied to a named LangSmith surface.
+</li><li>Its sharpest point for analytics: an average score can rise while a working case breaks, so changes are judged example by example.
+</li><li>A week old (2026-11-09), carded at Haiyuan's request. No measured results; the worked example is illustrative.
+</li></ul>
+<h2>Industry</h2>
+<h3>LangChain: "What Is Eval-Driven Development? How to Improve AI Agents"</h3>
+<p>Divya Santhanam, LangChain blog, 2026-11-09. Source: <a href="https://www.langchain.com/blog/what-is-eval-driven-development">https://www.langchain.com/blog/what-is-eval-driven-development</a></p>
+<p><strong>What it is.</strong> A how-to modeled on test-driven development: evals become the definition of success and the agent is built toward them.</p>
+<p><strong>The method.</strong></p>
+<ol><li><strong>Spec.</strong> For one behavior at a time, write when it should happen, what the agent should and should not do, and what must keep working, precisely enough to score pass or fail.
+</li><li><strong>Eval before build.</strong> Build a dataset, with real agent runs as one of the best sources. Use a code evaluator for deterministic checks and an LLM judge otherwise. Run a baseline before changing anything.
+</li><li><strong>Compare experiments.</strong> Each change gets its own experiment, compared with the last. Read the failing trace for the cause, and keep a held-out set, since tuning until everything passes can overfit.
+</li></ol>
+<p><strong>Then CI + production.</strong> Fast code checks can block a bad merge, slower LLM-judge suites run nightly or before a release, and production failures become new dataset examples.</p>
+<p><strong>LangSmith surfaces named.</strong> Datasets from real runs; experiments with a side-by-side comparison view; tracing; scoring of a step, a tool-call sequence or a multi-turn thread; pytest and Vitest integrations; online evaluators on sampled live traces; annotation queues; dashboards for eval scores, feedback, cost and latency; Insights, which clusters production traces; and LangSmith Engine, which turns issue clusters into dataset examples with assertions for review. For environment-changing agents it points to Harbor (per-task sandbox; a test script grades the end state).</p>
+<p><strong>Common mistakes.</strong> Defining success too loosely; writing the eval after the fix; checking only the average score; adding evals not tied to a specific change; trusting an LLM judge before comparing it with human scores.</p>
+<p><strong>Why it matters for BQAA/ADK.</strong> Writer's reading: traces sit at both ends of this loop. Real runs seed the dataset, a failing trace explains a regression, and production traces are scored, clustered and fed back as examples. Three analytics questions follow: can two agent versions be compared example by example, can tool choice be checked from recorded tool calls, and can judge scores be checked against human review. It is vendor guidance: a recommended workflow, not a measured result.</p>
+<p><strong>Checked:</strong> full page text, 2026-11-16; linked LangSmith docs not opened. Page metadata shows a 2026-11-12 edit with no change note.</p>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>langchain-eval-driven-development-edd</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> LangChain lays out eval-driven development for agents, step by step on LangSmith
+</li><li><strong>url:</strong> <a href="https://www.langchain.com/blog/what-is-eval-driven-development">https://www.langchain.com/blog/what-is-eval-driven-development</a> (2026-11-09, stable)
+</li><li><strong>card text:</strong> LangChain's Nov 9 how-to defines eval-driven development as a three-step loop: write a pass/fail spec for one behavior, build the dataset and evaluator and run a baseline before changing the agent, then compare experiments example by example. It ties each step to LangSmith: datasets from real runs, experiments with a comparison view, tracing, <code>pytest</code> and Vitest runs in CI, online evaluators on sampled live traces, annotation queues, dashboards, Insights and LangSmith Engine. Its worked example shows an average score rising while a working case regresses. It is method guidance with no measured results.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<p>None.</p>
+<p><strong>Headline claims</strong></p>
+<ul><li>LangChain defines eval-driven development as three steps: define what good looks like, write the eval before you build, then make the change and compare experiments (<a href="https://www.langchain.com/blog/what-is-eval-driven-development">https://www.langchain.com/blog/what-is-eval-driven-development</a>, 2026-11-09)
+</li><li>The post warns that a higher average score can hide a regressed example and says to review each example before keeping a change (<a href="https://www.langchain.com/blog/what-is-eval-driven-development">https://www.langchain.com/blog/what-is-eval-driven-development</a>, 2026-11-09)
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Mon Nov 16, 2026 · 12:34 PM PT · add-on · Fable</span>
+    </div>
+  </footer>
+</body>
+</html>
