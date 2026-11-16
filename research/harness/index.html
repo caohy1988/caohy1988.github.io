@@ -267,7 +267,7 @@
     <div class="meta">
       <span>Owner <strong>Haiyuan Cao</strong></span>
       <span>Timezone <strong>America/Los_Angeles</strong></span>
-      <span>Updated <strong>2026-11-14</strong> · <a href="#changelog">changelog</a></span>
+      <span>Updated <strong>2026-11-15</strong> · <a href="#changelog">changelog</a></span>
       <span>Live <a href="/research/usage/">usage</a> · <a href="/research/">briefs</a></span>
     </div>
     <nav class="jump" aria-label="On this page">
@@ -484,6 +484,7 @@
           <li>Every routine prompt carries a kill condition and writes one receipt line per run (<a href="#kill-condition">kill condition</a>, <a href="#receipt-line">receipt line</a>).</li>
           <li>A run skipped while the Mac was down is owed until one catch-up run pays back the whole window (<a href="#kill-condition">payback rule</a>).</li>
           <li>Mondays bring the kill review and weekly receipts; Haiyuan spot-checks one real artifact (<a href="#kill-review">kill review</a>).</li>
+          <li>Adopted 2026-11-15 by Haiyuan: a new routine, or a new kind of message from an existing one, starts quiet, logging messages of a kind it may not send yet as would-send lines until Haiyuan agrees to that kind, and a report-only Monday check inside weekly receipts marks whether each routine’s messages in the group rooms Manage belongs to were needed (<a href="#earn-attention">start quiet, earn attention</a>).</li>
           <li>When one verdict dominates, a Jev gate goes active only if it beats the constant “always the majority verdict” (<a href="#constant-baseline">constant baseline</a>).</li>
           <li>The <code>worth_running</code> shadow call runs only before retries and one-off launches (<a href="#worth-running-scope">scope</a>).</li>
           <li>Mac launch and Field Brief skills document symptom → action before the happy path (<a href="#exception-first">exception-first skills</a>).</li>
@@ -497,6 +498,7 @@
           <li>After a task, file a note that opens with a one-line summary, keeps only what is new and names the lessons applied (<a href="#memory-loop">memory loop</a>).</li>
           <li>Remember slow facts; re-fetch fast ones such as Mac status, PR SHAs, quota and CI before acting (<a href="#memory-rules">memory rules</a>).</li>
           <li>Shared memory holds only enduring, fleet-wide facts, one line each with its date and source (<a href="#shared-memory-admission">admission rule</a>).</li>
+          <li>Adopted 2026-11-15 by Haiyuan: shared user memory admits only what cannot be looked up again; before a qualifying fact is written there, the writer checks whether it already lives somewhere it can be read again, and if it does, the line points to where it lives instead of copying it (<a href="#pointer-not-copy">pointer, not copy</a>).</li>
           <li>Durable lessons are deleted only after Haiyuan approves the specific items (<a href="#memory-loop">memory loop</a>).</li>
           <li>A correction already in <code>forbidden.md</code> twice becomes a proposed skill diff, not another paragraph (<a href="#repeat-lesson">repeat lesson</a>).</li>
           <li><code>AGENTS.md</code> and <code>forbidden.md</code> may not grow past their byte ceilings (<a href="#resident-budget">byte ceiling</a>).</li>
@@ -514,6 +516,7 @@
           <li>In group rooms only the first @mention wakes a bot, and after two hops (the default cap; one hop in the Field Brief room after a miss ticket) the ask goes back to Haiyuan (<a href="#grok-patterns">group rooms</a>).</li>
           <li>Coding kicks go straight to Github Bot and get a kick-ledger row; its heartbeat reads the ledger first (<a href="#coding-em-kicks">kick ledger</a>).</li>
           <li>Adopted 2026-10-31 by Haiyuan: a kick Haiyuan put on hold, or one blocked on Haiyuan’s answer, stays <code>held</code> across heartbeats, PR board sweeps, re-kicks and restarts; CI, review and bot feedback is only logged on its row, and only Haiyuan’s answer or an explicit lift moves it (<a href="#held-kicks">holds wait for Haiyuan</a>).</li>
+          <li>Adopted 2026-11-15 by Haiyuan: when two routines or two event sources fire on the same source event and ask for the same work, they start one run, not two, and each new kick-ledger row records a source-event key (<a href="#source-event-dedupe">one run per piece of work</a>).</li>
           <li>Max throughput (2026-10-31): reviewers and catch tests launch in parallel on each PR head, the order Haiyuan confirmed for the catch-test pass on 2026-11-02; each PR runs as its own lane, a fallback seat swaps in immediately, and an idle seat pulls the next item; tmux isolation still applies (the 15 GB free floor was removed 2026-11-07; <a href="#max-throughput">max throughput</a>, <a href="#catch-tests">catch tests</a>).</li>
           <li>A bug job needs a repro artifact before the implementer starts, and the first commit is the failing test (<a href="#coding-em-kicks">reproduce before fix</a>).</li>
           <li>Commit <code>intent.md</code>, <code>spec.md</code> and <code>plan.md</code> before implementing anything bigger than a one-line fix (<a href="#em-loop">§5</a>).</li>
@@ -530,6 +533,14 @@
           <li>Standing approvals are listed per bot with evidence; promotion and demotion follow the ladder (<a href="#promotion-ladder">promotion ladder</a>).</li>
           <li>A bot’s profile mirrors its vault card; update both when a lasting boundary changes (<a href="#grok-patterns">profile = contract</a>).</li>
           <li>Never put keys in the vault or hub HTML, and rotate anything pasted into chat (<a href="#extend">§17</a>).</li>
+        </ul>
+      </div>
+      <div class="rule-group">
+        <h3>Persistent agents</h3>
+        <ul>
+          <li>Adopted 2026-11-15 by Haiyuan: a credential that a run needs is injected by a broker or proxy outside the agent, and the agent’s environment and the files it can read hold no live secret; the rule installs nothing, and choosing a broker or proxy, and the seats it covers, is a separate decision (<a href="#secrets-not-visible">secrets not visible</a>).</li>
+          <li>Adopted 2026-11-15 by Haiyuan: networking, identity and sandboxing stay in deterministic trusted code, isolated from the untrusted agent and the code it writes, and an unattended run gets hard bounds: a network allowlist, writes only in its work directory, process isolation and no unrestricted full-access mode; the rule installs nothing, and building the bounds and the trusted code is a separate decision (<a href="#trusted-control-plane">trusted control plane</a>).</li>
+          <li>Adopted 2026-11-15 by Haiyuan: each persistent agent has its own identity, distinct from the user’s, so that each action can be audited as the agent’s or the user’s and the agent’s access can be turned off separately from the user’s; the rule installs nothing and adds no seat, and creating the identities is a separate decision (<a href="#agent-identity">agent identity</a>).</li>
         </ul>
       </div>
     </div>
