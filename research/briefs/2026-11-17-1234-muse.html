@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-17-1234: Error bars on pass rates, exact detour bounds, and harnesses that withhold bad counts</title>
+  <meta name="description" content="Field Brief 2026-11-17-1234: Error bars on pass rates, exact detour bounds, and harnesses that withhold bad counts">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-17-1234-muse.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 PM PT · Tue Nov 17, 2026 · Muse</p>
+    <article>
+<h1>Field Brief — 2026-11-17-1234: Error bars on pass rates, exact detour bounds, and harnesses that withhold bad counts</h1>
+<p><strong>Writer: Muse (<code>muse-wonder-full-1.0</code>, high)</strong>
+<strong>For:</strong> Haiyuan Cao, TL of BQAA (BigQuery Agent Analytics) + ADK
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push to <a href="https://caohy1988.github.io/research/">https://caohy1988.github.io/research/</a>.
+<strong>Window:</strong> since the 2026-11-17-0034 brief (launched ~00:50 PT Tue Nov 17, 2026 = 2026-11-17T08:50Z) to launch (~12:50 PT Tue Nov 17 = 2026-11-17T20:50Z, ~12h). Tuesday US morning.
+<strong>arXiv:</strong> No new listing appeared. <code>curl https://arxiv.org/list/cs.AI/new</code> at 2026-11-17T20:41Z still shows "Showing new listings for Tuesday, 17 November 2026" with max id <strong>2611.21608</strong> — the verified ceiling is unchanged from 0034, so 0 new batch ids were screened and the reserve queue was worked instead. Full-PDF-read: 3 reserve papers (2611.19614, 2611.20844, 2611.20595); the other six reserve ids were re-screened at abstract level and stay reserve for 2026-11-18-0034.
+<strong>Effort:</strong> high. <strong>Path:</strong> fresh. Collectors paused (packs=0, fresh=0); the writer's own registry / GitHub / vendor-feed / blog / arXiv sweep is the only source. Untrusted web content was treated as evidence only.</p>
+<h2>Read this first</h2>
+<p>The three reserve papers all hold up on full read, and together they are one argument: report agent scores with their structure attached, or stop reporting them.</p>
+<p>The hierarchical reliability framework (2611.19614) separates execution noise from task heterogeneity and shows the common pooled standard error understates uncertainty by ~2.93x in its worked example (0.02502 pooled vs 0.07329 hierarchical on the same 100x20 matrix, §3.2.1); on Thinkingbox, reinforcement fine-tuning lifts mean pass rate significantly while pass@5/pass@20 coverage differences have 95% CIs that include zero — it made solvable tasks more consistent without expanding coverage (§4.1, Table 1). DetourBench (2611.20844) replaces authored reference paths with a search-proved minimum: on eight tasks every model succeeds on every repeat yet conditional attainment still spreads 0.074–0.190 (Table 6), and deleting one signpost sentence drops view use by 63 points and success by 41 across 160 pairs (Table 1, §5.1). SilentGuard (2611.20595) finds silent failures in 11 of 15 public research APIs (overcounts to 691x, Table 8) and shows model-facing fixes — checklists, reviewers, judges, warnings — leave ~70–74% of answers wrong because agents report flagged counts anyway in 77.4% of flagged runs, while harness withholding of values that fail an exact invariant cuts wrong answers to 1.7% with no clean-task loss (Tables 2–3).</p>
+<p>Industry: one NEW (AWS Agent Registry custom metadata schemas), three Progress notes (LangSmith trace-access controls, Langfuse read-access audit logs on v4.82.0, Mastra built-in MCP server). Everything else in-window is patch/alpha/model-launch level. The separately handled lab post on investigating unintended model actions is mentioned once in Industry mentions and not carded here, per instructions.</p>
+<h2>Industry</h2>
+<h3>NEW ranks</h3>
+<h4>NEW 1 — AWS Agent Registry: custom metadata schemas for governed agent/MCP/skill records</h4>
+<p>Primary: AWS ML Blog, "Govern and discover records with common metadata in AWS Agent Registry" (2026-11-17T20:31Z feed timestamp, stable): <a href="https://aws.amazon.com/blogs/machine-learning/govern-and-discover-records-with-common-metadata-in-aws-agent-registry/">https://aws.amazon.com/blogs/machine-learning/govern-and-discover-records-with-common-metadata-in-aws-agent-registry/</a>. Not in live catalog (grep <code>agent registry</code> / <code>custom metadata</code>: no Agent Registry card).</p>
+<p>Custom metadata schemas are "now available" in AWS Agent Registry: an administrator defines organization-wide key–value fields (business unit, owner, risk class, environment), applies the schema to a registry, and every record — agent, MCP server, skill or custom record — must carry validated values. Records with unknown/missing/invalid fields get a <code>ValidationException</code>; records saved with no custom metadata are held as <code>NON_COMPLIANT</code> and cannot be submitted for approval. Approvers review against validated values (EventBridge can trigger an approval function), and discovery APIs can filter records by these attributes. The worked example is a governed registry publishing a read-only payments-ledger MCP server enriched from existing security/inventory systems before approval.</p>
+<p><strong>BQAA read:</strong> governed agent inventory is the join key analytics needs. A vendor-side schema gate that blocks unclassified agents/tools at publish time is the registry analogue of BQAA's trace-side governance; trace exports that carry the same validated owner/risk/environment fields join cleanly to cost, quality and incident views.</p>
+<h3>Progress notes</h3>
+<ol><li><strong>LangSmith trace sensitive-data controls</strong> → parent <code>langsmith-pii-redaction</code>. LangChain post "Protect sensitive data in your traces: new controls in LangSmith" (Trammell Saltzgaber, November 17, 2026, <a href="https://www.langchain.com/blog/protect-sensitive-data-in-your-traces-new-controls-in-langsmith">https://www.langchain.com/blog/protect-sensitive-data-in-your-traces-new-controls-in-langsmith</a>) ships three named controls on top of the carded redaction/ABAC surface: hide/show trace inputs and outputs separately from run trees, latency and cost; per-user-group permissions layered over RBAC/ABAC per workspace; and trace-level ABAC policies keyed on root-run metadata. Material move on the parent's product claim: redaction transforms data, these controls gate reads so engineers can debug with full-fidelity structure and no sensitive payload.
+</li><li><strong>Langfuse read-access audit logs (v4.82.0)</strong> → parent <code>langfuse-v4-61-0-v4-63-0-skills-gateway-keys-experiment-filters</code>. Changelog "Read-access audit logs" (November 17, 2026, <a href="https://langfuse.com/changelog/2026-11-17-read-access-audit-logs">https://langfuse.com/changelog/2026-11-17-read-access-audit-logs</a>; release v4.82.0 2026-11-17T14:28Z, <a href="https://github.com/langfuse/langfuse/releases/tag/v4.82.0">https://github.com/langfuse/langfuse/releases/tag/v4.82.0</a>): Langfuse now records reads — open/list/search/export/download across UI, public API and MCP tools over traces, observations, scores, sessions and experiments — with actor + role, route + parameters, returned row count and ids, success/denied, IP and user agent; Enterprise/Government (+ always on Cloud HIPAA), backed by ClickHouse audit-log reads from the v4.82 release notes. New audit surface on an existing carded vendor; Progress, not a new product.
+</li><li><strong>Mastra built-in MCP server</strong> → parent <code>mastra-core-1-83-0-resumable-streams-run-observation</code>. Mastra post "Introducing Mastra's Built-in MCP Server" (Paul Scanlon, Nov 17, 2026, <a href="https://mastra.ai/blog/introducing-built-in-mcp-server">https://mastra.ai/blog/introducing-built-in-mcp-server</a>; requires @mastra/core &gt;=1.83.0): <code>@mastra/mcp</code> exposes agents/workflows/tools at <code>/api/mcp</code> with <code>call_agent</code>, <code>start_workflow</code> and <code>get_trace</code> tools, bearer-token auth through the same RBAC/FGA routes, and <code>toolsets</code>/<code>include</code>/<code>exclude</code> control over exposure; not exposed in production without an auth provider unless explicitly enabled. Extends the carded 1.83 run-observation line with a machine-facing trace-read surface; Progress.
+</li></ol>
+<h3>One-line mentions (NOTE-level, not catalogued)</h3>
+<ul><li><strong>@mastra/core 1.84.0</strong> (npm 2026-11-17T19:50Z, stable): first stable 1.84 after the alpha train; no GitHub release for 1.84 existed at sweep time (newest release still @mastra/core@1.83.0, Nov 13), so no capability claim can be verified from primary release notes; NOTE only.
+</li><li><strong>Frontier model launches</strong> are not agent-analytics products and are not ranked: a model-vendor "Introducing GPT-6.2" post (OpenAI news RSS, 2026-11-17T17:45Z) plus Bedrock GA of the same models (AWS What's New, 2026-11-17T17:17Z), and a lab model-family launch dated November 17, 2026 on the Anthropic news index. Paraphrased per vendor-title rule; no eval/observability product shipped.
+</li><li>The lab research post <a href="https://www.anthropic.com/research/investigating-unintended-model-actions">https://www.anthropic.com/research/investigating-unintended-model-actions</a> is published separately as a user-requested add-on this slot; see that page. Not carded here.
+</li><li><strong>LangChain, "What We've Learned Building Proactive Agents"</strong> (Sydney Runkle, November 17, 2026): method advice, no measured results beyond one operational mix figure (&gt;70% of Managed Deep Agents runs now schedule-triggered); mention only.
+</li><li><strong>AWS, "Responsible AI for agentic AI: A phased roadmap"</strong> (2026-11-17T16:56Z): method advice, no measured results of its own (its one efficiency number is a linked customer case study); its Phase 2/3 language (session/trace/span telemetry, then evaluation and hardening) is useful vocabulary, not a product; mention only.
+</li><li><strong>Grafana Cloud Logs full-text search</strong> (2026-11-17T16:53Z) and <strong>Snowflake CoCo Desktop v2.0.0</strong> (feature-updates page, Nov 17): adjacent tooling, no agent-eval/analytics capability claimed; NOTE only.
+</li><li>Registry/GitHub patches, one monorepo train counted once each: Cloudflare workers-sdk train headed by wrangler@4.164.0 (VPC TLS certificate references; not agent analytics), Vercel <code>ai</code> 5.0.291/6.0.333/7.0.174/7.0.175 patch train, langchain-openai 1.8.1, agno 3.2.1 (session-compaction read endpoint; incremental), opik 2.2.145–2.2.146, braintrust Python 0.51.0 (JS side is an RC build → NOTE by rule), letta-code 0.34.64, Claude Code 2.1.327. All patch/fix level from their release bodies; none rankable.
+</li><li>No in-window release: google-adk (newest 2.14.1, Nov 12; NOTE-only by rule anyway), inspect-ai (0.3.290, Nov 14), pydantic-ai (2.69.0 was pre-window), litellm, Phoenix, Weave, LangGraph. No first-party BQAA card.
+</li></ul>
+<h2>Academy</h2>
+<h3>NEW 1 — A Hierarchical Statistical Framework for Evaluating Agent Reliability — <a href="https://arxiv.org/abs/2611.19614">abs</a></h3>
+<p><strong>Full PDF read</strong> (28 pages via pdftotext in chunks: abstract, §§1–5, Eq. (18)/(30)/(33), Figs. 1–11, Table 1, references, Appendices A–D incl. derivations and sample-size analysis; methods/results/conclusion included). Reserve promotion from 0034. Not in live catalog (grep <code>2611.19614</code>: 0 hits).</p>
+<p>Milletari &amp; Kundu (Microsoft) organize evaluation as scenarios &gt; instances &gt; samples and derive how uncertainty propagates upward: scenario-level variance is the sum of a between-task term (task-heterogeneity tau²/M, untouched by more runs per task) and a within-task sampling term (Eq. 18). The worked toy (M=20 tasks, N=100 runs, Uniform(0,1) true probabilities) makes the failure mode concrete: identical data and identical mean (0.4825 at N=M=20) give hierarchical SE <strong>0.07329</strong> vs pooled SE <strong>0.02502</strong> — flattening repeats into fake tasks understates error ~2.93x, and the pooled SE keeps shrinking with N while the honest one plateaus on having only 20 tasks (§3.2.1, Fig. 5). They give exact finite-sample sampling variances for the unbiased pass@k (Eq. 30) and pass^k (Eq. 33, via subset-overlap/U-statistics), prove the plug-in <code>p^k</code> estimator is upward-biased for k&gt;1 (App. C), and warn that plugging in observed rates yields estimated SE=0 at 0/N or N/N without proving certainty. Thinkingbox case study (5 scenarios, 98–104 instances each; base vs RL fine-tuned Qwen-3.8-27B): per-scenario mean-pass-rate gaps +0.039±0.008 to +0.145±0.012 (Table 1), but overall pass@5/pass@20 gap 95% CIs include zero while pass^k reliability rises — training sharpened already-solvable tasks rather than expanding coverage (§4.1, Fig. 10). Limits stated by the authors: binary outcomes for the metric formulas, tasks modeled as i.i.d. draws (deliberately selected suites may need another model), and no run budget fixes an unrepresentative task mix (§3.1); normal-approximation intervals need care on small sets (App. D).</p>
+<p><strong>BQAA read:</strong> BQAA dashboards should store per-instance attempt counts and propagate both variance terms; any "model A beats B by 2 points" claim from pooled repeats is exactly the 2.93x error shown here. Report pass@1 (typical), pass@k (coverage under retries) and pass^k (repeatable success) as three different questions, each with its own error bar.</p>
+<h3>NEW 2 — DetourBench: Trajectory-Level Evaluation of Interactive Agents with Exact Minimum-Action Bounds — <a href="https://arxiv.org/abs/2611.20844">abs</a></h3>
+<p><strong>Full PDF read</strong> (15 pages in chunks: abstract, §§1–6, Tables 1–8, Figs. 1–3, Appendices A–I incl. selection audits, necessity audits, per-task results and oracle-cost timing; limitations in §6). Reserve promotion from 0034. Not in live catalog (grep <code>2611.20844</code>: 0 hits).</p>
+<p>DetourBench constrains each task to a finite, partially observable transition system where discovered resources stay globally addressable, so exhaustive BFS computes the exact full-information minimum charged accesses L_o with a replayable witness, plus exact residual work R_T from any recoverable terminal state; irreversible wrong commitments get no finite residual rather than a fake distance (§3.2–3.4). Success, conditional attainment (L_o/C on successes), residual progress and normalized detour are reported separately. Two results matter. Controlled pair (§5.1, Table 1; 40 Currency pairs, 960 episodes): removing one seed sentence that names an already-available view drops view use by <strong>63 points</strong>, success by <strong>41 points</strong>, and adds <strong>2.9</strong> out-of-scope reads per episode; on 176 both-arm-success pairs attainment falls 0.763→0.637 (delta −0.126, 95% cluster-bootstrap CI [−0.156, −0.099]). Integrated suite (§5.2–5.5, Table 2; 25 tasks x 5 endpoints x 3 repeats = 375 episodes): success 58.7–96.0% orders models one way, conditional attainment 0.803–0.890 another (lowest-success GLM still beats two models on attainment); eight tasks are solved by everyone every time yet attainment spreads 0.074–0.190, widest on task 3 where best/worst models both have RSR=0.000 (no repeats/invalid calls) but differ 17.0 vs 21.7 mean accesses (Table 4). Of 99 failures, 95 exhaust the 1.5x budget a median of 3 accesses from the goal (47 within 2), with duplicates/invalids only 7.6% of charged steps (§3.5). Stated limits (§6): model-informed screening (not prevalence), three repeats, the omniscient oracle does not net out lookalike-selection advantage, and semantic necessity is executed as content counterfactuals for only 4 of 25 tasks (structural removal audit: 309/314 oracle-route nodes load-bearing, App. C).</p>
+<p><strong>BQAA read:</strong> trajectory analytics need a reference cost that is proved, not authored. Where a workflow graph is knowable, store charged accesses against a computed minimum and split failures into one-step-short, budget-exhausted-far, and irreversibly committed — three different fixes that a binary score records identically.</p>
+<h3>NEW 3 — Invariant-Aware Harness Enforcement to Protect LLM Agents from Silent API Failures (SilentGuard) — <a href="https://arxiv.org/abs/2611.20595">abs</a></h3>
+<p><strong>Full PDF read</strong> (25 pages in chunks: abstract, §§1–6, Tables 1–31, Figs. 1–7, Appendices A–K incl. benchmark construction, per-model/per-fault results, cost, fine-tuning, cutoff sensitivity and the preregistered prediction log 26/39 held; limitations in §5.4/§6 area and App. K). Reserve promotion from 0034. Not in live catalog (grep <code>2611.20595</code>: 0 hits).</p>
+<p>A silent API failure is an HTTP 200 whose body does not answer the request sent. Probing 15 public research APIs found <strong>11 with at least one silent fault</strong>: 10 return the unfiltered count for a plausibly misnamed filter (overcounts 2x–691x, Table 8/Fig. 3), 6 of 14 testable silently cap over-limit pages, 3 silently drop typo'd filter values (§5.1, Table 11). The controlled core (AgentOrchBench, 36 count tasks, 7 open models, exact grading) separates three ingredients. Evidence: a judge without extra queries leaves 71.7% wrong as advice and 70.8% even when blocking, because a self-consistent wrong count shows nothing. Permission: warned agents still report the flagged count in 77.4% (judge-flagged) / 64.4% (warned) of runs despite confidence dropping 1.00→0.43; adding "you may answer cannot-be-determined" cuts wrong to 18.2% but ranges 0–59% by model. Enforcement: SilentGuard checks every result in the harness (count identity N(F)+N(F&lt;k and not C_k)=N(F&lt;k) via its own extra queries, list membership, spec/parameter check, learned contracts; re-check once, withhold on exact-check failure, warn on learned-check failure) and leaves <strong>1.7% wrong at most</strong> across models (per-model max 3.7%, Table 19) with clean accuracy unchanged (84.9% vs 84.9%); frontier models go 70.2%→0.5% (Table 5). Honest debits: it abstains rather than recovers (correct under faults falls 16.4%→2.4%; 67% coverage at 3.3% risk under a 25% fault rate, Fig. 2); on six post-freeze fault types wrong falls only 61.1%→24.5% (Table 6); auto-repair beats it on designed faults but ships 49 wrong answers marked "verified" on unseen faults; blind retry wins on faults that clear in 1–2 calls (ToolMaze 60.4% vs 47.6%) while repeating write actions 2.36x/run; self-consistent lies defeat any check built from the API's own answers (&lt;=2.8% caught, Table 30); filters inside query strings evade the spec check (21.3% wrong remains on real APIs, uneven 38.6% pre-freeze vs 7.4% later APIs).</p>
+<p><strong>BQAA read:</strong> this is the harness-side twin of trace-side verification: judge/warning layers in BQAA pipelines should be assumed advisory until proven otherwise. Cheap exact identities (partition counts summing, returned rows satisfying the filter, parameters inside the published spec) belong in the tool-call path with withholding authority; "verified" must never label an auto-repair the check cannot confirm.</p>
+<h3>Scouted-not-ranked (reserve queue carried to 2026-11-18-0034; abstracts re-read this slot, PDFs not read)</h3>
+<ul><li><strong>2611.20711</strong> AgentFaultBench: state-verified tool-fault recovery in isolated GitLab; recovery advice ~neutral vs reminder in the 1,944-run primary (−8.33/0.00/+1.06pp), revised policy +9.90–10.42pp on held-out tasks — reserve.
+</li><li><strong>2611.20927</strong> LEDGER: auditable agent memory under change; rule-decided current value/source trust/deletion, 91.1% held-out vs 83.3% full-replay on synthetic coding workload — reserve.
+</li><li><strong>2611.20873</strong> Re-Reading Is Not Free: ~1B-token trace analysis; cached reads 94.8% of tokens, ~260 cached per generated token, cache-aware estimate ~250kWh vs ~10kWh output-based — reserve.
+</li><li><strong>2611.19982</strong> Autonomous multi-modal agents for ITOps observability (system + per-agent benchmarks) — reserve.
+</li><li><strong>2611.21259</strong> Authorization/trust boundaries in LangChain/LangGraph/AutoGen/OpenClaw, 12 OWASP-mapped experiments — reserve.
+</li><li><strong>2611.19465</strong> VAST: verifiable multi-step red-team environments compiled from vulnerability scenarios — reserve.
+</li></ul>
+<h2>Six-week EV</h2>
+<ul><li><strong>2611.19614 (reliability statistics):</strong> add hierarchical error bars to BQAA model/agent comparison views (per-instance N and M stored alongside rates); retire pooled SEs. Cheapest high-value change in this brief — it prevents shipping decisions on noise.
+</li><li><strong>2611.20844 (DetourBench):</strong> for BQAA's own graph-knowable workflows (lineage lookup, approval chains), log charged accesses vs a computed minimum and the three-way failure split; use attainment, not success alone, in regression gates.
+</li><li><strong>2611.20595 (SilentGuard):</strong> put two exact checks in ADK/BQAA tool paths first — parameter-vs-spec rejection and partition-count identity on aggregate endpoints — with withhold-then-abstain semantics and a coverage/risk dashboard; do not ship auto-repair answers labeled verified.
+</li><li><strong>Industry cluster (LangSmith IO gating, Langfuse read-audit, AWS registry schemas):</strong> trace governance is converging on three vendor-shipped primitives — read-side field gating, read-access audit events, publish-time metadata validation. BQAA should name its equivalents explicitly rather than rediscovering them per customer.
+</li></ul>
+<h2>TL;DRs for BQAA</h2>
+<ul><li>2611.19614 Reliability statistics: pooled repeats understate pass-rate error ~2.93x; fine-tuning raised consistency, not coverage (pass@5/20 gap CIs include zero) — propagate task-level uncertainty.
+</li><li>2611.20844 DetourBench: with a proved minimum route, models at identical 100% success still differ up to 0.19 attainment, and one missing signpost sentence costs −63 points of correct-view use.
+</li><li>2611.20595 SilentGuard: 11/15 real APIs fail silently (to 691x); judges/warnings leave ~70% wrong because agents answer anyway — harness withholding on exact invariants reaches 1.7%.
+</li><li>AWS Agent Registry custom metadata schemas: publish-time validated owner/risk/environment fields with a NON_COMPLIANT gate — governed inventory BQAA analytics can join against.
+</li><li>LangSmith / Langfuse / Mastra Progress: trace IO read-gating, read-access audit logs, and an MCP <code>get_trace</code> surface all shipped Nov 17 — read governance is now a competitive table-stakes trio.
+</li></ul>
+<h2>Unconfirmed</h2>
+<ul><li>OpenAI Wallet post body: still HTTP 403 (vendor sweep <code>openai_wallet</code>); OpenAI index also 403. Looked: vendor sweep + news RSS (RSS itself HTTP 200, 1,405 dated items read to completion).
+</li><li>gap: blog lane Anthropic RSS <a href="https://www.anthropic.com/rss.xml">https://www.anthropic.com/rss.xml</a> HTTP 404; xAI news HTTP 403; NVIDIA feed URL HTTP 404; Azure AI blog category URL HTTP 404. News/research index pages for Anthropic returned HTTP 200 and were scanned for Nov 17 dates instead; xAI/NVIDIA/Azure-AI in-window posts are a gap, not "no posts."
+</li><li>Snowflake blog HTTP 403 (docs feature-updates HTTP 200, used instead); Honeycomb changelog HTTP 404 (blog HTTP 200); Splunk feed HTTP 404 (blog index HTTP 200, no extractable dates).
+</li><li>Braintrust changelog: HTTP 200, page <code>dateModified</code> 2026-11-17T18:14Z only — no dated product item extractable; recorded as gap. Galileo/Opik/Weave/Phoenix/New-Relic/Dynatrace docs pages HTTP 200 with no extractable in-window dated item (Dynatrace "2026-11-17" hits were asset build hashes, verified). Foundry blog HTTP 200, no Nov 17 item found; Vertex release notes HTTP 200, newest date found 2026-11-10.
+</li><li>Carried items re-checked once each, no new dated in-window primary, so not carded: Datadog coding-agent monitoring (feed + LLM-observability docs HTTP 200; feed newest item dated 2026-11-17T00:00Z is a metrics-storage engineering post, not coding-agent monitoring), AgentCore Web Search GA wording (release-notes page HTTP 200; in-window-visible item is free-monthly-queries, no new GA claim extracted), Databricks Genie per-feature split (blog HTTP 200; Nov 17 items are Lakebase/Ignite/clean-rooms/cache/clinical-data posts, no Genie GA split), model-vendor office suite (no primary found in feeds above).
+</li><li>@mastra/core 1.84.0 capability delta: npm confirms the stable publish; GitHub has no 1.84.0 release body yet, so "what changed in 1.84.0 vs 1.83.0" is unconfirmed beyond the MCP launch post (which requires &gt;=1.83.0).
+</li></ul>
+<h2>Housekeeping</h2>
+<ul><li>Packs used: none (packs=0, fresh=0; collectors paused per Haiyuan 2026-10-22 order — disclosed, not a failure). Fresh-list path used: <code>_runs/fb-2026-11-17-1234/fresh-items.md</code> (empty as expected). No pack was opened or invented.
+</li><li>Gaps: LinkedIn authwall; X/Reddit not collected; HN dropped; Medium scouting paused (lead-only rule anyway).
+</li><li>blog lane: 42 posts checked, 4 carded
+</li><li>arXiv: listing re-checked 2026-11-17T20:41Z — still Tuesday 17 November 2026, verified ceiling <strong>2611.21608</strong>, 0 new ids; reserve queue worked (9 abstracts re-read, 3 full-PDF-read at cap, 6 carried as reserve). Priority pin <code>2609.02702</code> untouched.
+</li><li>Verification: <code>registry_check.py</code>, <code>gh_releases.py</code>, <code>vendor_sweep.sh</code> run in foreground (window 2026-11-17T08:50Z) plus a 24-source blog-lane curl sweep; GitHub release bodies read for langfuse/agno/opik/wrangler/langchain-openai; npm/PyPI JSON read for @mastra/core 1.84.0 and braintrust 0.51.0; blog bodies opened for LangChain (2), Langfuse, Mastra and AWS ML (2). Every candidate grepped against the live catalog (712 items / 218 briefs / 220 runs at sweep time): 0 hits for all four ranked items; Progress parents verified to exist.
+</li><li>Scratch: run dir <code>_runs/muse-brief-1234-tue20261117/</code> (vendor/blog HTML + sweep outputs kept for audit); fetched paper <code>.pdf</code>/<code>.txt</code> deleted at close.
+</li></ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>aws-agent-registry-custom-metadata-schemas</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> AWS Agent Registry adds validated custom metadata schemas for governed agent, MCP and skill records
+</li><li><strong>url:</strong> <a href="https://aws.amazon.com/blogs/machine-learning/govern-and-discover-records-with-common-metadata-in-aws-agent-registry/">https://aws.amazon.com/blogs/machine-learning/govern-and-discover-records-with-common-metadata-in-aws-agent-registry/</a> (2026-11-17, stable)
+</li><li><strong>card text:</strong> AWS Agent Registry now lets administrators define organization-wide metadata schemas (owner, business unit, risk class, environment) that every agent, MCP server and skill record must satisfy. Invalid records raise a ValidationException, records without metadata are held NON_COMPLIANT and cannot be submitted for approval, and discovery APIs filter on the validated attributes.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-19614-hierarchical-reliability-statistics</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> A Hierarchical Statistical Framework for Evaluating Agent Reliability
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.19614">https://arxiv.org/abs/2611.19614</a>
+</li><li><strong>card text:</strong> A scenario/instance/sample hierarchy separates execution noise from task heterogeneity, with exact finite-sample variances for unbiased pass@k and pass^k; pooling repeats understates standard error ~2.93x in the worked example. On Thinkingbox, RL fine-tuning improves mean pass rate and repeatability while pass@5/pass@20 coverage gaps have 95% CIs including zero.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-20844-detourbench-exact-minimum-action-bounds</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> DetourBench: Trajectory-Level Evaluation of Interactive Agents with Exact Minimum-Action Bounds
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.20844">https://arxiv.org/abs/2611.20844</a>
+</li><li><strong>card text:</strong> DetourBench computes a search-proved minimum access count and exact residual work per task, reporting success, attainment, residual progress and detour separately. Eight tasks solved by every model on every repeat still spread attainment 0.074–0.190, and deleting one signpost sentence drops correct-view use 63 points across 160 pairs.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-20595-silentguard-invariant-harness-enforcement</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Invariant-Aware Harness Enforcement to Protect LLM Agents from Silent API Failures
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.20595">https://arxiv.org/abs/2611.20595</a>
+</li><li><strong>card text:</strong> Silent failures appear in 11 of 15 public research APIs (counts inflated up to 691x), and checklists, reviewers, judges and warnings leave ~70–74% of answers wrong because agents report flagged values anyway. Harness checks against exact invariants (count identity, spec parameters) with withholding cut wrong answers to 1.7% across 7 open models and 0.5% on frontier models, by abstaining rather than recovering.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>langsmith-pii-redaction</code>
+<ul><li><strong>text:</strong> LangSmith ships trace sensitive-data access controls (Nov 17, 2026): separate visibility for trace inputs/outputs vs run trees and performance stats, per-user-group workspace permissions over RBAC/ABAC, and trace-level ABAC policies keyed on root-run metadata: <a href="https://www.langchain.com/blog/protect-sensitive-data-in-your-traces-new-controls-in-langsmith">https://www.langchain.com/blog/protect-sensitive-data-in-your-traces-new-controls-in-langsmith</a>.
+</li></ul>
+</li><li><strong>parent:</strong> <code>langfuse-v4-61-0-v4-63-0-skills-gateway-keys-experiment-filters</code>
+<ul><li><strong>text:</strong> Langfuse v4.82.0 adds read-access audit logs (Nov 17, 2026): opens/lists/searches/exports/downloads of traces, observations, scores, sessions and experiments across UI, public API and MCP tools are logged with actor, route, parameters, returned row ids and allow/deny outcome (Enterprise; always on Cloud HIPAA): <a href="https://langfuse.com/changelog/2026-11-17-read-access-audit-logs">https://langfuse.com/changelog/2026-11-17-read-access-audit-logs</a>.
+</li></ul>
+</li><li><strong>parent:</strong> <code>mastra-core-1-83-0-resumable-streams-run-observation</code>
+<ul><li><strong>text:</strong> Mastra's built-in MCP server (Nov 17, 2026; requires @mastra/core &gt;=1.83.0) exposes agents, workflows and tools at /api/mcp with call_agent, start_workflow and get_trace tools behind token auth and the same RBAC/FGA checks, with toolset/include/exclude exposure control: <a href="https://mastra.ai/blog/introducing-built-in-mcp-server">https://mastra.ai/blog/introducing-built-in-mcp-server</a>.
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>Pooling repeated runs as independent tasks understates pass-rate standard error ~2.93x (0.02502 vs 0.07329 hierarchical, same data); RL fine-tuning lifted consistency but pass@5/pass@20 coverage gaps include zero in their 95% CIs — <a href="https://arxiv.org/abs/2611.19614">https://arxiv.org/abs/2611.19614</a> (2026-11-14).
+</li><li>Against a search-proved minimum route, models tied at 100% success still differ up to 0.19 in attainment, and removing one signpost sentence drops success 41 points — <a href="https://arxiv.org/abs/2611.20844">https://arxiv.org/abs/2611.20844</a> (2026-11-16).
+</li><li>Silent API failures occur in 11 of 15 public research APIs (up to 691x overcounts); harness withholding on exact invariants cuts wrong answers from 74.0% to 1.7% where judges and warnings leave ~70% — <a href="https://arxiv.org/abs/2611.20595">https://arxiv.org/abs/2611.20595</a> (2026-11-16).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Tue Nov 17, 2026 · 12:34 PM PT · Muse</span>
+    </div>
+  </footer>
+</body>
+</html>
