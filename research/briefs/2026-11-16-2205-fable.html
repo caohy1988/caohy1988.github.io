@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-16-2205: Anthropic&#x27;s guide to building and reporting safety evals (add-on)</title>
+  <meta name="description" content="Field Brief 2026-11-16-2205: Anthropic&#x27;s guide to building and reporting safety evals (add-on)">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-16-2205-fable.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 10:05 PM PT · add-on · Mon Nov 16, 2026 · Fable</p>
+    <article>
+<h1>Field Brief — 2026-11-16-2205: Anthropic's guide to building and reporting safety evals (add-on)</h1>
+<p><strong>Writer: Fable (<code>claude-fable-5-2</code>)</strong>
+<strong>For:</strong> Haiyuan Cao, TL of BQAA (BigQuery Agent Analytics) + ADK
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push to <a href="https://caohy1988.github.io/research/">https://caohy1988.github.io/research/</a>.
+<strong>Scope:</strong> user-requested add-on (Haiyuan, 22:05 PT Mon Nov 16, 2026); one Industry card.</p>
+<h2>Read this first</h2>
+<ul><li>Anthropic published a method post, not a release: how to build, run and report AI safety evals.
+</li><li>Its minimum is three things: define the construct, validate the grader against humans, report uncertainty.
+</li><li>Self-reported guidance and figures, not a benchmark. Published 2026-11-13, carded at Haiyuan's request.
+</li></ul>
+<h2>Industry</h2>
+<h3>Anthropic: "Building strong safety evaluations"</h3>
+<p>Ruth Appel, Evan Frondorf, Jeremy Hadfield, Rebecca Hiscott, Kamya Jagadish, Shayne Longpre, Madeleine Tucker and Brett Wittmershaus, 2026-11-13. Source: <a href="https://www.anthropic.com/research/building-strong-safety-evaluations">https://www.anthropic.com/research/building-strong-safety-evaluations</a></p>
+<p><strong>What it is.</strong> Recommendations for safety evals, which ask whether a model "did the right thing", with examples from Anthropic's system cards.</p>
+<p><strong>Recommendations.</strong></p>
+<ol><li><strong>Team.</strong> Involve methods experts (sampling, grading, analysis) and domain experts (what counts as harm) from the start.
+</li><li><strong>Running safely.</strong> Safeguards are often disabled, so sandbox without internet access and monitor in real time. After its own incidents, the lab paused many internet-enabled evals.
+</li><li><strong>Construct.</strong> For self-harm conversations refusal is often the wrong construct: a model refusing every such prompt gets a perfect refusal-rate score but is not necessarily safer. The lab's multi-turn evals report an "appropriate response rate" against expert rubrics, where one bad turn fails the conversation. Pair harmful with benign prompts to catch over-refusal.
+</li><li><strong>Grader validation.</strong> LLM graders can break silently. Use yes/no criteria, hide scenario metadata from the grader, flag and exclude items it breaks on, and re-grade a sample with a different model. Have humans label a sample blind: grader-expert agreement should roughly match expert-expert agreement.
+</li><li><strong>Uncertainty.</strong> Preregister metrics, comparisons, slices and thresholds. The lab's floors: 100 items for a multi-turn eval, 1,000 for single-turn. Report confidence intervals and per-category results, including unchanged categories.
+</li><li><strong>Disclosure.</strong> Report model version, sampling settings, prompts, grader version and dates; never compare scores across graders. Give the developer time to fix a severe flaw before publishing.
+</li></ol>
+<p><strong>If you only do three things.</strong> Write down the construct before collecting data, validate the grader against human judgment before trusting its numbers, and report uncertainty.</p>
+<p><strong>Examples.</strong> Aggregate single-turn harmless response rates are 94% to 98% for every recent model on the API: saturated, useful mainly as regression checks. On a multi-turn romance-scams eval, Claude Opus 5 and Opus 5.5 differed (98% versus 94%) without statistical significance. For Claude Fable 5.1, multi-turn results on the raw API and claude.ai differed by up to 34 percentage points.</p>
+<p><strong>Why it matters for BQAA/ADK.</strong> Writer's reading: the grader and reporting advice turns into questions any eval record must answer. Which system prompt, tools, surface and grader version produced a score? Does the judge agree with blind human labels? Does each rate carry an interval and a per-category breakdown?</p>
+<p><strong>Checked:</strong> full page text, 2026-11-16; linked system cards not opened.</p>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>lab-building-strong-safety-evaluations</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Anthropic lays out how to build, run and report safety evals: construct first, validated graders, stated uncertainty
+</li><li><strong>url:</strong> <a href="https://www.anthropic.com/research/building-strong-safety-evaluations">https://www.anthropic.com/research/building-strong-safety-evaluations</a> (2026-11-13, stable)
+</li><li><strong>card text:</strong> Anthropic's Nov 13 post gives recommendations for building, running and reporting AI safety evals: involve methods and domain experts, run in a monitored sandbox without internet access, preregister the analysis, validate LLM graders against blind human labels, and report confidence intervals with the full configuration. It argues that refusal is often the wrong construct for self-harm conversations and reports a per-conversation appropriate response rate against expert rubrics. Its own examples include a 98% versus 94% gap between Claude Opus 5 and Opus 5.5 that was not statistically significant, and a gap of up to 34 percentage points for Claude Fable 5.1 between the raw API and <code>claude.ai</code>. It is method guidance with self-reported figures, not a benchmark; its three-item minimum is to write down the construct first, validate the grader against human judgment, and report uncertainty.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<p>None.</p>
+<p><strong>Headline claims</strong></p>
+<ul><li>Anthropic's post says that if you only do three things when building a safety eval, write down the construct before collecting data, validate the grader against human judgment before trusting any number it produces, and report uncertainty (<a href="https://www.anthropic.com/research/building-strong-safety-evaluations">https://www.anthropic.com/research/building-strong-safety-evaluations</a>, 2026-11-13)
+</li><li>The post reports that Claude Opus 5 and Opus 5.5 differed 98% versus 94% on a multi-turn romance-scams eval and that the difference was not statistically significant (<a href="https://www.anthropic.com/research/building-strong-safety-evaluations">https://www.anthropic.com/research/building-strong-safety-evaluations</a>, 2026-11-13)
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Mon Nov 16, 2026 · 10:05 PM PT · add-on · Fable</span>
+    </div>
+  </footer>
+</body>
+</html>
