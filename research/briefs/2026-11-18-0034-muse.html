@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-18-0034: Judge the judges, test recovery advice against a neutral turn, and verify against the request — not the artifact&#x27;s own tests</title>
+  <meta name="description" content="Field Brief 2026-11-18-0034: Judge the judges, test recovery advice against a neutral turn, and verify against the request — not the artifact&#x27;s own tests">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-18-0034-muse.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 AM PT · Wed Nov 18, 2026 · Muse</p>
+    <article>
+<h1>Field Brief — 2026-11-18-0034: Judge the judges, test recovery advice against a neutral turn, and verify against the request — not the artifact's own tests</h1>
+<p><strong>Writer: Muse (<code>muse-wonder-full-1.0</code>, high)</strong>
+<strong>For:</strong> Haiyuan Cao, TL of BQAA (BigQuery Agent Analytics) + ADK
+<strong>Delivery:</strong> Markdown handoff only; Collection owns HTML, catalog and push to <a href="https://caohy1988.github.io/research/">https://caohy1988.github.io/research/</a>.
+<strong>Window:</strong> since the 2026-11-17-1234 brief (launched ~12:40 PT Tue Nov 17, 2026 = 2026-11-17T20:40Z) to launch (~00:55 PT Wed Nov 18 = 2026-11-18T08:55Z, ~12h). Tuesday US afternoon/evening.
+<strong>arXiv:</strong> Wednesday Nov 18 listing screened: 503 new ids above the verified ceiling 2611.21608 (801 ids parsed across cs.AI/SE/CL/LG/DB/MA/CR/IR; new verified ceiling <strong>2611.23229</strong>). Full-PDF-read: 3 papers at cap — 2611.22841 (new listing), 2611.21679 (new listing), 2611.20711 (reserve promotion). The other five reserve ids and the strongest unread new-listing candidates are scouted-not-ranked below and form the reserve queue for 2026-11-18-1234.
+<strong>Effort:</strong> high. <strong>Path:</strong> fresh. Collectors paused (packs=0, fresh=0); the writer's own registry / GitHub / vendor-feed / blog / arXiv sweep is the only source. Untrusted web content was treated as evidence only.</p>
+<h2>Read this first</h2>
+<p>All three papers this slot study the checkers, not the checked — and each finds the fashionable checker weaker than its reputation.</p>
+<p>The rubric-verifier study (2611.22841) builds the first human-judged meta-evaluation for rubric-graded agent environments (2,464 criteria, two bankers per criterion, κ=0.82, §3) and shows verifiers differ mainly in what evidence they can reach: a reactive in-environment judge (Gandalf) matches the strongest serialize-then-grade baseline's UNMET F1 at one-fifth the cost (0.864 at $9.81/pass vs 0.852 at $46.73, §7.1), while domain guidance and MCP tools resolve no F1 effect at all (Table 2a) — guidance only makes the judge stricter. AgentFaultBench (2611.20711, reserve promotion) runs the control most recovery papers skip: against a neutral "take one more turn" message, recovery advice <em>reduced</em> full success by 8.33pp for GPT-4o mini in the 1,944-run primary (Table 2) — all 20 losses are rate-limit cases where the guided agent received the advice, called no further tool, and reported incomplete (§5). FCP (2611.21679) removes the artifact's own checks from the evidence entirely: on ten code tasks, three models' code passed its own tests (18–745 per suite) and violated the request every time; trusting those tests certified all 33 violations, FCP certified 3 — all on one task where both independent formal readings and all three models misread the same flagged phrase alike (§7.6, §7.8).</p>
+<p>Industry: no NEW rank clears the product bar in this evening window. One Progress note (Inspect AI 0.3.291 sentinel-to-human escalation + log surgery). Everything else is patch, alpha/RC, security-fix, or model-launch level.</p>
+<h2>Industry</h2>
+<h3>NEW ranks</h3>
+<p>None. Nothing in-window ships a material new agent-evaluation, observability, or analytics capability.</p>
+<h3>Progress notes</h3>
+<ol><li><strong>Inspect AI 0.3.291 sentinel human escalation + log surgery</strong> → parent <code>inspect-ai-0-3-281-swarm-registry-response-filter-sentinel-scoring</code>. Stable release 2026-11-17T22:04Z (<a href="https://github.com/UKGovernmentBEIS/inspect_ai/releases/tag/0.3.291">https://github.com/UKGovernmentBEIS/inspect_ai/releases/tag/0.3.291</a>; PyPI 2026-11-17T22:08Z): when a sentinel sidecar escalates, <code>human()</code> can now ask a person about a single call, the model's whole turn, or the request before it is sent, and sentinels now run for bridged agents — a human-approval surface on the carded sentinel-scoring line. The same release adds eval-log accounting BQAA-style pipelines need: count a finished log's samples as failures with an empty-attempt run (<code>inspect log zero</code>), exclude samples from a finished log's metrics, <code>inspect log merge-shards</code> for sharded runs, and recording HF template/generation settings in the log. Sentinel/approver/reviewer spend is excluded from cost limits. Material move on an existing carded eval platform; Progress, not a new product.
+</li></ol>
+<h3>One-line mentions (NOTE-level, not catalogued)</h3>
+<ul><li><strong>Apache Spark Optimization Agent for Amazon EMR Serverless</strong> (AWS What's New 2026-11-17T22:25Z, <a href="https://aws.amazon.com/about-aws/whats-new/2026/11/apache-spark-optimization-agent/">https://aws.amazon.com/about-aws/whats-new/2026/11/apache-spark-optimization-agent/</a>): analyzes completed Spark runs (config, logs, telemetry) and returns cost/performance configuration changes with telemetry evidence, via console or SageMaker Unified Studio MCP Server — but the recommendations come from a deterministic engine for Spark tuning, not an LLM-agent eval/analytics product; adjacent telemetry analytics, NOTE only. Not in live catalog (grep <code>spark optimization</code>: 0 hits).
+</li><li><strong>AWS ML blog, "Reducing token costs and latency in Amazon Bedrock AgentCore JSON workloads"</strong> (2026-11-17T22:44Z): method advice on JSON payload shaping for AgentCore; no product shipped — mention only. The other two in-window AWS ML posts (SageMaker KV-cache-aware routing; "code for rules, models for judgment" cost essay, both 2026-11-17 evening) are inference/cost guidance, not agent analytics.
+</li><li><strong>Google Cloud, "How to Build Durable Agentic Systems with Google Antigravity"</strong> (2026-11-18T00:11Z): method advice, no measured results; Google ADK-adjacent tooling is NOTE-only by rule anyway.
+</li><li><strong>A lab model-family launch</strong> dated November 18, 2026 on the Anthropic news index: a model release, not an agent-analytics product; paraphrased per vendor-title rule.
+</li><li><strong>@mastra/core 1.84.0 re-check:</strong> still no GitHub release page for 1.84.0 at sweep time (newest release remains @mastra/core@1.83.0, Nov 13; npm <code>latest</code> is 1.84.0, in-window publishes are 1.85.0-alpha.0–.2 and snapshot builds → NOTE by rule). The 1.84.0 capability delta remains unconfirmed (see Unconfirmed).
+</li><li>Registry/GitHub movers, each monorepo train counted once, all patch/fix level from their release bodies: openai-agents 0.25.0 (third-party session-adapter utilities, one sandbox provider removed; incremental), pydantic-ai 2.70.0 (two high-severity harness ReDoS fixes — ANSI-strip and JWT-redaction patterns — plus minor features; a security patch, not a product capability), langchain-core 1.8.2 (<code>headers</code> on <code>langsmith_gateway</code>), Vercel <code>ai</code> 7.0.176 patch train, litellm 1.108.11 LTS + 1.110.0 fix train (1.111.0rc1 is an RC → NOTE by rule), arize-phoenix v21.2.0 (CLI prompt-tag command + fixes), letta-code 0.34.65. None rankable.
+</li><li>No in-window release: google-adk (newest 2.14.1, Nov 12; NOTE-only anyway), Langfuse (v4.82.0 was pre-window; changelog newest item is the Nov 17 read-access audit logs already Progress'd at 1234), LangSmith/LangGraph SDKs, Weave, Braintrust SDKs, Phoenix Python client. No first-party BQAA card.
+</li></ul>
+<h2>Academy</h2>
+<h3>NEW 1 — Verifying Agents in Rubric-Graded Environments — <a href="https://arxiv.org/abs/2611.22841">abs</a></h3>
+<p><strong>Full PDF read</strong> (31 pages via pdftotext in chunks: abstract, §§1–10, Tables 1–4, Figure 1, references, Appendices A–F incl. dataset provenance, taxonomy construction, the RewardKit matched comparison and over-acceptance/over-rejection analysis; methods/results/limitations included). New-listing paper. Not in live catalog (grep <code>2611.22841</code> / <code>gandalf</code>: 0 hits).</p>
+<p>Dücker et al. (Handshake AI Research) treat the verifier — not the agent — as the object of study. BankerVerifierBench (BVB) has 2,464 binary rubric criteria over 24 investment-banking tasks (67–128 criteria each), one rollout per task, every criterion judged independently by two practicing bankers (92.1% raw agreement, Cohen's κ 0.82) and adjudicated; 66.3% are met, so they score UNMET F1, which an always-"met" verifier scores 0 on (§3, §7). A three-stage pipeline derives nine verifier capabilities from the rubric corpus itself (largest: recompute a derived figure, 21.2%; Table 1), distilled into three design principles — reactive verification, environment alignment (judge runs read-only inside the rollout's own environment), domain guidance — implemented as Gandalf (§§4–6). Results (§7.1, Fig. 1): Gandalf/Gemini 3 Flash reaches F1 0.864 at $9.81 per dataset pass vs Archipelago's 0.852 at $46.73; with GPT-5.4 it leads by 0.127 F1 (0.892 vs 0.765) at one-third the cost, paired 95% intervals excluding zero. The honest debits are the useful part: toggling MCP tools and guidance moves F1 by at most 0.008 with all CIs including zero — guidance only shifts the operating point (UNMET predicted +2.2pp, precision −0.030, recall +0.024; Table 2a) — and the concurrent RewardKit verifier matches Gandalf at matched models while costing 24–44% less (App. D, Table A4), so most of the win is the shared reactive in-environment design, not the extras. Per-capability errors track evidence access exactly as predicted: trajectory-only grading fails where the criterion depends on the rendered deliverable (17.0% error on visual presentation), serialized snapshots collapse on stateful-tool evidence in the second environment (36.7% vs 10.0% on cross-component linkage; §8.2, Table 4), and no verifier solves tracing a value across files (14.1–28.8% error for all). Stated limits (§10): one rollout per task, 24 tasks per environment, the second dataset is internal and not reproducible, whole-system comparisons do not isolate principles, and verifier F1 was never tied to better RL-trained agents.</p>
+<p><strong>BQAA read:</strong> BQAA's judges should be meta-evaluated like this before their scores drive decisions: human-adjudicated per-criterion labels, UNMET-class F1 (not accuracy on a 66%-met corpus), cost per pass next to F1, and over-acceptance vs over-rejection reported separately (App. E) — verifiers with near-identical F1 differ by 44.7 over-rejections per pass, and the backing model alone can swing FN/FP from 1.03 to 0.08. Budget note: guidance text and extra tool access are not free accuracy; measure them or drop them.</p>
+<h3>NEW 2 — AgentFaultBench: State-Verified Evaluation of Tool-Fault Recovery — <a href="https://arxiv.org/abs/2611.20711">abs</a></h3>
+<p><strong>Full PDF read</strong> (63 pages via pdftotext in chunks: abstract, §§1–7, Tables 1–5, Limitations and Ethics, references, Appendices A–Y incl. fault catalogue, per-model counts, intervention texts, delivery audits, sensitivity analyses and the later operational/Sol/new-instance campaigns; methods/results/limitations included). Reserve promotion from 2026-11-17-1234. Not in live catalog (grep <code>2611.20711</code>: 0 hits).</p>
+<p>Gupta asks whether recovery advice helps an agent finish after a tool fails — against the right control. LangGraph/CrewAI agents execute specified GitLab incident tasks (expected issue/report text supplied, so execution and procedure are tested, not content generation) under injected faults (429 cooldowns, forged verification, 503 bursts, post-commit permission revocation; Table 1). Scoring separates correct final state from full success (state + required reads + genuine verification + valid final JSON), and a separately written standard-library checker agrees on all 1,879 observed primary outcomes and 241 constructed cases (§4). Primary result (1,944 planned runs, Table 2): guided feedback vs a neutral "take one more ordinary turn" reminder changes full success by <strong>−8.33pp</strong> (GPT-4o mini; 2 wins/20 losses/194 ties, no missing outcomes), 0.00pp (GPT-4.1 mini) and +1.06pp (GPT-4.1), the latter two inconclusive under missing-data bounds. The mechanism is visible: all 20 first-model losses are rate-limit cases where the guided agent demonstrably received the advice (325/325 guided messages bound into returned model calls), still had six tools, called none of them, and reported incomplete citing the rate limit — the advice bundles pending steps, prohibitions and "if any required step remains blocked, report incomplete" (§5, App. O/P). State/process separation also bites the other way: 318 runs reach the correct state but fail full requirements (311 missing required reads), and GPT-4.1 neutral completes state on all 32 clean cases but full success on only 17. Later campaigns: a revised policy (execution information + next-step advice, incl. restoring executor-held issue IDs the agent never saw) gains +9.90–10.42pp on six unused related instances for GPT-4o mini (161 vs 142 of 192), while stronger baselines already solve every recoverable case (all ties); removing the issue IDs changes 47/48 vs 46/48, so information-restoration and wording remain confounded (Apps. V–Y). Stated limits: small constructed tasks in three incident families on one workflow, no human validation of semantic flags, no retry arm in the primary study, code/records not public with the submission.</p>
+<p><strong>BQAA read:</strong> this is the evaluation template for every "recovery hint / self-healing prompt" claim: same-trigger neutral-continuation control, delivery verified separately from effect, state vs procedure scored apart, missing outcomes kept as bounds instead of dropped. The failure mode transfers directly to production harnesses — a well-meant "report incomplete if blocked" clause inside recovery guidance can convert a retryable 429 into a voluntary stop; BQAA trace views should flag runs that end immediately after a guidance injection with tools unused.</p>
+<h3>NEW 3 — FCP: Formal Context Protocol for Verifying LLM-Generated Artifacts — <a href="https://arxiv.org/abs/2611.21679">abs</a></h3>
+<p><strong>Full PDF read</strong> (26 pages via pdftotext in chunks: abstract, §§1–11, Tables 1–8, Figures 1–5, references, Appendices A–E incl. Lean-checked proofs, the property language, and per-study details; methods/results/limitations included). New-listing paper. Not in live catalog (grep <code>2611.21679</code> / <code>formal context</code>: 0 hits).</p>
+<p>FCP verifies an AI-generated artifact against the request itself, never against the artifact's own tests. It splits conformance (artifact vs a formal reading; decided by model checkers/SMT) from fidelity (reading vs prose meaning; undecidable, refutable by one behavior two independent readings judge differently), and gives each of eight false-assurance situations — vacuity, unreceptive assumptions, fidelity, conflict, under-determination, weak properties, black-box dependence, engine error — a mechanical witness, with only fidelity ending as a concrete question to the request's author (Table 1, §§2–4). Adapters put hardware, text, agents (scaffold as circuit, model output unconstrained; every rule classified enforced/delegated/broken) and code (exhaustive request-derived scope, plus translation-validated proofs beyond it) on the same engines (§§5–6). The numbers are stark. Hardware: trusting AI-written assertions certified 56/244 (23%) of violated requirements; FCP certified 0/244, and all 45 disagreements between two isolated formalizers were real errors (Table 4) — though only 44/98 well-formed formalizations matched intent at all. Code (§7.5–7.6, Tables 6–7): on ten tasks each with a planted conflict, three models' implementations passed their own suites (18–745 tests) and violated the request in every case; in nine tasks all three resolved the conflict identically, in eight answering every scope call (up to 3.6M) identically — agreement across models signaled a shared misreading, not correctness. Self-checks certified all 33 violations; FCP found 9 of 10 conflicts before any code existed and certified 3 violations, all on the gift-card task where both formalizers and all three models resolved one flagged ambiguity alike; a variant reading per flagged answer removes them (§7.8). Proofs beyond the scope decided 2,245/2,263 verdicts for all inputs and caught 7 failures the exhaustive scope missed (§7.7, Table 8). Debits are stated (§10): small planted-defect corpus, all models from one family, gold readings model-assisted (mechanically validated, fidelity still a judgment), assurance bought with an author review queue (8–27 decisions per hardware reading), and an LLM judge baseline on the prompt study marked all 33 checklist items PASS on a literally unsatisfiable prompt (§7.3) — which FCP instead returned as a question with its witness.</p>
+<p><strong>BQAA read:</strong> two portable rules. First, never let an artifact's own generated tests, or cross-model agreement, count as verification evidence in BQAA quality gates — both failed 30/30 implementations here; log them as generation metadata, not assurance. Second, the enforced/delegated/broken split is exactly the right analytics primitive for agent scaffolds: BQAA should report, per guardrail rule, whether the harness enforces it for every model output or merely relies on the model complying — six of eight planted scaffold bugs were invisible until the model deviated, which is precisely the prompt-injection condition.</p>
+<h3>Scouted-not-ranked (abstracts read this slot, PDFs not read; reserve queue for 2026-11-18-1234)</h3>
+<p>New Wednesday listing:</p>
+<ul><li><strong>2611.23074</strong> Runtime Verification of Multiple Natural Language Criteria for Agent Governance: tree-attention verifier scoring N criteria in parallel with ternary verdicts; 1,000 criteria vs 4K-token context in &lt;2s on one H100; beats DynaGuard-4B on trace-level failure detection — strongest unread new candidate, first reserve.
+</li><li><strong>2611.22238</strong> Context Has a Price: &gt;20,000 coding-agent runs; retrieved code cuts search 18–34% but raises cost 33–42% at tenth-price caching, and observation-pruning flips from −19–36% to +38–116% with a cache discount — reserve (pairs with 2611.20873).
+</li><li><strong>2611.22511</strong> LMLineage: per-sentence output-to-input-span attribution with calibrated confidences plus drift-triggered context compaction — reserve.
+</li><li><strong>2611.22991</strong> RagHarnessDebugger: repair-decision traces audited for contract inference; 76–77% of available repairs unrealized under aggregate metrics — reserve.
+</li><li><strong>2611.22901</strong> Done, But Still Working: anytime evaluation of coding-agent stopping on ~6,000 replayed runs; hindsight savings &lt;1–57% by model/scaffold, preregistered stop rule saves 23% without established non-inferiority — reserve.
+</li></ul>
+<p>Carried reserves (abstracts re-read this slot):</p>
+<ul><li><strong>2611.20927</strong> LEDGER auditable agent memory (91.1% held-out vs 83.3% full replay, synthetic coding workload) — reserve.
+</li><li><strong>2611.20873</strong> Re-Reading Is Not Free: ~1B-token traces, cached reads 94.8% of tokens, ~250kWh cache-aware vs ~10kWh output-based estimate — reserve.
+</li><li><strong>2611.21259</strong> Authorization/trust boundaries across LangChain/LangGraph/AutoGen/OpenClaw, 12 OWASP-mapped experiments — reserve.
+</li><li><strong>2611.19982</strong> Autonomous multi-modal agents for ITOps observability (per-agent benchmarks; agents instrumented with agent analytics) — reserve.
+</li><li><strong>2611.19465</strong> VAST verifiable multi-step red-team environments (full workflow protocol lifts completion 14/90 → 76/90 on its main stratum) — reserve.
+</li></ul>
+<h2>Six-week EV</h2>
+<ul><li><strong>2611.22841 (verifier meta-evaluation):</strong> stand up a small human-adjudicated criterion set for BQAA's own judges and report UNMET F1, cost/pass, and over-acceptance vs over-rejection per judge model; A/B any guidance text or tool-access change before shipping it — both were free parameters with zero measured F1 effect here.
+</li><li><strong>2611.20711 (AgentFaultBench):</strong> adopt the neutral-continuation control as BQAA's house test for recovery/hint features in ADK harnesses, and add a trace alert for "guidance injected → zero further tool calls → incomplete" runs; audit shipped recovery prompts for stop-clauses that fire on retryable errors.
+</li><li><strong>2611.21679 (FCP):</strong> classify each BQAA/ADK guardrail as enforced vs delegated in product docs and dashboards, and strip "tests pass" / multi-model agreement signals out of any quality gate that presents them as verification; where a spec exists, add disagreement witnesses (two independent readings/checkers) as the escalation trigger.
+</li><li><strong>Inspect 0.3.291 (Progress):</strong> sentinel-to-human escalation at call/turn/request granularity is now table stakes for eval harnesses running untrusted agents; mirror the log-zero/exclude/merge-shards operations in BQAA eval-set accounting so failed or sharded runs cannot silently vanish from denominators.
+</li></ul>
+<h2>TL;DRs for BQAA</h2>
+<ul><li>2611.22841 Rubric verifiers: in-environment reactive judging wins on cost (0.864 F1 at $9.81 vs 0.852 at $46.73 per pass); guidance and MCP tools moved F1 by ≤0.008 — meta-evaluate judges, report over-acceptance separately.
+</li><li>2611.20711 AgentFaultBench: recovery advice <em>hurt</em> (−8.33pp vs a neutral extra turn) because guided agents stopped after 429s with tools unused — never ship recovery prompts without a neutral-continuation control.
+</li><li>2611.21679 FCP: self-written tests certified 33/33 request violations and cross-model agreement meant shared misreading; verify against the request, and label guardrails enforced vs delegated.
+</li><li>Inspect AI 0.3.291: sentinel sidecars can now escalate to a human per call/turn/request, with log zero/exclude/merge-shards for honest eval denominators.
+</li></ul>
+<h2>Unconfirmed</h2>
+<ul><li>OpenAI Wallet post body: still HTTP 403 (vendor sweep <code>openai_wallet</code>). OpenAI news RSS itself HTTP 200 and read to completion (1,406 items; newest 2026-11-17T17:45Z, pre-window).
+</li><li>gap: blog lane Anthropic RSS <a href="https://www.anthropic.com/rss.xml">https://www.anthropic.com/rss.xml</a> HTTP 404 (news + research index pages HTTP 200 used instead; research index newest dated post is the already-carded Nov 13 safety-evaluations post, page <code>_updatedAt</code> Nov 17 only); xAI news HTTP 403 (retried once, still 403 — in-window xAI posts are a gap, not "no posts"). NVIDIA gap resolved: <a href="https://blogs.nvidia.com/feed/">https://blogs.nvidia.com/feed/</a> HTTP 200 this slot, newest item 2026-11-17T14:00Z pre-window, none in-window. Azure AI blog index HTTP 200 with only a page <code>dateModified</code> (2026-11-17T19:00Z) extractable — no dated in-window item confirmed; recorded as gap for the Azure AI category specifically.
+</li><li>Snowflake blog HTTP 403 (docs feature-updates HTTP 200); Honeycomb changelog HTTP 404 (blog HTTP 200); Splunk feed HTTP 404 (blog index HTTP 200, no extractable dates). Braintrust changelog HTTP 200, page-modified 2026-11-18T08:18Z only — no dated product item extractable; gap. Galileo/Opik/Weave/Phoenix/New Relic/Dynatrace/Foundry/Vertex pages HTTP 200 with no extractable in-window dated item.
+</li><li>@mastra/core 1.84.0 capability delta: npm confirms the stable publish (pre-window, Nov 17T19:50Z) but GitHub still has no 1.84.0 release body (newest release @mastra/core@1.83.0); "what changed in 1.84.0" remains unconfirmed beyond the Nov 17 MCP launch post already Progress'd.
+</li><li>Carried items re-checked once each, no new dated in-window primary, so not carded: Datadog coding-agent monitoring (feed HTTP 200, newest item 2026-11-17T00:00Z metrics-storage post; LLM-observability docs HTTP 200, undated), AgentCore Web Search GA wording (AgentCore release-notes page HTTP 200, no extractable in-window dated GA claim), Databricks Genie per-feature split (blog HTTP 200; Nov 17–18 items are Ignite/Lakebase/clean-rooms/cache/cluster-rate-limits, plus a Nov 17 Genie One clinical-data post that is a use-case story, not a per-feature GA split), model-vendor office suite (no primary found in any feed above).
+</li><li>EMR Spark Optimization Agent availability scope (GA vs preview, regions): the What's New detail page is JS-rendered and its body was not extractable by curl; the claim above rests on the What's New RSS entry text (2026-11-17T22:25Z), which does not state preview/GA status — recorded here rather than asserted.
+</li></ul>
+<h2>Housekeeping</h2>
+<ul><li>Packs used: none (packs=0, fresh=0; collectors paused per Haiyuan 2026-10-22 order — disclosed, not a failure). Fresh-list path used: <code>_runs/fb-2026-11-18-0034/fresh-items.md</code> (empty as expected). No pack was opened or invented.
+</li><li>Gaps: LinkedIn authwall; X/Reddit not collected; HN dropped; Medium scouting paused (lead-only rule anyway).
+</li><li>blog lane: 14 posts checked, 0 carded
+</li><li>arXiv: Wednesday 18 November 2026 listing confirmed on the fetched pages ("Showing new listings for Wednesday, 18 November 2026"); 801 ids parsed across cs.AI/SE/CL/LG/DB/MA/CR/IR, <strong>503 new ids screened</strong> above 2611.21608, new verified ceiling <strong>2611.23229</strong>. Keyword pre-rank (<code>screen.py</code>/<code>screen.out</code>) used as a starting point; titles/abstracts judged directly, including a targeted pass for observability/telemetry/text-to-SQL terms below the top scores. Reserve queue: 6 abstracts re-read via the arXiv API, 1 promoted to full read (2611.20711), 5 carried; 10 new-listing abstracts read, 2 full-read, 5 listed scouted-not-ranked. Priority pin <code>2609.02702</code> untouched. Catalog baseline at sweep time: 718 items / 221 briefs / 223 runs (matches kickoff).
+</li><li>Verification: <code>registry_check.py</code>, <code>gh_releases.py</code>, <code>vendor_sweep.sh</code> run in foreground (window 2026-11-17T20:40Z) plus a blog-lane curl sweep (frontier-lab and framework/ops indexes and feeds; <code>rss_scan.py</code> in the run dir carries a stale Nov 14–15 window and found no feed files, so feeds were re-parsed directly with the correct window). GitHub release bodies read for inspect-ai, openai-agents-python, pydantic-ai, phoenix, litellm, langchain, vercel/ai; AWS What's New/ML and Google Cloud feed entries read in full. Every candidate grepped against the live catalog: 0 hits for all three ranked papers; the Progress parent verified to exist.
+</li><li>Scratch: run dir <code>_runs/muse-brief-0034-wed20261118/</code> (sweep outputs + vendor HTML kept for audit); fetched paper <code>.pdf</code>/<code>.txt</code> files under <code>papers/</code> deleted at close.
+</li></ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>arxiv-2611-22841-rubric-verifier-meta-evaluation</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Verifying Agents in Rubric-Graded Environments
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.22841">https://arxiv.org/abs/2611.22841</a>
+</li><li><strong>card text:</strong> First human-judged meta-evaluation of rubric verifiers (2,464 criteria, κ=0.82): a reactive in-environment judge matches the best serialize-then-grade F1 at one-fifth the cost (0.864 @ $9.81 vs 0.852 @ $46.73/pass), while guidance and MCP tools resolve no F1 gain. Verifier errors track evidence access, and near-equal-F1 verifiers differ sharply in over-acceptance vs over-rejection.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-20711-agentfaultbench-tool-fault-recovery</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> AgentFaultBench: State-Verified Evaluation of Tool-Fault Recovery
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.20711">https://arxiv.org/abs/2611.20711</a>
+</li><li><strong>card text:</strong> In 1,944 state-verified GitLab tool-fault runs, recovery advice reduced full success by 8.33pp vs a neutral extra turn for GPT-4o mini — guided agents stopped after retryable 429s with tools unused. State completion and procedure compliance diverge in 318 runs, showing why recovery claims need neutral-continuation controls and delivery checks.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-21679-fcp-verify-against-request</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> FCP: Formal Context Protocol for Verifying LLM-Generated Artifacts
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.21679">https://arxiv.org/abs/2611.21679</a>
+</li><li><strong>card text:</strong> FCP checks artifacts against the request, not their own tests: self-checks certified 23% of violated hardware requirements and all 33 code violations (models passed own tests yet violated every task, usually identically), FCP certified 0 and 3. Its agent adapter classifies each rule enforced/delegated/broken with the model output unconstrained.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>inspect-ai-0-3-281-swarm-registry-response-filter-sentinel-scoring</code>
+<ul><li><strong>text:</strong> Inspect AI 0.3.291 (2026-11-17, stable): sentinel sidecars can escalate to a human about a call, a whole turn, or a request before sending, incl. for bridged agents; adds inspect log zero/exclude/merge-shards eval-log accounting and excludes sentinel/approver/reviewer spend from cost limits.
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>A reactive in-environment rubric verifier reaches UNMET F1 0.864 at $9.81/pass vs 0.852 at $46.73 for serialize-then-grade, on 2,464 human-adjudicated criteria (<a href="https://arxiv.org/abs/2611.22841">https://arxiv.org/abs/2611.22841</a>, 2026-11-17).
+</li><li>Recovery advice underperformed a neutral extra turn by 8.33pp in 1,944 state-verified tool-fault runs; all 20 losses stopped after rate limits with tools unused (<a href="https://arxiv.org/abs/2611.20711">https://arxiv.org/abs/2611.20711</a>, 2026-11-16).
+</li><li>Code from three models passed its own tests and violated the request on all ten tasks; trusting self-tests certified 33/33 violations, request-side formal checking certified 3 (<a href="https://arxiv.org/abs/2611.21679">https://arxiv.org/abs/2611.21679</a>, 2026-11-15).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Wed Nov 18, 2026 · 12:34 AM PT · Muse</span>
+    </div>
+  </footer>
+</body>
+</html>
