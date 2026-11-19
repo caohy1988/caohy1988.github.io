@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MongoDB + Firebolt vs BigQuery Agent Analytics: how they differ — Field Brief</title>
+<meta name="description" content="A plain-language field report: what MongoDB announced when it acquired Firebolt, what Firebolt is, and how it differs from BigQuery Agent Analytics (BQAA), with a status strip, data-flow diagrams and a side-by-side table. Written from the BQAA side; sources fetched 2026-11-18.">
+<meta property="og:title" content="MongoDB + Firebolt vs BigQuery Agent Analytics: how they differ"><meta property="og:description" content="MongoDB plans analytics that applications and agents can use; BQAA records what agents did. A sourced field report with a status strip, data-flow diagrams and a side-by-side table, written from the BQAA side."><meta property="og:type" content="article"><meta property="og:url" content="https://caohy1988.github.io/research/mongodb-firebolt-vs-bqaa/">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%231b2129'/%3E%3Cpath%20d='M6%2010h9M6%2016h12M6%2022h7'%20stroke='%2391c3e8'%20stroke-width='3'/%3E%3Cpath%20d='M20%209l6%207-6%207'%20fill='none'%20stroke='%23f2622e'%20stroke-width='2.6'/%3E%3C/svg%3E">
+<link rel="canonical" href="https://caohy1988.github.io/research/mongodb-firebolt-vs-bqaa/">
+<meta name="theme-color" content="#1b2129">
+<link rel="stylesheet" href="../../assets/site-nav.css" data-site-nav>
+<script defer src="../../assets/site-nav.js" data-site-nav></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#study">Skip to study</a>
+<!-- site-nav:start -->
+<div class="site-topbar" data-site-nav data-sticky="">
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+    <button class="site-nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav-links site-nav" id="site-nav" aria-label="Primary">
+      <a href="/research/" aria-current="page">Research</a>
+      <a href="/research/stories/">BQAA</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-bigquery">BigQuery</button>
+        <div class="site-nav-menu" id="site-nav-menu-bigquery">
+          <a href="/research/conversational-analytics/">Conversational Analytics</a>
+          <a href="/research/bqml-ai-operators/">BQ ML / AI Ops</a>
+          <a href="/research/bigquery-graph/">BQ Graph</a>
+          <a href="/research/bigquery-lakehouse/">BQ Lakehouse</a>
+          <a href="/research/bigquery-search/">BQ Search</a>
+        </div>
+      </div>
+      <a href="/research/usage/">Usage</a>
+      <a href="/research/harness/">Harness</a>
+      <a href="/research/harness-lab/">Lab</a>
+      <a href="/research/templates/">Templates</a>
+      <a href="/research/jev/">Jev</a>
+      <a href="/research/durable-agents/">Durable</a>
+      <a href="/research/tl-agent-era/">Leadership</a>
+      <a href="/research/profile/">Profile</a>
+      <div class="site-nav-folder">
+        <button type="button" class="site-nav-folder-button" aria-haspopup="true" aria-expanded="false" aria-controls="site-nav-menu-builds">Builds</button>
+        <div class="site-nav-menu" id="site-nav-menu-builds">
+          <a href="/rfc/">RFC</a>
+          <a href="/rfc/detailed-rfc/">Detailed RFC</a>
+          <a href="/evalbench/">EvalBench</a>
+          <a href="/research/builds/mcp-apps-feature-matrix/">MCP Apps matrix</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+<!-- site-nav:end -->
+<header class="topbar">
+<a class="brand" href="/research/" aria-label="Field notes, MongoDB + Firebolt vs BQAA (Research home)"><svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6"/><path class="bm-a" d="M6 10h9M6 16h12M6 22h7"/><path class="bm-cut" d="M20 9l6 7-6 7"/></svg><span class="brand-name">Field notes</span> <span class="brand-sub">MongoDB + Firebolt vs BQAA</span></a>
+<div class="top-actions"><a href="#sources">Sources <span class="source-count">30</span></a></div>
+</header>
+<main id="study">
+<section class="hero" aria-labelledby="title">
+<div class="hero-copy">
+<p class="eyebrow">A field brief, prepared 18 November 2026</p>
+<h1 id="title">MongoDB + Firebolt and BigQuery Agent Analytics: how they differ</h1>
+<div class="tldr" role="note" aria-label="TL;DR">
+<p class="tldr-title">TL;DR</p>
+<ul>
+<li>On 17 November 2026, MongoDB said it had acquired Firebolt, a high-performance analytical database, and plans to run Firebolt’s engine next to MongoDB so applications and agents can analyze live data; it is not available yet, and there is a waitlist <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">MongoDB post</a>; <a href="https://www.mongodb.com/products/platform/real-time-analytics">waitlist</a>)</span>.</li>
+<li>BigQuery Agent Analytics (BQAA) does a different job: it records what agents do, such as requests, responses, tool calls and errors, in BigQuery, Google Cloud’s data platform, so teams can debug, monitor and evaluate them <span class="cite">(<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery guide</a>; <a href="https://docs.cloud.google.com/bigquery/docs/introduction">BigQuery overview</a>; <a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>.</li>
+<li>In our judgement, BQAA’s closest MongoDB counterpart is not Firebolt but the tracing built into Atlas Agent Engine, MongoDB’s agent platform, which is in public preview <span class="cite">(<a href="https://www.mongodb.com/docs/agentengine/manage/inspect-traces/">trace docs</a>; <a href="https://www.mongodb.com/docs/agentengine/">Atlas Agent Engine docs</a>)</span>.</li>
+<li>BQAA was announced generally available in Google’s Agent Development Kit (ADK) in April 2026, in a note that names no language, and its maturity varies by language: Python’s plugin reached version 2.0 in December 2025, while the Go and JS plugins arrived in November 2026 <span class="cite">(<a href="https://docs.cloud.google.com/bigquery/docs/release-notes#April_15_2026">release notes</a>; <a href="https://github.com/google/adk-python/releases/tag/v1.21.0">Python</a>; <a href="https://github.com/google/adk-go/releases/tag/plugin/agentanalytics/v0.1.0">Go</a>; <a href="https://github.com/google/adk-js/releases/tag/integrations-v2.5.0">JS</a>)</span>.</li>
+</ul>
+</div>
+</div>
+<div class="hero-notes">
+<p class="provenance">Prepared and sources fetched on 18 November 2026, Pacific time. Written from the BQAA side, so weigh its judgements accordingly.</p>
+<p class="citation-key">Main sources: MongoDB’s announcement, <a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">MongoDB Acquires Firebolt to Bring Lightning-Fast Real-Time Analytics Into Its Intelligent Data Platform</a> (17 November 2026); Firebolt’s <a href="https://docs.firebolt.io/overview">What is Firebolt?</a>; the ADK <a href="https://adk.dev/integrations/bigquery-agent-analytics/">BigQuery Agent Analytics plugin</a> page; and the BigQuery guide <a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">Use BigQuery agent analytics</a>. Repository links are pinned to release tags.</p>
+<p class="hero-meta">Nine short sections, a status strip, two data-flow diagrams, a comparison table, a list of what the sources do not say, and 30 linked sources.</p>
+</div>
+</section>
+
+<div class="study-layout">
+<nav class="contents" aria-label="In this study">
+<p class="small-label" aria-hidden="true">In this study</p>
+<ol>
+<li><a href="#announced"><span class="toc-num">01</span> What MongoDB announced</a></li>
+<li><a href="#firebolt"><span class="toc-num">02</span> What Firebolt is</a></li>
+<li><a href="#why-mongodb"><span class="toc-num">03</span> Why MongoDB wants it</a></li>
+<li><a href="#bqaa"><span class="toc-num">04</span> What BQAA is</a></li>
+<li><a href="#at-a-glance"><span class="toc-num">05</span> At a glance: where each piece stands</a></li>
+<li><a href="#data-flow"><span class="toc-num">06</span> How the data flows</a></li>
+<li><a href="#side-by-side"><span class="toc-num">07</span> Side by side</a></li>
+<li><a href="#overlap"><span class="toc-num">08</span> Where they meet</a></li>
+<li><a href="#bottom-line"><span class="toc-num">09</span> Bottom line</a></li>
+<li><a href="#not-stated"><span class="toc-num"></span> What the sources do not say</a></li>
+<li><a href="#sources"><span class="toc-num"></span> Sources</a></li>
+</ol>
+</nav>
+<div class="study">
+
+<section id="announced" class="chapter" aria-labelledby="announced-h">
+<p class="chapter-number" aria-hidden="true">01 / The news</p>
+<h2 id="announced-h"><span class="visually-hidden">1. </span>What MongoDB announced</h2>
+<p>On 17 November 2026, MongoDB published “MongoDB Acquires Firebolt to Bring Lightning-Fast Real-Time Analytics Into Its Intelligent Data Platform”, written by Fred Roma, its Senior Vice President of Engineering <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>.</p>
+<p>The reasoning fits in one line. MongoDB customers’ operational data already lives in MongoDB, “so analytics should be able to run there too, at the source. That’s why MongoDB acquired Firebolt.” <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span></p>
+<p>You cannot use it yet. The post says the teams “are already working together to bring Firebolt’s engine into MongoDB”, and that customers will be able to turn on real-time analytics in the coming months. Until then, MongoDB offers a waitlist <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>; <a href="https://www.mongodb.com/products/platform/real-time-analytics">waitlist page</a>)</span>.</p>
+<p>If you already use Firebolt, the post says “Nothing changes” and you “can continue using the product with the same support and service” <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>. Firebolt’s own site now carries a banner: “Firebolt is joining MongoDB to bring real-time analytics into their Intelligent Data Platform” <span class="cite">(<a href="https://www.firebolt.io/">firebolt.io</a>)</span>.</p>
+<p>Plans can change, and the post says so: its forward-looking statements notice covers “the anticipated benefits, integration, and future development of Firebolt’s technology”, and warns that “actual results may differ materially” <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>.</p>
+</section>
+
+<section id="firebolt" class="chapter" aria-labelledby="firebolt-h">
+<p class="chapter-number" aria-hidden="true">02 / The company MongoDB bought</p>
+<h2 id="firebolt-h"><span class="visually-hidden">2. </span>What Firebolt is</h2>
+<p>MongoDB says data infrastructure has long been split into “two worlds: operational databases that run applications, and data warehouses that analyze what already happened” <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>. Firebolt sits on the analytics side. It calls itself “a high-performance analytical database” that “runs as a single binary on a laptop and scales to hundreds of nodes and petabytes of data on object storage in your own cloud” <span class="cite">(<a href="https://docs.firebolt.io/overview">What is Firebolt?</a>)</span>. MongoDB’s FAQ adds that it is “designed for low-latency queries and high-concurrency applications”: fast answers to many queries at once <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>.</p>
+<ul>
+<li>It uses standard SQL <span class="cite">(<a href="https://docs.firebolt.io/overview">What is Firebolt?</a>)</span>.</li>
+<li>It keeps real-time data in its own storage format and reads open formats, Parquet and Iceberg, for batch work, “so there is no lock-in” <span class="cite">(<a href="https://docs.firebolt.io/overview">What is Firebolt?</a>)</span>.</li>
+<li>It runs as a single binary, on Kubernetes or as a managed service; AWS and GCP are generally available (GA) and Azure is in preview, and self-managed Firebolt is in preview too <span class="cite">(<a href="https://docs.firebolt.io/overview">What is Firebolt?</a>)</span>.</li>
+<li>Its MCP (Model Context Protocol) server, which Firebolt calls “a bridge between your data warehouse and AI assistants”, lets clients built on large language models (LLMs) write and execute SQL against Firebolt <span class="cite">(<a href="https://docs.firebolt.io/guides/integrations/mcp">Firebolt MCP Server</a>)</span>.</li>
+<li>It has its own route from MongoDB: a change data capture (CDC) feature, in private preview (early access on request), that keeps a Firebolt table continuously in sync with a MongoDB collection and stores each document whole, as JSON <span class="cite">(<a href="https://docs.firebolt.io/guides/change-data-capture/mongodb">Firebolt MongoDB CDC</a>)</span>.</li>
+</ul>
+</section>
+
+<section id="why-mongodb" class="chapter" aria-labelledby="why-mongodb-h">
+<p class="chapter-number" aria-hidden="true">03 / The reasoning</p>
+<h2 id="why-mongodb-h"><span class="visually-hidden">3. </span>Why MongoDB wants it</h2>
+<p>MongoDB’s argument is about where analytics runs. Its post says that copying operational data into a separate system means building and maintaining pipelines, keeping systems in sync and running another platform, with a “risk of stale answers”; it calls this “the data-movement tax” <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>.</p>
+<p>MongoDB’s plan: “Firebolt’s engine will run right alongside your database, and we’ll keep it in sync automatically, so there’s no pipeline to build or manage.” The post says customers will get “one platform for operational and real-time analytical workloads” <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>.</p>
+<p>Agents are a big part of the pitch. MongoDB says they “act continuously, can drive thousands of concurrent queries, and need sub-second answers on fresh data” <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>.</p>
+<p>It is not meant to replace a warehouse. Asked whether it does, MongoDB’s FAQ answers: “No. Traditional data warehouses and data lakes remain the right fit for internal BI, reporting, and data science” (BI is business intelligence); real-time analytics is for “application-facing analytics” <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>.</p>
+<p>Real-time analytics will extend MongoDB’s platform, which the post says already brings together operational data, search and vector search, AI models, stream processing, and the ability to build and run agents in production. Over time, MongoDB says, customers will also be able to analyze data from other sources and formats alongside their MongoDB data <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>. For reference, MongoDB stores data records as BSON documents, a binary representation of JSON documents <span class="cite">(<a href="https://www.mongodb.com/docs/manual/core/document/">MongoDB manual</a>)</span>.</p>
+</section>
+
+<section id="bqaa" class="chapter" aria-labelledby="bqaa-h">
+<p class="chapter-number" aria-hidden="true">04 / Our side</p>
+<h2 id="bqaa-h"><span class="visually-hidden">4. </span>What BQAA is</h2>
+<p>BigQuery Agent Analytics (BQAA) is a plugin for the Agent Development Kit (ADK), which its site calls “the open-source agent development framework that lets you build, debug, and deploy reliable AI agents at enterprise scale” <span class="cite">(<a href="https://adk.dev/">ADK home</a>)</span>. When an agent runs, the plugin “captures and logs critical operational events directly into a Google BigQuery table”, for debugging, real-time monitoring and offline evaluation <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>.</p>
+<p>BigQuery itself is a “fully managed, AI-ready data platform” for managing and analyzing data <span class="cite">(<a href="https://docs.cloud.google.com/bigquery/docs/introduction">BigQuery overview</a>)</span>. BigQuery’s guide says its logging integrations write through the Storage Write API, which gives “high-throughput, low-latency log streaming without blocking agent execution” (the language notes below cover Kotlin, where the ADK page and the code differ). The same guide calls BQAA “an open source solution” that streams “requests, responses, tool calls, and errors” into BigQuery, and says it is supported in ADK and in LangGraph, another agent framework <span class="cite">(<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery guide</a>)</span>.</p>
+<ul>
+<li><strong>Where the data lands:</strong> a table in your own Google Cloud project, agent_events by default in ADK, with a predefined schema that tracks metrics such as token use and latency <span class="cite">(<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery guide</a>; <a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>.</li>
+<li><strong>How you use it:</strong> SQL, which can use AI.GENERATE for automated root-cause analysis of errors or join agent events with your business tables; dashboards; notebooks; and a Python software development kit (SDK) that reconstructs and evaluates multi-turn agent traces <span class="cite">(<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery guide</a>)</span>. The ADK page adds a Looker Studio template and a Looker Block <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>.</li>
+<li><strong>Other frameworks:</strong> a LangGraph and LangChain callback handler in Python, or direct ingestion through the Storage Write API for custom frameworks <span class="cite">(<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery guide</a>)</span>.</li>
+<li><strong>Safety and cost:</strong> BigQuery’s access controls, data masking and encryption can secure the logs <span class="cite">(<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery guide</a>)</span>, and the Storage Write API is a paid service <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>.</li>
+</ul>
+<p id="bqaa-languages">ADK is available in Python, TypeScript, Go, Java and Kotlin <span class="cite">(<a href="https://adk.dev/">ADK home</a>)</span>, and the plugin’s code exists in all five: <a href="https://github.com/google/adk-python/blob/v2.14.1/src/google/adk/plugins/bigquery_agent_analytics_plugin.py">Python</a>, <a href="https://github.com/google/adk-go/blob/plugin/agentanalytics/v0.1.0/plugin/agentanalytics/bigquery_agent_analytics_plugin.go">Go</a>, <a href="https://github.com/google/adk-java/blob/v1.15.0/core/src/main/java/com/google/adk/plugins/agentanalytics/BigQueryAgentAnalyticsPlugin.java">Java</a>, <a href="https://github.com/google/adk-kotlin/blob/v1.6.0/integrations/bigquery/src/jvmMain/kotlin/com/google/adk/kt/plugins/agentanalytics/BigQueryAgentAnalyticsPlugin.kt">Kotlin</a> and <a href="https://github.com/google/adk-js/blob/integrations-v2.5.0/integrations/src/bigquery_analytics/plugin.ts">JS (TypeScript)</a>, each at a release tag. The ADK page lists four of them (Python from v1.21.0, Go from v0.1.0, Java from v1.5.0, Kotlin from v0.8.0) but not JS <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>. The JS plugin says it writes the same table schema as the Python one, so Python and TypeScript agents can share one table and its views <span class="cite">(<a href="https://github.com/google/adk-js/blob/integrations-v2.5.0/integrations/src/bigquery_analytics/plugin.ts">JS source</a>)</span>.</p>
+<p>Features differ by language. The ADK page says Java records only one of the four workflow event types added for ADK 2.0 (TOOL_PAUSED), and its Kotlin notes describe rows inserted one at a time <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>, while ADK Kotlin v1.6.0, released 17 November 2026, lists “write analytics rows in background batches” <span class="cite">(<a href="https://github.com/google/adk-kotlin/releases/tag/v1.6.0">Kotlin release notes</a>)</span>. This page does not compare languages feature by feature; section 5 shows where each one stands.</p>
+</section>
+
+<section id="at-a-glance" class="chapter" aria-labelledby="at-a-glance-h">
+<p class="chapter-number" aria-hidden="true">05 / Status strip</p>
+<h2 id="at-a-glance-h"><span class="visually-hidden">5. </span>At a glance: where each piece stands</h2>
+<p>Here is where each piece stands on 18 November 2026. Each card uses the status its own sources give; we have not forced them onto one scale.</p>
+<figure class="viz status-viz" aria-labelledby="status-cap">
+<figcaption id="status-cap">Status by component, as of 18 November 2026. Dashed edges mark announced or preview items.</figcaption>
+<div class="status-grid">
+<div class="status-col">
+<h3 class="status-head">MongoDB + Firebolt</h3>
+<ul class="status-list">
+<li class="status-card is-early"><p class="status-word">Announced · waitlist</p><p class="status-name">Real-time analytics on MongoDB, using Firebolt’s engine</p><p class="status-detail">Announced 17 November 2026. MongoDB says customers will be able to turn it on in the coming months.</p></li>
+<li class="status-card is-early"><p class="status-word">Private preview</p><p class="status-name">Firebolt’s MongoDB change data capture (CDC)</p><p class="status-detail">Keeps a Firebolt table in sync with a MongoDB collection. Early access on request.</p></li>
+<li class="status-card is-early"><p class="status-word">Public preview</p><p class="status-name">Atlas Agent Engine, with built-in tracing</p><p class="status-detail">MongoDB says it is for evaluation and prototyping and does not recommend production use during preview.</p></li>
+<li class="status-card"><p class="status-word">GA on AWS and GCP</p><p class="status-name">Firebolt today</p><p class="status-detail">Azure is in preview, and self-managed Firebolt is in preview.</p></li>
+</ul>
+</div>
+<div class="status-col">
+<h3 class="status-head">BQAA (BigQuery Agent Analytics)</h3>
+<ul class="status-list">
+<li class="status-card"><p class="status-word">GA announced 15 April 2026</p><p class="status-name">BQAA in ADK, overall</p><p class="status-detail">Listed in BigQuery’s release notes on 20 November 2025. The GA note names no language.</p></li>
+<li class="status-card"><p class="status-word">Released · plugin v2.0</p><p class="status-name">Python</p><p class="status-detail">ADK Python v1.21.0 (December 2025) upgraded the plugin to v2.0. The ADK page lists Python from v1.21.0.</p></li>
+<li class="status-card"><p class="status-word">Released · listed from v1.5.0</p><p class="status-name">Java</p><p class="status-detail">ADK Java v1.5.0 (June 2026) added new event types to the plugin. The ADK page lists Java from v1.5.0.</p></li>
+<li class="status-card"><p class="status-word">Released · added in v0.8.0</p><p class="status-name">Kotlin</p><p class="status-detail">Added in ADK Kotlin v0.8.0 (August 2026). v1.6.0 (17 November 2026) writes rows in background batches.</p></li>
+<li class="status-card"><p class="status-word">Pre-1.0 release</p><p class="status-name">Go</p><p class="status-detail">First release v0.1.0 on 5 November 2026. Its exported API may still change before v1.0.0.</p></li>
+<li class="status-card"><p class="status-word">Added in integrations v2.5.0</p><p class="status-name">JS (TypeScript)</p><p class="status-detail">Released 12 November 2026. Not on the ADK page’s language list.</p></li>
+</ul>
+</div>
+</div>
+<p class="viz-sources">Sources: real-time analytics, <a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">MongoDB post</a> and <a href="https://www.mongodb.com/products/platform/real-time-analytics">waitlist page</a> · CDC, <a href="https://docs.firebolt.io/guides/change-data-capture/mongodb">Firebolt MongoDB CDC</a> · Atlas Agent Engine, <a href="https://www.mongodb.com/docs/agentengine/">docs</a> and <a href="https://www.mongodb.com/docs/agentengine/manage/inspect-traces/">trace docs</a> · Firebolt today, <a href="https://docs.firebolt.io/overview">What is Firebolt?</a> · BQAA overall, BigQuery release notes for <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_20_2025">20 November 2025</a> and <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#April_15_2026">15 April 2026</a> · Python, <a href="https://github.com/google/adk-python/releases/tag/v1.21.0">ADK Python v1.21.0 release</a> · Java, <a href="https://github.com/google/adk-java/releases/tag/v1.5.0">ADK Java v1.5.0 release</a> · Kotlin, <a href="https://github.com/google/adk-kotlin/releases/tag/v0.8.0">ADK Kotlin v0.8.0 release</a> and <a href="https://github.com/google/adk-kotlin/releases/tag/v1.6.0">v1.6.0 release</a> · Go, <a href="https://github.com/google/adk-go/releases/tag/plugin/agentanalytics/v0.1.0">ADK Go v0.1.0 release</a> · JS, <a href="https://github.com/google/adk-js/releases/tag/integrations-v2.5.0">adk-js integrations v2.5.0 release</a> · the ADK page’s language list, <a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>.</p>
+</figure>
+</section>
+
+<section id="data-flow" class="chapter" aria-labelledby="data-flow-h">
+<p class="chapter-number" aria-hidden="true">06 / Diagrams</p>
+<h2 id="data-flow-h"><span class="visually-hidden">6. </span>How the data flows</h2>
+<p>Each diagram answers three questions: where the data starts, where it is analyzed, and who queries it. Dashed boxes and arrows are planned, not available yet.</p>
+<div class="flow-grid">
+<figure class="viz flow-fig" aria-labelledby="flow-a-cap">
+<figcaption id="flow-a-cap">MongoDB + Firebolt (planned), and MongoDB’s agent tracing today</figcaption>
+<svg class="flow-svg" viewBox="0 0 400 640" role="img" aria-labelledby="flow-a-title flow-a-desc" focusable="false">
+<title id="flow-a-title">MongoDB + Firebolt: how data would flow, and where agent traces go today</title>
+<desc id="flow-a-desc">Planned real-time analytics: operational data starts in the MongoDB database as BSON documents; it would be kept in sync automatically with Firebolt’s engine running next to the database, which is planned and not available yet; applications and agents would query it for real-time answers. Agent traces today: an agent running on Atlas Agent Engine, MongoDB’s agent platform in public preview, has every run traced automatically; traces stay on the platform by default, where the Traces page shows every session in the project and the Playground shows only your own interactive test sessions; traces go to your own observability tool over OTLP only if you turn export on. The announcement does not connect these two flows.</desc>
+<defs><marker id="arr-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1b2129"/></marker></defs>
+<text class="ft-lane" x="20" y="22">Planned: real-time analytics</text>
+<text class="ft-step" x="20" y="44">WHERE THE DATA STARTS</text>
+<g class="fnode"><rect class="fbox fbox-store" x="20" y="52" width="360" height="54" rx="4"/><text class="ft-main" x="34" y="74">MongoDB database</text><text class="ft-sub" x="34" y="94">operational data, as BSON documents</text></g>
+<line class="farrow farrow-planned" x1="60" y1="107" x2="60" y2="141" marker-end="url(#arr-a)"/>
+<text class="ft-label" x="74" y="129">kept in sync automatically (planned)</text>
+<text class="ft-step" x="20" y="160">WHERE IT IS ANALYZED</text>
+<g class="fnode"><rect class="fbox fbox-planned" x="20" y="168" width="360" height="54" rx="4"/><text class="ft-main" x="34" y="190">Firebolt engine, next to the database</text><text class="ft-sub" x="34" y="210">planned; not available yet</text></g>
+<line class="farrow farrow-planned" x1="60" y1="223" x2="60" y2="257" marker-end="url(#arr-a)"/>
+<text class="ft-label" x="74" y="245">real-time answers (planned)</text>
+<text class="ft-step" x="20" y="276">WHO QUERIES IT</text>
+<g class="fnode"><rect class="fbox" x="20" y="284" width="360" height="54" rx="4"/><text class="ft-main" x="34" y="306">Applications and agents</text><text class="ft-sub" x="34" y="326">act on live data (planned)</text></g>
+<line class="fsep" x1="20" y1="362" x2="380" y2="362"/>
+<text class="ft-lane" x="20" y="390">Today: agent traces on Atlas Agent Engine</text>
+<text class="ft-sub" x="20" y="408">MongoDB’s agent platform, in public preview</text>
+<g class="fnode"><rect class="fbox" x="20" y="418" width="360" height="40" rx="4"/><text class="ft-main" x="34" y="443">Agent running on Atlas Agent Engine</text></g>
+<line class="farrow" x1="60" y1="459" x2="60" y2="493" marker-end="url(#arr-a)"/>
+<text class="ft-label" x="74" y="481">every run traced automatically</text>
+<g class="fnode"><rect class="fbox fbox-store" x="20" y="496" width="360" height="54" rx="4"/><text class="ft-main" x="34" y="518">Atlas Agent Engine</text><text class="ft-sub" x="34" y="538">traces stay on the platform by default</text></g>
+<line class="farrow" x1="60" y1="551" x2="60" y2="585" marker-end="url(#arr-a)"/>
+<text class="ft-label" x="74" y="573">optional export over OTLP</text>
+<g class="fnode"><rect class="fbox" x="20" y="588" width="360" height="40" rx="4"/><text class="ft-main" x="34" y="613">Your own observability tool</text></g>
+</svg>
+<p class="viz-note">On the platform, the Traces page shows every session in the project, while the Playground shows only your own interactive test sessions. OTLP is the OpenTelemetry protocol, which MongoDB calls “a vendor-neutral format that most observability tools accept” <span class="cite">(<a href="https://www.mongodb.com/docs/agentengine/manage/inspect-traces/">trace docs</a>)</span>. The announcement does not connect these two flows.</p>
+<p class="viz-sources">Sources: <a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">MongoDB post</a> (database, planned engine and sync, who queries, no mention of tracing) · <a href="https://www.mongodb.com/docs/manual/core/document/">MongoDB manual</a> (BSON documents) · <a href="https://www.mongodb.com/products/platform/atlas-agent-engine">Atlas Agent Engine</a> (agent platform) · <a href="https://www.mongodb.com/docs/agentengine/">Atlas Agent Engine docs</a> (public preview) · <a href="https://www.mongodb.com/docs/agentengine/manage/inspect-traces/">trace docs</a> (traced runs, Traces page, Playground, default storage, OTLP export).</p>
+</figure>
+<figure class="viz flow-fig" aria-labelledby="flow-b-cap">
+<figcaption id="flow-b-cap">BQAA (BigQuery Agent Analytics)</figcaption>
+<svg class="flow-svg" viewBox="0 0 400 400" role="img" aria-labelledby="flow-b-title flow-b-desc" focusable="false">
+<title id="flow-b-title">BQAA: how agent events flow into BigQuery and who queries them</title>
+<desc id="flow-b-desc">Agent data starts in agents built with ADK, in Python, Go, Java, Kotlin or JS, which write through the BQAA plugin, or in LangGraph, LangChain or custom code, which write through a callback handler or direct writes. These routes send captured event rows to a BigQuery events table in your configured project; the ADK plugin’s default table name is agent_events. Your team queries it with SQL, joins it with business tables, and uses dashboards, notebooks and a Python SDK to debug, monitor and evaluate agents.</desc>
+<defs><marker id="arr-b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1b2129"/></marker></defs>
+<text class="ft-lane" x="20" y="22">Today: agent events into BigQuery</text>
+<text class="ft-step" x="20" y="44">WHERE THE DATA STARTS</text>
+<g class="fnode"><rect class="fbox" x="20" y="52" width="172" height="72" rx="4"/><text class="ft-main" x="32" y="74">ADK agents</text><text class="ft-sub" x="32" y="94">Python, Go, Java,</text><text class="ft-sub" x="32" y="112">Kotlin or JS</text></g>
+<g class="fnode"><rect class="fbox" x="208" y="52" width="172" height="72" rx="4"/><text class="ft-main" x="220" y="74">Other frameworks</text><text class="ft-sub" x="220" y="94">LangGraph, LangChain</text><text class="ft-sub" x="220" y="112">or custom code</text></g>
+<line class="farrow" x1="60" y1="125" x2="60" y2="175" marker-end="url(#arr-b)"/>
+<text class="ft-label" x="72" y="155">BQAA plugin</text>
+<line class="farrow" x1="248" y1="125" x2="248" y2="175" marker-end="url(#arr-b)"/>
+<text class="ft-label" x="260" y="147">handler or</text>
+<text class="ft-label" x="260" y="164">direct writes</text>
+<text class="ft-step" x="20" y="194">WHERE IT IS ANALYZED</text>
+<g class="fnode"><rect class="fbox fbox-store" x="20" y="202" width="360" height="72" rx="4"/><text class="ft-main" x="34" y="224">Events table in BigQuery</text><text class="ft-sub" x="34" y="244">in your configured project</text><text class="ft-sub" x="34" y="262">ADK default name: agent_events</text></g>
+<line class="farrow" x1="60" y1="275" x2="60" y2="309" marker-end="url(#arr-b)"/>
+<text class="ft-label" x="74" y="297">SQL, joins with business tables</text>
+<text class="ft-step" x="20" y="328">WHO QUERIES IT</text>
+<g class="fnode"><rect class="fbox" x="20" y="336" width="360" height="54" rx="4"/><text class="ft-main" x="34" y="358">Your team</text><text class="ft-sub" x="34" y="378">dashboards, notebooks, Python SDK</text></g>
+</svg>
+<p class="viz-note">Teams use this to debug, monitor and evaluate their agents; section 5 shows each language’s status.</p>
+<p class="viz-sources">Sources: <a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a> (plugin, BigQuery table, ADK default name agent_events, debugging, monitoring, evaluation) · plugin code in <a href="https://github.com/google/adk-python/blob/v2.14.1/src/google/adk/plugins/bigquery_agent_analytics_plugin.py">Python</a>, <a href="https://github.com/google/adk-go/blob/plugin/agentanalytics/v0.1.0/plugin/agentanalytics/bigquery_agent_analytics_plugin.go">Go</a>, <a href="https://github.com/google/adk-java/blob/v1.15.0/core/src/main/java/com/google/adk/plugins/agentanalytics/BigQueryAgentAnalyticsPlugin.java">Java</a>, <a href="https://github.com/google/adk-kotlin/blob/v1.6.0/integrations/bigquery/src/jvmMain/kotlin/com/google/adk/kt/plugins/agentanalytics/BigQueryAgentAnalyticsPlugin.kt">Kotlin</a>, <a href="https://github.com/google/adk-js/blob/integrations-v2.5.0/integrations/src/bigquery_analytics/plugin.ts">JS</a> · <a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery guide</a> (LangGraph and LangChain handler, direct writes through the Storage Write API, your configured project, SQL, joins with business tables, dashboards, notebooks, Python SDK).</p>
+</figure>
+</div>
+</section>
+
+<section id="side-by-side" class="chapter" aria-labelledby="side-by-side-h">
+<p class="chapter-number" aria-hidden="true">07 / Comparison</p>
+<h2 id="side-by-side-h"><span class="visually-hidden">7. </span>Side by side</h2>
+<div class="table-wrap" role="region" aria-label="Comparison table: MongoDB + Firebolt and BQAA" tabindex="0">
+<table class="compare" role="table" aria-labelledby="compare-caption">
+<caption id="compare-caption">MongoDB + Firebolt and BQAA on seven questions, as of 18 November 2026</caption>
+<colgroup><col class="c-dim"><col class="c-a"><col class="c-b"></colgroup>
+<thead role="rowgroup">
+<tr role="row"><th scope="col" role="columnheader">Question</th><th scope="col" role="columnheader">MongoDB + Firebolt</th><th scope="col" role="columnheader">BQAA</th></tr>
+</thead>
+<tbody role="rowgroup">
+<tr role="row"><th scope="row" role="rowheader">What it does</th><td role="cell" data-label="MongoDB + Firebolt">Planned: fast analytics on live MongoDB data, kept in sync automatically, with “no pipeline to build or manage”.</td><td role="cell" data-label="BQAA">Records what agents do, such as requests, responses, tool calls and errors, in BigQuery.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Who it is for</th><td role="cell" data-label="MongoDB + Firebolt">MongoDB customers whose applications and agents rely on data already in MongoDB; MongoDB positions it for “application-facing analytics”.</td><td role="cell" data-label="BQAA">Teams building agents with ADK, LangGraph or LangChain, or with their own code.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Data model</th><td role="cell" data-label="MongoDB + Firebolt">MongoDB stores BSON documents; Firebolt’s MongoDB CDC keeps each document whole, as JSON.</td><td role="cell" data-label="BQAA">Agent events as rows of a BigQuery table, agent_events by default in ADK, with a predefined schema.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Agent traces</th><td role="cell" data-label="MongoDB + Firebolt">Not part of the announcement. Atlas Agent Engine traces every run and keeps the traces on its platform by default, with optional export over OTLP.</td><td role="cell" data-label="BQAA">In your own BigQuery table, queryable with SQL and joinable with business tables.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">How you connect</th><td role="cell" data-label="MongoDB + Firebolt">Planned: turn on real-time analytics for your MongoDB data. Firebolt today: standard SQL, an MCP server for LLM clients, and MongoDB CDC in private preview.</td><td role="cell" data-label="BQAA">The ADK plugin, the LangGraph and LangChain handler, or direct Storage Write API writes; then SQL, dashboards, notebooks or the Python SDK.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Languages</th><td role="cell" data-label="MongoDB + Firebolt">Not stated for the new offering. Atlas Agent Engine says it works with any LLM or framework; its ADK adapter is Python only.</td><td role="cell" data-label="BQAA">ADK plugin in Python, Go, Java, Kotlin and JS; LangGraph and LangChain handler in Python.</td></tr>
+<tr role="row"><th scope="row" role="rowheader">Status</th><td role="cell" data-label="MongoDB + Firebolt">Announced 17 November 2026, with a waitlist. Atlas Agent Engine is in public preview.</td><td role="cell" data-label="BQAA">GA in ADK announced 15 April 2026, in a note that names no language; Go’s plugin is pre-1.0, and the JS plugin arrived in November 2026.</td></tr>
+</tbody>
+</table>
+</div>
+<p class="viz-sources">Sources by row: what it does, <a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">MongoDB post</a> and <a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery guide</a> · who it is for, MongoDB post and BigQuery guide · data model, <a href="https://www.mongodb.com/docs/manual/core/document/">MongoDB manual</a>, <a href="https://docs.firebolt.io/guides/change-data-capture/mongodb">Firebolt MongoDB CDC</a>, <a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a> and BigQuery guide · agent traces, MongoDB post, <a href="https://www.mongodb.com/docs/agentengine/manage/inspect-traces/">trace docs</a> and BigQuery guide · how you connect, MongoDB post, <a href="https://docs.firebolt.io/overview">What is Firebolt?</a>, <a href="https://docs.firebolt.io/guides/integrations/mcp">Firebolt MCP Server</a>, Firebolt MongoDB CDC and BigQuery guide · languages, MongoDB post, <a href="https://www.mongodb.com/products/platform/atlas-agent-engine">Atlas Agent Engine</a>, <a href="https://www.mongodb.com/docs/agentengine/build/build-adk-agent/">MongoDB’s ADK guide</a>, <a href="#bqaa-languages">the plugin code linked in section 4</a> and BigQuery guide · status, MongoDB post, <a href="https://www.mongodb.com/products/platform/real-time-analytics">waitlist page</a>, <a href="https://www.mongodb.com/docs/agentengine/">Atlas Agent Engine docs</a>, <a href="https://docs.cloud.google.com/bigquery/docs/release-notes#April_15_2026">BigQuery release notes</a>, <a href="https://github.com/google/adk-go/releases/tag/plugin/agentanalytics/v0.1.0">Go release</a> and <a href="https://github.com/google/adk-js/releases/tag/integrations-v2.5.0">JS release</a>.</p>
+</section>
+
+<section id="overlap" class="chapter" aria-labelledby="overlap-h">
+<p class="chapter-number" aria-hidden="true">08 / Overlap</p>
+<h2 id="overlap-h"><span class="visually-hidden">8. </span>Where they meet</h2>
+<h3 id="overlap-agents">Both are about agents, from opposite ends</h3>
+<p>MongoDB says real-time analytics will let “applications and agents” analyze live data and act on it <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>. BQAA exists to log and analyze what agents do <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>.</p>
+<h3 id="overlap-tracing">The real overlap is agent tracing</h3>
+<p>MongoDB defines a trace as “a record of everything that happens while your agent processes a request” <span class="cite">(<a href="https://www.mongodb.com/docs/agentengine/manage/inspect-traces/">trace docs</a>)</span>. Atlas Agent Engine’s runtime “traces every model call, tool call, and memory access” <span class="cite">(<a href="https://www.mongodb.com/products/platform/atlas-agent-engine">Atlas Agent Engine</a>)</span>, and each trace is organized as sessions, runs and steps, with each step’s duration and each model call’s token count <span class="cite">(<a href="https://www.mongodb.com/docs/agentengine/manage/inspect-traces/">trace docs</a>)</span>. BQAA covers similar ground: LLM calls and tool usage, plus user input and model responses <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>.</p>
+<h3 id="overlap-difference">The difference: where the records go, and what is sent</h3>
+<ul>
+<li>Atlas Agent Engine keeps traces on its own platform by default. You can export them over OTLP, but an export currently has to include full trace content, and metadata-only redaction is not yet available <span class="cite">(<a href="https://www.mongodb.com/docs/agentengine/manage/inspect-traces/">trace docs</a>)</span>.</li>
+<li>BQAA sends captured event rows to a BigQuery table in your configured project <span class="cite">(<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery guide</a>)</span>. In ADK Python and Go, you can exclude selected columns at write time with an optional payload column denylist; the columns you can list are content, content_parts, attributes and latency_ms <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>.</li>
+<li>BQAA rows can also line up with Cloud Trace. When the plugin inherits an active OpenTelemetry trace ID, you can use it to match BigQuery rows to the corresponding trace if that trace was exported to Cloud Trace; with no active span, the plugin falls back to a per-invocation trace_id <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>.</li>
+</ul>
+<h3 id="overlap-adk">Both speak ADK</h3>
+<p>MongoDB has a guide for running ADK agents on Atlas Agent Engine: its agent-engine-sdk-adk adapter, available for Python only, translates ADK agents, workflow nodes and tool calls into operations that the platform runs and records <span class="cite">(<a href="https://www.mongodb.com/docs/agentengine/build/build-adk-agent/">ADK guide</a>)</span>. BQAA is itself an ADK plugin <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>. Neither MongoDB’s ADK guide <span class="cite">(<a href="https://www.mongodb.com/docs/agentengine/build/build-adk-agent/">ADK guide</a>)</span> nor the ADK plugin page <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span> says whether the two can be used together.</p>
+<h3 id="complement">Could they work together?</h3>
+<p class="judgement"><em class="judge">Judgement:</em> they need not compete. MongoDB’s FAQ says “Traditional data warehouses and data lakes remain the right fit for internal BI, reporting, and data science” <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>, and BQAA’s offline evaluation of agent logs is one example of analysis done in BigQuery <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>. Once MongoDB’s real-time analytics is available, a team could use both: its agents query live business data through MongoDB, while BQAA logs the agents’ own behavior to BigQuery. That is an untested example: neither MongoDB’s ADK guide <span class="cite">(<a href="https://www.mongodb.com/docs/agentengine/build/build-adk-agent/">ADK guide</a>)</span> nor the ADK plugin page <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span> describes it.</p>
+</section>
+
+<section id="bottom-line" class="chapter" aria-labelledby="bottom-line-h">
+<p class="chapter-number" aria-hidden="true">09 / Bottom line</p>
+<h2 id="bottom-line-h"><span class="visually-hidden">9. </span>Bottom line</h2>
+<p class="judgement"><em class="judge">Judgement:</em> these two answer different questions. MongoDB + Firebolt asks how an application or agent gets fast answers from live operational data with no pipeline to build or manage; it is announced, not yet available, with a waitlist <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>; <a href="https://www.mongodb.com/products/platform/real-time-analytics">waitlist page</a>)</span>.</p>
+<p class="judgement"><em class="judge">Judgement:</em> BQAA asks what an agent did, and records it in BigQuery for debugging, monitoring and evaluation <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>. It was announced GA in ADK on 15 April 2026 <span class="cite">(<a href="https://docs.cloud.google.com/bigquery/docs/release-notes#April_15_2026">release notes</a>)</span>, but maturity varies by language: Go’s plugin is pre-1.0 and the JS plugin arrived in November 2026 <span class="cite">(<a href="https://github.com/google/adk-go/releases/tag/plugin/agentanalytics/v0.1.0">Go release</a>; <a href="https://github.com/google/adk-js/releases/tag/integrations-v2.5.0">JS release</a>)</span>.</p>
+<p class="judgement"><em class="judge">Judgement:</em> for BQAA readers, the MongoDB product to watch is Atlas Agent Engine’s built-in tracing, in public preview, which keeps traces on its own platform by default <span class="cite">(<a href="https://www.mongodb.com/docs/agentengine/manage/inspect-traces/">trace docs</a>; <a href="https://www.mongodb.com/docs/agentengine/">Atlas Agent Engine docs</a>)</span>. The Firebolt deal shows MongoDB wants analytics to run next to the data its customers’ applications and agents rely on, and the announcement does not mention agent telemetry <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>.</p>
+</section>
+
+<section id="not-stated" class="chapter" aria-labelledby="not-stated-h">
+<p class="chapter-number" aria-hidden="true">Gaps</p>
+<h2 id="not-stated-h">What the sources do not say</h2>
+<p>What we looked for and could not find, and where we looked:</p>
+<ul class="gaps">
+<li>Deal price, terms and closing date: not in MongoDB’s announcement <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>. MongoDB’s press-release list, as of 18 November 2026, has no Firebolt release; its newest item is dated 29 September 2026 <span class="cite">(<a href="https://www.mongodb.com/company/newsroom/press-releases">press releases</a>)</span>. Firebolt’s site banner links to MongoDB’s post, and its blog listing has no post of its own about the deal <span class="cite">(<a href="https://www.firebolt.io/">firebolt.io</a>; <a href="https://www.firebolt.io/blog">Firebolt blog</a>)</span>.</li>
+<li>Launch date, price and regions for real-time analytics on MongoDB: the post gives no date beyond “In the coming months” <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>, and the real-time analytics page shows a sign-up form and no price <span class="cite">(<a href="https://www.mongodb.com/products/platform/real-time-analytics">waitlist page</a>)</span>.</li>
+<li>Which MongoDB deployments it will cover, Atlas or self-managed: the post does not say <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>.</li>
+<li>How the automatic sync will work, and whether it reuses Firebolt’s MongoDB change data capture (private preview): not stated in the post or the CDC guide <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>; <a href="https://docs.firebolt.io/guides/change-data-capture/mongodb">Firebolt MongoDB CDC</a>)</span>.</li>
+<li>Agent telemetry in the deal: the post does not mention tracing, telemetry or agent observability <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>, and the trace docs do not say whether Atlas Agent Engine traces will be queryable through the Firebolt engine <span class="cite">(<a href="https://www.mongodb.com/docs/agentengine/manage/inspect-traces/">trace docs</a>)</span>.</li>
+<li>Whether the BQAA plugin runs inside an ADK agent hosted on Atlas Agent Engine: not stated in MongoDB’s ADK guide or the ADK plugin page <span class="cite">(<a href="https://www.mongodb.com/docs/agentengine/build/build-adk-agent/">ADK guide</a>; <a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span>.</li>
+<li>Firebolt’s standalone roadmap: the post says “Nothing changes for existing Firebolt customers” and gives no roadmap for the standalone product <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>.</li>
+<li>Launch stage of the plugin in each language: the 15 April 2026 GA note names no language <span class="cite">(<a href="https://docs.cloud.google.com/bigquery/docs/release-notes#April_15_2026">release notes</a>)</span>, and neither the ADK plugin page <span class="cite">(<a href="https://adk.dev/integrations/bigquery-agent-analytics/">ADK docs</a>)</span> nor the BigQuery guide <span class="cite">(<a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">BigQuery guide</a>)</span> states a launch stage for the plugin in each language.</li>
+<li>Performance: MongoDB’s announcement <span class="cite">(<a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">post</a>)</span>, Firebolt’s home page <span class="cite">(<a href="https://www.firebolt.io/">firebolt.io</a>)</span>, its docs overview <span class="cite">(<a href="https://docs.firebolt.io/overview">What is Firebolt?</a>)</span> and its blog listing <span class="cite">(<a href="https://www.firebolt.io/blog">Firebolt blog</a>)</span> do not compare Firebolt’s performance with BigQuery’s, and this page makes no comparative performance claim.</li>
+</ul>
+</section>
+
+<section id="sources" class="chapter sources" aria-labelledby="sources-h">
+<p class="chapter-number" aria-hidden="true">Sourcebook</p>
+<h2 id="sources-h">Sources</h2>
+<ul class="source-list">
+<li><a href="https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt">https://www.mongodb.com/company/blog/news/mongodb-acquires-firebolt</a></li>
+<li><a href="https://www.mongodb.com/products/platform/real-time-analytics">https://www.mongodb.com/products/platform/real-time-analytics</a></li>
+<li><a href="https://www.mongodb.com/company/newsroom/press-releases">https://www.mongodb.com/company/newsroom/press-releases</a></li>
+<li><a href="https://www.mongodb.com/docs/manual/core/document/">https://www.mongodb.com/docs/manual/core/document/</a></li>
+<li><a href="https://www.mongodb.com/products/platform/atlas-agent-engine">https://www.mongodb.com/products/platform/atlas-agent-engine</a></li>
+<li><a href="https://www.mongodb.com/docs/agentengine/">https://www.mongodb.com/docs/agentengine/</a></li>
+<li><a href="https://www.mongodb.com/docs/agentengine/manage/inspect-traces/">https://www.mongodb.com/docs/agentengine/manage/inspect-traces/</a></li>
+<li><a href="https://www.mongodb.com/docs/agentengine/build/build-adk-agent/">https://www.mongodb.com/docs/agentengine/build/build-adk-agent/</a></li>
+<li><a href="https://www.firebolt.io/">https://www.firebolt.io/</a></li>
+<li><a href="https://www.firebolt.io/blog">https://www.firebolt.io/blog</a></li>
+<li><a href="https://docs.firebolt.io/overview">https://docs.firebolt.io/overview</a></li>
+<li><a href="https://docs.firebolt.io/guides/change-data-capture/mongodb">https://docs.firebolt.io/guides/change-data-capture/mongodb</a></li>
+<li><a href="https://docs.firebolt.io/guides/integrations/mcp">https://docs.firebolt.io/guides/integrations/mcp</a></li>
+<li><a href="https://adk.dev/">https://adk.dev/</a></li>
+<li><a href="https://adk.dev/integrations/bigquery-agent-analytics/">https://adk.dev/integrations/bigquery-agent-analytics/</a></li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/introduction">https://docs.cloud.google.com/bigquery/docs/introduction</a></li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics">https://docs.cloud.google.com/bigquery/docs/bigquery-agent-analytics</a></li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#November_20_2025">https://docs.cloud.google.com/bigquery/docs/release-notes#November_20_2025</a></li>
+<li><a href="https://docs.cloud.google.com/bigquery/docs/release-notes#April_15_2026">https://docs.cloud.google.com/bigquery/docs/release-notes#April_15_2026</a></li>
+<li><a href="https://github.com/google/adk-python/blob/v2.14.1/src/google/adk/plugins/bigquery_agent_analytics_plugin.py">https://github.com/google/adk-python/blob/v2.14.1/src/google/adk/plugins/bigquery_agent_analytics_plugin.py</a></li>
+<li><a href="https://github.com/google/adk-go/blob/plugin/agentanalytics/v0.1.0/plugin/agentanalytics/bigquery_agent_analytics_plugin.go">https://github.com/google/adk-go/blob/plugin/agentanalytics/v0.1.0/plugin/agentanalytics/bigquery_agent_analytics_plugin.go</a></li>
+<li><a href="https://github.com/google/adk-java/blob/v1.15.0/core/src/main/java/com/google/adk/plugins/agentanalytics/BigQueryAgentAnalyticsPlugin.java">https://github.com/google/adk-java/blob/v1.15.0/core/src/main/java/com/google/adk/plugins/agentanalytics/BigQueryAgentAnalyticsPlugin.java</a></li>
+<li><a href="https://github.com/google/adk-kotlin/blob/v1.6.0/integrations/bigquery/src/jvmMain/kotlin/com/google/adk/kt/plugins/agentanalytics/BigQueryAgentAnalyticsPlugin.kt">https://github.com/google/adk-kotlin/blob/v1.6.0/integrations/bigquery/src/jvmMain/kotlin/com/google/adk/kt/plugins/agentanalytics/BigQueryAgentAnalyticsPlugin.kt</a></li>
+<li><a href="https://github.com/google/adk-js/blob/integrations-v2.5.0/integrations/src/bigquery_analytics/plugin.ts">https://github.com/google/adk-js/blob/integrations-v2.5.0/integrations/src/bigquery_analytics/plugin.ts</a></li>
+<li><a href="https://github.com/google/adk-python/releases/tag/v1.21.0">https://github.com/google/adk-python/releases/tag/v1.21.0</a></li>
+<li><a href="https://github.com/google/adk-java/releases/tag/v1.5.0">https://github.com/google/adk-java/releases/tag/v1.5.0</a></li>
+<li><a href="https://github.com/google/adk-kotlin/releases/tag/v0.8.0">https://github.com/google/adk-kotlin/releases/tag/v0.8.0</a></li>
+<li><a href="https://github.com/google/adk-kotlin/releases/tag/v1.6.0">https://github.com/google/adk-kotlin/releases/tag/v1.6.0</a></li>
+<li><a href="https://github.com/google/adk-go/releases/tag/plugin/agentanalytics/v0.1.0">https://github.com/google/adk-go/releases/tag/plugin/agentanalytics/v0.1.0</a></li>
+<li><a href="https://github.com/google/adk-js/releases/tag/integrations-v2.5.0">https://github.com/google/adk-js/releases/tag/integrations-v2.5.0</a></li>
+</ul>
+</section>
+
+</div>
+</div>
+</main>
+<footer class="footer">
+<div class="footer-inner">
+<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="6"/><path class="bm-a" d="M6 10h9M6 16h12M6 22h7"/><path class="bm-cut" d="M20 9l6 7-6 7"/></svg>
+<div><p class="footer-title">MongoDB + Firebolt and BigQuery Agent Analytics: how they differ</p><p>Independent synthesis on <a href="https://caohy1988.github.io/research/mongodb-firebolt-vs-bqaa/">caohy1988.github.io/research/mongodb-firebolt-vs-bqaa/</a>, not a publication of any vendor. Written from the BQAA side. Prepared and sources fetched <time datetime="2026-11-18">2026-11-18</time>.</p></div>
+<a class="back-top" href="#title">Back to top</a>
+</div>
+</footer>
+</body>
+</html>

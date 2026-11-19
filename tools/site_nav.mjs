@@ -74,23 +74,26 @@ export const PAGES = {
   "/research/bqaa-permission-model/": "research/bqaa-permission-model/index.html",
   "/research/foundry-insights-vs-bqaa/": "research/foundry-insights-vs-bqaa/index.html",
   "/research/smithdb-vs-bqaa/": "research/smithdb-vs-bqaa/index.html",
+  "/research/mongodb-firebolt-vs-bqaa/": "research/mongodb-firebolt-vs-bqaa/index.html",
 };
 
 // Which nav entry is "current" for a page. Demos live under the RFC (that is what their old nav said).
-// The three harness sub-pages marked Harness before they were listed here. The three studies and the build note
+// The three harness sub-pages marked Harness before they were listed here. The four studies and the build note
 // are reached from the Research hub's own link strip, so they mark Research.
 export const CURRENT = {
   "/rfc/demo/": "/rfc/", "/rfc/full-demo/": "/rfc/", "/rfc/e2e/": "/rfc/",
   "/research/harness/core/": "/research/harness/", "/research/harness/installation/": "/research/harness/", "/research/harness/cases/": "/research/harness/",
   "/research/coding-agent-mod-bqaa/": "/research/", "/research/bqaa-permission-model/": "/research/",
   "/research/foundry-insights-vs-bqaa/": "/research/", "/research/smithdb-vs-bqaa/": "/research/",
+  "/research/mongodb-firebolt-vs-bqaa/": "/research/",
 };
 
 // Long single-page documents keep the bar pinned (they did before the shared chrome).
 export const STICKY = new Set(["/rfc/detailed-rfc/", "/rfc/demo/", "/rfc/full-demo/", "/rfc/e2e/", "/research/harness/", "/research/jev/", "/research/durable-agents/", "/research/tl-agent-era/",
   // pinned in their pasted blocks before they were listed here
   "/research/harness/core/", "/research/harness/installation/", "/research/harness/cases/", "/research/coding-agent-mod-bqaa/",
-  "/research/bqaa-permission-model/", "/research/foundry-insights-vs-bqaa/", "/research/smithdb-vs-bqaa/"]);
+  "/research/bqaa-permission-model/", "/research/foundry-insights-vs-bqaa/", "/research/smithdb-vs-bqaa/",
+  "/research/mongodb-firebolt-vs-bqaa/"]);
 
 const START = "<!-- site-nav:start -->";
 const END = "<!-- site-nav:end -->";
