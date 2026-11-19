@@ -1,6 +1,36 @@
 {
   "items": [
     {
+      "id": "databricks-unity-gateway-insights-agent-trace-tokenomics",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Databricks Unity Gateway Insights — Genie analyzes millions of agent traces against your ontology and prices token waste",
+      "html": " <a href=\"https://www.databricks.com/blog/introducing-unity-gateway-insights\">Launch page</a> (2026-11-18T22:42:36Z, stable) — Unity Gateway Insights automatically uses Genie to analyze agent traces alongside business data and the Genie Ontology, surfacing three ranked waste classes — recurring MCP errors (retries make a failed tool call look like a successful session while you pay for every retry), frontier models running routine tasks, and workflows recurring in ≥3 sessions or across ≥2 engineers that are worth codifying into shared skills (it writes the prompt for you). Each finding links to the example sessions behind it, reports compare a workstream's share of sessions against its share of tokens, and you can add up to 10 questions per report. Databricks reports that fixing seven small MCP-server bugs recovered an estimated $1.2M/year ($499K in wasted tokens plus 12,000 engineer-hours) in about an hour of work, and that offline replays showed no gain moving from Opus 4.8 to Opus 5 so it stayed on the cheaper model. Traces are collected without instrumentation: launching Claude Code, Codex or GitHub Copilot through the <code>ug</code> CLI turns on each agent's own OpenTelemetry tracing, and traces land in a unified trace table — a governed Delta table in Unity Catalog in an open format, owner-only by default until Unity Catalog grants and row filters are applied, read in place so sensitive trace data is never exported. <a href=\"/research/briefs/2026-11-19-0034-qwen.html\">Full brief</a>.",
+      "added": "2026-11-19T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "aws-airbnb-cost-per-task-coding-agents-bedrock",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "How Airbnb uses cost per task to operate coding agents on Amazon Bedrock — evals and observability joined on one metric",
+      "html": " <a href=\"https://aws.amazon.com/blogs/machine-learning/how-airbnb-uses-cost-per-task-to-operate-coding-agents-on-amazon-bedrock/\">Launch page</a> (2026-11-18T21:48:19Z, stable) — Airbnb defines cost per task as the list-price cost of all tokens an agent uses to finish one task, prices it from the same four token counts (uncached input, cache read, cache write, output) in both evals and production, and runs the two systems side by side: evals choose model defaults and gateway-enforced reasoning-effort ceilings before rollout, CloudWatch runtime metrics plus gateway usage records reveal afterwards when those choices need revisiting. The central finding is that eval and production diverge — a model scoring more than three points above the previous best at about the same cost per task ended up costing several times more per user per week, because each request cost ~3× as much and users sent ~3× more requests; output tokens were only a tenth of a request's cost while cached-context re-reads dominated, because a model good enough to work alone for long stretches induced long self-directed sessions. Moving those heavy users to a newer model that scored higher at ~1/6 the cost per task cut the group's spend to ~1/7 at roughly the same request count. Other measured detail: low→high reasoning effort bought 0.8 score points at 2.5× cost; a 40% latency rise with flat TimeToFirstToken and derived OTPS traced to a system-prompt change that lifted output tokens per request 50%; a 1M-TPM quota at 300 rpm showed ~30% consumed on a billed-token dashboard but ~77% after a 5:1 output burndown, and cutting <code>max_tokens</code> from 4,096 to 1,024 shrank the admission reservation from 4,696 to 1,624 tokens (~65%) while staying above p99. Attribution guidance: Bedrock metrics are dimensioned only by <code>ModelId</code> and filtering on it undercounts errors, so use tagged IAM roles/session tags with CUR 2.0, per-application inference profiles, or <code>requestMetadata</code> key-values on <code>Converse</code> (written to invocation logs, left off the bill) — and alarm on Bedrock failing to deliver invocation logs, because requests keep succeeding when attribution breaks. Grading uses a model grader over eight weighted dimensions with a rescue ceiling capping the total at 25/100, on Harbor-style sandboxed task folders. <a href=\"/research/briefs/2026-11-19-0034-qwen.html\">Full brief</a>.",
+      "added": "2026-11-19T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
+      "id": "aws-opensearch-memory-ga-agent-event-store",
+      "tag": "Industry",
+      "kind": "rank",
+      "title": "Amazon OpenSearch Memory generally available — verbatim agent-interaction events plus derived memories, IAM-scoped per store",
+      "html": " <a href=\"https://aws.amazon.com/about-aws/whats-new/2026/11/amazon-opensearch-memory-generally-available\">Launch page</a> (2026-11-18T21:09:00Z, stable) — A new serverless capability in Amazon OpenSearch Service for giving AI agents persistent memory: it stores agent interactions as searchable events, keeps the original events verbatim and searchable within seconds, and asynchronously derives structured memories, so agents recall prior decisions, earlier interactions and user preferences without replaying full conversation history to the model. It manages the full memory lifecycle — extraction, embedding, indexing, consolidation (adding, updating or skipping memories as new information arrives) and retrieval by keyword, semantic or hybrid search — replacing separately built extraction/indexing/consolidation/retrieval systems, with no clusters, instance types or indexes to provision. Access is controlled with IAM per memory store with actor and session scoping, and expiration periods can be set for events and memories. GA in US East (N. Virginia, Ohio), US West (Oregon), Europe (Frankfurt) and Asia Pacific (Tokyo). The verbatim-event-plus-derived-memory split with actor/session scoping is the same two-layer shape as a trace store plus a semantic layer, which is what makes per-agent and per-session behaviour and cost queries possible without replaying transcripts. <a href=\"/research/briefs/2026-11-19-0034-qwen.html\">Full brief</a>.",
+      "added": "2026-11-19T0034",
+      "addedDisplay": "12:34 AM PT",
+      "progress": []
+    },
+    {
       "id": "langsmith-coding-agents-pr-outcome-spend",
       "tag": "Industry",
       "kind": "rank",
@@ -1026,6 +1056,11 @@
           "at": "2026-10-23T0034",
           "displayTime": "12:34 AM PT",
           "html": "Claude Code 2.1.309 (October 22, non-prerelease/latest) exposes interrupted tool outcomes as unknown after self-hosted runner migration and repairs sandbox/permission boundaries. This does not establish a new OTel field or replay safety: https://github.com/anthropics/claude-code/releases/tag/v2.1.309. <a href=\"/research/briefs/2026-10-23-0034-astra.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-11-19T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "Claude Code v2.1.328 (GitHub Release published 2026-11-19T01:14:04Z; npm 2026-11-18T23:09:39Z) adds telemetry-loss detection and fleet-level observability: <code>/status</code> and <code>claude doctor</code> now warn when an OpenTelemetry exporter has no endpoint and its data would likely be lost, and the self-hosted-runner orchestrator exposes <code>..._session_queue_wait_by_reason_seconds</code> (separating a re-opened session's wait from a new one's) and <code>..._sessions_given_up_total</code> (counting by cause how often a runner could not be started). It also adds <code>\"onFailure\": \"block\"</code> for <code>mcp_tool</code> hooks so a failing hook blocks the action, <code>CLAUDE_CODE_DISABLE_DEFERRED_TOOL_RESUME</code> so a host can stop <code>--resume</code>/<code>--continue</code> from running a hook-deferred tool call, and fixes automatic compaction reusing the session's earlier system prompt instead of rebuilding it as <code>/compact</code> does. <a href=\"/research/briefs/2026-11-19-0034-qwen.html\">Full brief</a>."
         }
       ]
     },
@@ -1375,6 +1410,11 @@
           "at": "2026-10-24T0034",
           "displayTime": "12:34 AM PT",
           "html": "Pydantic AI 2.61.0 (October 23 PT, stable) adds structured text citations, restricted same-provider history replay and Vercel-adapter preservation. Document-index ambiguity, edited/merged text and late streaming delivery limit replay/UI coverage; citation presence is not factual verification: https://github.com/pydantic/pydantic-ai/releases/tag/v2.61.0. <a href=\"/research/briefs/2026-10-24-0034-astra.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-11-19T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "pydantic-ai v2.71.0 (GitHub Release 2026-11-19T02:13:05Z; PyPI 02:45:42Z) adds <code>DeferredToolRequests.validated_args</code> so an approver sees the exact arguments a deferred tool call will run with, keeps a run paused when content is queued at a <code>DeferredToolRequests</code> or <code>PendingModelResponse</code> pause, re-pauses when such a pause is resumed without <code>deferred_tool_results</code>, and adds <code>grep_tool_result</code> plus <code>unit='bytes'</code> reads for <code>ToolOutputLimits</code> spills. <a href=\"/research/briefs/2026-11-19-0034-qwen.html\">Full brief</a>."
         }
       ]
     },
@@ -1662,7 +1702,13 @@
       "html": " <a href=\"https://github.com/google-gemini/gemini-cli/releases/tag/v0.64.0\">Launch page</a> (2026-10-13, stable) — Gemini CLI v0.64.0 streams token usage to ACP clients as usage_update notifications instead of confining it to the TUI, and moves chat recording to append-only delta patching with bounded history windowing. File-tool writes become serialized and atomic, CLI state persists atomically with backup recovery, and folder-trust state propagates to headless runs. <a href=\"/research/briefs/2026-10-14-0034-muse.html\">Full brief</a>.",
       "added": "2026-10-14T0034",
       "addedDisplay": "12:34 AM PT",
-      "progress": []
+      "progress": [
+        {
+          "at": "2026-11-19T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "gemini-cli v0.69.0 (2026-11-19T01:45:47Z) adds a <code>/stats heatmap</code> subcommand for daily token usage, moving per-day token spend into the CLI itself rather than only into exported usage events. <a href=\"/research/briefs/2026-11-19-0034-qwen.html\">Full brief</a>."
+        }
+      ]
     },
     {
       "id": "arxiv-2610-16067-oracle-failures-agent-evaluation-reliability",
@@ -2785,6 +2831,11 @@
           "at": "2026-10-16T0034",
           "displayTime": "12:34 AM PT",
           "html": "Phoenix arize-phoenix-v20.23.0 (2026-10-16) exports the server's own logs over OTLP, so collector operational logs travel the same pipeline as collected traces; it also forwards Bedrock tool results directly as text in the playground and documents Atomic Agents tracing. <a href=\"/research/briefs/2026-10-16-0034-muse.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-11-19T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "<code>@arizeai/phoenix-evals</code> 2.8.0 (GitHub Release 2026-11-19T01:20:30Z; npm 01:22:36Z) lets classification evaluators run on a decision model rather than a chat model — pass <code>google.decisionModel(\"gemini-decision-1\")</code> as the <code>model</code> to <code>createClassificationEvaluator</code> or any built-in evaluator (requires <code>@ai-sdk/google</code> ≥ 4.0.118) — the evaluator-side counterpart to the experimental DECISION span kind. <a href=\"/research/briefs/2026-11-19-0034-qwen.html\">Full brief</a>."
         }
       ]
     },
@@ -8128,6 +8179,11 @@
           "at": "2026-11-04T0034",
           "displayTime": "12:34 AM PT",
           "html": "Snowflake's Expedition primary (2026-11-03) states Cortex AI Gateway Observability is generally available, capturing model calls, tool invocations, reasoning steps and guardrail decisions in governed tables in the customer's own account, SQL-queryable and joinable to business data; Agent Trace Intelligence (loop/cost/tool-failure analytics over that join) is in private preview. A rival warehouse is now GA on traces-as-in-account-tables. <a href=\"/research/briefs/2026-11-04-0034-muse.html\">Full brief</a>."
+        },
+        {
+          "at": "2026-11-19T0034",
+          "displayTime": "12:34 AM PT",
+          "html": "Snowflake added Log mode for prompt injection guardrails (docs release note dated Nov 18, 2026 — date only, no time, so it cannot be pinned inside this 12h window): Cortex AI Guardrails now take an optional <code>mode</code> in the <code>AI_SETTINGS</code> account parameter, where <code>mode: LOG</code> scans and records possible prompt injections in CoCo, sf-intelligence and Cortex Agents without changing responses while <code>mode: BLOCK</code> (the default) acts on detections, and LOG-mode detections are queryable in the <code>CORTEX_AI_GUARDRAILS_USAGE_HISTORY</code> account-usage view — shadow-mode measurement of a safety control, framed in the docs as a way to evaluate guardrails on your AI traffic before you block. <a href=\"/research/briefs/2026-11-19-0034-qwen.html\">Full brief</a>."
         }
       ]
     },
@@ -8982,6 +9038,26 @@
     }
   ],
   "runs": [
+    {
+      "id": "2026-11-19T0034",
+      "date": "2026-11-19",
+      "display": "12:34 AM PT",
+      "href": "/research/briefs/2026-11-19-0034-qwen.html",
+      "analyzer": "Qwen",
+      "added": [
+        "databricks-unity-gateway-insights-agent-trace-tokenomics",
+        "aws-airbnb-cost-per-task-coding-agents-bedrock",
+        "aws-opensearch-memory-ga-agent-event-store"
+      ],
+      "updated": [
+        "claude-code-2-1-307-otel-safety-events-tool-interventions",
+        "gemini-cli-v0-64-0-acp-usage-update-append-only-chat-recording",
+        "arize-phoenix-20-19-0-openinference-decision-span-kind-experimental",
+        "pydantic-ai-v2-57-0-approval-reviewer-mcp-apps-service-tier-pricing",
+        "snowflake-cortex-gateway-2"
+      ],
+      "note": "PUBLISH (Qwen qwen3.8-max backup writer, Muse quota-blocked 429, Kimi provider 500s; fresh path; published late at ~12:45 PT Thu as a no-skip catch-up after the 00:34 run stalled before publish): 3 Industry NEW (Databricks Unity Gateway Insights; AWS/Airbnb cost-per-task on Bedrock; Amazon OpenSearch Memory GA) + 3 Academy NEW full-PDF reads (2611.23234 runtime transaction schema; 2611.23346 state-transfer auditing; 2611.23335 Truthgate) + 5 Progress; arXiv Thu 19 Nov listing screened, ceiling 2611.23229 -> 2611.24936; blog lane 22 checked, 2 carded."
+    },
     {
       "id": "2026-11-18T1234",
       "date": "2026-11-18",
@@ -12402,6 +12478,14 @@
     }
   ],
   "briefs": [
+    {
+      "id": "2026-11-19T0034",
+      "date": "2026-11-19",
+      "display": "12:34 AM PT",
+      "href": "/research/briefs/2026-11-19-0034-qwen.html",
+      "analyzer": "Qwen",
+      "title": "Trace economics goes GA — Databricks prices agent waste, Airbnb prices a task, and three papers say the record must live outside the agent"
+    },
     {
       "id": "2026-11-18T1234",
       "date": "2026-11-18",
