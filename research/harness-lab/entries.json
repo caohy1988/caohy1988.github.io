@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-21T17:25:52Z",
+  "updatedAt": "2026-11-21T23:20:16Z",
   "title": "Harness Lab",
   "blurb": "Curated tips and methods that make this Field Brief / EM fleet stronger — Grok bots, Mac CLIs, Obsidian vault, routines, and launch standards. Keep only what we can apply; not generic AI news.",
   "entries": [
@@ -7308,15 +7308,14 @@
         "security",
         "lint",
         "vault",
-        "Mac CLI",
-        "backlog"
+        "Mac CLI"
       ],
-      "appliedToPlaybook": false,
+      "appliedToPlaybook": true,
       "plainTitle": "AgentSkill-scan: check skill and tool bundles for attacks before installing",
       "whatItIs": "An offline scanner that reads a skill, command or tool-server bundle without running it and flags hidden instructions, text that could expose a secret and dangerous shell commands, with file and line. It can fail a build at a chosen severity and accept today's findings as a baseline.",
-      "whyItMatters": "Our skill lint checks format and copies, not attacks, and an earlier pre-install scan card was parked. Only a Lab proposal, not installed: its catches are the author's fixture results, static rules cannot see runtime behavior, and any change needs Haiyuan.",
-      "status": "not-adopted",
-      "statusNote": "A Lab proposal only: no scan of skill or tool-server bundles runs before install, and the nearest control is the report-only skill lint, which checks frontmatter and copies (#skills)."
+      "whyItMatters": "Our skill lint checks format and copies, not attacks. As of 2026-11-21 a report-only pre-install scan of one skill is a playbook trial: findings never block. Known gaps: a finished scan can still exit 3 when both logs fill, and a tight redirection can mislabel a filename. Not a gate, not in ~/bin.",
+      "status": "report-only",
+      "statusNote": "Adopted 2026-11-21 as a report-only trial, never a gate: scan one skill with the local wrapper before install; findings never block (#preinstall-skill-scan; Maps/Decisions/2026-11-21-preinstall-skill-scan-trial.md)."
     },
     {
       "id": "wissensdatenbank-2026-11-18",
