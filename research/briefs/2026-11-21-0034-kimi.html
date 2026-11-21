@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-21-0034: Eval-cost evidence, governed agent flows, and replayable decisions</title>
+  <meta name="description" content="Field Brief 2026-11-21-0034: Eval-cost evidence, governed agent flows, and replayable decisions">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-21-0034-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 AM PT · Sat Nov 21, 2026 · Kimi</p>
+    <article>
+<h1>Field Brief — 2026-11-21-0034: Eval-cost evidence, governed agent flows, and replayable decisions</h1>
+<p><strong>Writer: Kimi (<code>kimi-code/k3.1-pro</code>) — fallback; Muse quota-blocked</strong></p>
+<p>Delivery: Markdown handoff only; Collection owns HTML, catalog and push.
+Window: since the 2026-11-20-1234 brief (~12:45 PT Fri = 2026-11-20T20:45Z) to launch (~00:55 PT Sat = 2026-11-21T08:55Z); the writer's own sweep ran through 08:57Z.
+arXiv: no new listing appeared. The Friday 20 Nov cs.AI listing remains current, maximum 2611.26624 against ceiling 2611.26627; zero IDs are above the ceiling. Full PDFs read for LEDGER (2611.20927), Anchor and Check (2611.25818), and Sightline (2611.26221); 19 unread reserves carry forward.
+Effort: high. Path: fresh.</p>
+<h2>Read this first</h2>
+<ul><li><strong>Evaluation cost is now a measured design trade-off, not merely advice to use a smaller judge.</strong> Arize reports code-first checks, trace trimming and cascades that cut cost 20x or more in several vendor-run tasks while retaining or improving task-specific accuracy. Do not generalize those results into a universal judge ranking.
+</li><li><strong>Two AWS releases expose useful agent-control primitives.</strong> The Agent Toolkit skill uses workload traces to estimate distributed-KV-cache fit before spending, while AWS Quick combines deterministic multi-agent flows with detect-only guardrails, approval boundaries and group agent-hour limits.
+</li><li><strong>The Academy cards share one primitive: evidence that can be audited after the answer.</strong> LEDGER scores the evidence sent to the model as well as the answer; Anchor and Check replays a pure reconciliation decision from stored samples; Sightline attaches a calibrated miss rate to input-output data-flow summaries. None establishes unattended-production safety.
+</li></ul>
+<h2>Industry</h2>
+<h3>NEW</h3>
+<h4>1. <a href="https://arize.com/blog/reduce-the-cost-of-evals/">Arize measures code checks, trimming and cascades for lower-cost evaluation</a></h4>
+<p><strong>2026-11-21T01:22:44Z (page <code>datePublished</code> 2026-11-20T17:22:44-08:00), stable. Measured vendor study, not method-only advice.</strong></p>
+<ul><li>On 890 Berkeley Function Calling Leaderboard tool calls, a schema check settled 38% for free before an LLM judge. Arize reports cost falling from $2.17 to $1.34 per 1,000 and accuracy moving from 96.4% to 96.5%.
+</li><li>On 199 expert-labelled AgentRewardBench traces, code trimming reduced cost 20x–24x across four judges and improved balanced accuracy for each. For one judge, the reported comparison is 56.0% at $154.84 for full traces versus 70.0% at $6.58 for trimmed traces; this is a task-specific result, not a general accuracy multiplier.
+</li><li>On the RAGTruth hallucination task, a decision-model-first cascade escalated 8% of cases to a large judge and scored 86.8% at $1.40 per 1,000, against 84.9% at $14.53 for the large judge alone. A separate code-plus-judge result shows why structural checks should settle only the cases they can actually decide.
+</li><li><strong>Boundary:</strong> these are Arize's own experiments and prices, with no independent rerun here. Sampling, trimming, judge choice and escalation thresholds need validation on the customer's eval and labels; the post itself warns that a result on its data is only a hypothesis for another workload.
+</li></ul>
+<h4>2. <a href="https://aws.amazon.com/blogs/machine-learning/cut-self-hosted-llm-cost-and-latency-with-the-distributed-kv-caching-agent-skill/">AWS Agent Toolkit adds a distributed-KV-cache evaluation and setup skill</a></h4>
+<p><strong>2026-11-21T00:14:26Z, stable.</strong></p>
+<ul><li>The Agent Toolkit for AWS skill lets a coding agent diagnose cold-prefill latency, estimate fit, size and price a shared ElastiCache tier, configure LMCache for vLLM or SGLang, and troubleshoot transfers. It checks fit before creating infrastructure and stops when expected savings do not cover cache cost.
+</li><li>KVTrace records vLLM/SGLang cache events and replays block hashes and token counts offline against candidate cache sizes; it does not record token IDs or prompt text. Sensitive workloads can supply an anonymize-key file, and tenants that share a cache need a tenant ID in the KV hash.
+</li><li>The guided flow starts with read-only fleet inspection, seeks explicit approval for high-impact operations, and checks that two cache-loaded runs produce the same output before production. That correctness check matters because healthy hit counters alone do not establish a compatible layout.
+</li><li><strong>Boundary:</strong> the post separately quotes up to 40% lower inference cost and 80% lower TTFT for the underlying distributed-cache architecture. Those are not measured outcomes of this new agent skill, and freed GPU time becomes a dollar saving only if capacity or served traffic changes.
+</li></ul>
+<h4>3. <a href="https://aws.amazon.com/blogs/machine-learning/new-in-aws-quick-more-capable-flows-an-updated-web-experience-and-agents-that-work-together/">AWS Quick combines multi-agent flows, prompt guardrails and group agent-hour limits</a></h4>
+<p><strong>2026-11-21T01:06:42Z, stable.</strong></p>
+<ul><li>Quick's conversational Flows now orchestrate agents, skills, tools and structured data with deterministic calculation/check steps, longer runs and larger data volumes. Multi-agent orchestration lets specialized agents work in parallel and combines their contributions; work can continue after the browser tab closes.
+</li><li>New prompt guardrails in preview filter denied topics/words, detect prompt attacks and protect selected personal-information types. Administrators can test in detect-only mode before enforcement. Group controls add permissions and agent-hour limits, while connector write actions still require user permission.
+</li><li><strong>Boundary:</strong> this is a product-capability launch, not a measured orchestration-quality or guardrail-accuracy result. The customer fourfold data-use and 80-hours-per-month anecdotes are not treated as controlled evaluation evidence.
+</li></ul>
+<h3>Progress</h3>
+<ul><li><strong>Vercel AI SDK 7.0.179 — parent <code>vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts</code>.</strong> <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.179">GitHub</a> 2026-11-20T23:17:40Z; npm 23:21:52Z. The experimental Live/WebSocket path supports continuous Live models with normalized <code>session-start</code>, PCM16 audio, <code>context-append</code> and <code>session-close</code> events carrying final usage. Live-bound client secrets and provider-declared direct WebSocket connections remove the application relay for supported models; the API remains experimental. The same monorepo's <code>@ai-sdk/workflow@2.0.111</code> is not double-counted.
+</li></ul>
+<h3>Mentions (NOTE only)</h3>
+<ul><li><a href="https://aws.amazon.com/blogs/machine-learning/introducing-amazon-sagemaker-hyperpod-global-inference-gateway-one-endpoint-across-regions-and-clusters/">SageMaker HyperPod Global Inference Gateway</a> (22:35:24Z) routes across clusters using KV headroom, queue depth, Region proximity and error rate; useful serving telemetry, but not an agent-analytics launch.
+</li><li><a href="https://aws.amazon.com/blogs/machine-learning/introducing-managed-cluster-extensions-for-observability-and-user-management-in-amazon-sagemaker-hyperpod-slurm/">SageMaker HyperPod Slurm cluster extensions</a> (23:07:03Z) manage node/GPU/Slurm metrics and per-node extension health; cluster observability rather than agent traces.
+</li><li><a href="https://aws.amazon.com/about-aws/whats-new/2026/11/web-search-amazon-bedrock/">Web Search on Amazon Bedrock</a> (2026-11-21T00:17:00Z) adds five languages, non-US English and an optional country bias for AgentCore/Bedrock grounding; a tool capability, not new analytics.
+</li><li><a href="https://aws.amazon.com/about-aws/whats-new/2026/11/amazon-cloudwatch-omni-microsoft-azure">CloudWatch Omni Azure collection</a> (01:10:00Z) brings Azure logs, metrics and Application Insights traces into CloudWatch; cross-cloud infrastructure observability, with no agent-specific contract claimed.
+</li><li><a href="https://github.com/BerriAI/litellm/releases/tag/v1.108.14">LiteLLM 1.108.14 LTS</a> (PyPI 23:42:30Z) fixes Claude tool-search loss on follow-up Responses calls and adds <code>input_json</code> parts on <code>/v1/decisions</code>; narrow compatibility patch, not a rank.
+</li><li>OpenAI Agents SDK <code>v1.0.0-alpha.1</code>, <code>@mastra/core@1.86.0-alpha.3</code> and browser-use <code>1.0.8rc1</code> appeared in-window; prereleases remain NOTE at most.
+</li><li><code>letta-code@0.34.68</code> and Grafana Pyroscope 2.4.4/2.3.6 were observed in registries/GitHub. Pyroscope 2.4.4 is dependency, OpenTelemetry and security maintenance; no agent-analytics rank.
+</li><li><a href="https://www.langchain.com/blog/series-c">LangChain's Series C</a> is funding news, not a product release. <a href="https://research.google/blog/how-google-duplex-evolved-to-also-call-businesses-for-you-in-gemini/">Google's Duplex retrospective</a> describes Tasks in Gemini but supplies no agent-analytics launch or evaluation result for this brief.
+</li></ul>
+<h2>Academy</h2>
+<h3>1. <a href="https://arxiv.org/abs/2611.20927">LEDGER: Auditable Agent Memory Under Change — arXiv:2611.20927</a></h3>
+<p><strong>Full PDF read:</strong> all 11 pages via <code>pdftotext -layout</code>, including architecture, evaluation, results, threats to validity, conclusion and references. Key evidence: Tables V–VIII and §§III–VII.</p>
+<p>LEDGER has an LLM propose facts while explicit rules decide supersession, source trust, validity intervals and deletion; LEDGER+EP adds raw-turn retrieval and scrubs those turns on deletion. On the authors' synthetic coding-agent workload, fallback mode answers 94.3% on development seeds and 91.1% on five held-out seeds, versus 82.1% and 83.3% for full replay (Tables V–VI). More importantly for analytics, development-seed evidence contains a forbidden stale/future/contaminated value in 16 of 512 probes for fallback mode versus 249 for full replay; description-only deletion sent no deleted value in the evaluated LEDGER probes.</p>
+<p>On a 210-question LongMemEval subset, LEDGER+EP augment and full replay both score 74.8%, with 1,087 versus 108,447 injected tokens (Table VII). The paired 95% difference interval of −6.2 to +6.2 points does not establish equivalence. The coding workload is synthetic and built by the authors, held-out seeds shrink the lead, and no downstream coding task is measured. Deletion guarantees also depend on extraction/routing and do not cover every missed-value phrasing, earlier snapshots, response caches or run logs (§§III-E, V-H, VII).</p>
+<h3>2. <a href="https://arxiv.org/abs/2611.25818">Anchor and Check: Deterministic Cross-Prompt, Cross-Model Reconciliation for Auditable LLM Decisions — arXiv:2611.25818</a></h3>
+<p><strong>Full PDF read:</strong> all 20 pages via <code>pdftotext -layout</code>, including the method, matched/cross-model comparisons, operational results, limitations and Appendices A–F. Key evidence: Tables 2–8 and §§5.7, 6–7.</p>
+<p>The contract commits a greedy anchor, checks it through an alternate prompt and another model family, and lets a pure function emit five outcomes; only Agree is automated. Across 48,000 model-item evaluations on six tasks and eight models, anchor+alternate+peer reaches 0.852 AUROC versus 0.829 for single-model semantic entropy over 10 samples, at 29% of that baseline's cost (Table 2). Against equal-budget cross-model pipelines, however, differences from pooled entropy over three and five samples are +0.4 [−0.5, +1.2] and +0.1 [−0.8, +1.0] points: no superiority or equivalence claim is justified (Table 3).</p>
+<p>Under the strict three-call Agree gate, 70.1% of items are automated at 5.4% error among automated items; 84.0% of errors go to review, but 16% of all errors are still acted on (Table 8). Stored samples, model/prompt/decoding provenance, decision key, equality-rule version, outcome and action replay the pure reconciler exactly. The hosted generations themselves are not reproducible: repeated anchors change 7.7% of items and the three-call gate flips 5.2% (§5.7). Shared-wrong-answer coupling, comparable checker strength, staffed review queues and untested structured/date key types remain deployment limits (§7).</p>
+<h3>3. <a href="https://arxiv.org/abs/2611.26221">Sightline: Calibrated Data-Flow Summaries for LLM-Integrated Applications — arXiv:2611.26221</a></h3>
+<p><strong>Full PDF read:</strong> all 28 pages via <code>pdftotext -layout</code>, including the Lean-mechanized theory, calibration, six evaluation questions, threats to validity, data-availability statement and references. Key evidence: Tables 3–6 and §§3–6.</p>
+<p>Sightline uses one teacher-forced pass to read per-head attention for recorded prompt placeholders, learns which reads are uses, and applies split-conformal calibration over repository families. On 2,103 unseen repository families and four models it reaches 81.1–86.7 Macro-F1 (Table 3). At a calibrated 1% true-flow miss level per call site it prunes 43.9–65.6% of spurious flows, 1.6–2.6 times the best baseline; calibration on another collection still prunes 43.8–60.1% (Table 5).</p>
+<p>An open surrogate reads models treated as closed within −4.2 to +3.2 Macro-F1 points of self-reading (Table 6). In a 120-turn AgentDojo client, it removes 50.0% of label creep and lets none of 34 attack calls through the tested integrity policy (§5.7). These results do not make attention a complete causal explanation or a production security guarantee: runtime values are reconstructed rather than observed in production, labels come from LLM/author procedures, baselines are author-implemented, and the miss bound assumes exchangeable deployment and calibration clusters (§6).</p>
+<h3>Scouted, not ranked</h3>
+<p>Abstract-screened only; no full-PDF-read claim for these 19 unread reserves. They carry to 1234 Sat in reserve order:</p>
+<ul><li><a href="https://arxiv.org/abs/2611.23990">2611.23990 SCAFFOLD</a> — warrant-preserving evidence transport for reusable agent skills.
+</li><li><a href="https://arxiv.org/abs/2611.24357">2611.24357</a> — semantic context handoff with on-demand evidence retrieval.
+</li><li><a href="https://arxiv.org/abs/2611.24185">2611.24185</a> — control-flow integrity for agent skills.
+</li><li><a href="https://arxiv.org/abs/2611.24313">2611.24313 AutoPI</a> — taxonomy-guided adaptive red teaming.
+</li><li><a href="https://arxiv.org/abs/2611.23588">2611.23588 ARISE</a> — self-evolving enterprise-agent memory.
+</li><li><a href="https://arxiv.org/abs/2611.22511">2611.22511 LMLineage</a> — sentence-to-input-span attribution, calibrated confidence and drift-triggered micro-compaction.
+</li><li><a href="https://arxiv.org/abs/2611.22991">2611.22991 RagHarnessDebugger</a> — repair-decision records and trace-integrity auditing.
+</li><li><a href="https://arxiv.org/abs/2611.21259">2611.21259</a> — orchestration authorization and trust boundaries against the OWASP agentic-application list.
+</li><li><a href="https://arxiv.org/abs/2611.19982">2611.19982</a> — multimodal ITOps agents instrumented with agent analytics.
+</li><li><a href="https://arxiv.org/abs/2611.19465">2611.19465 VAST</a> — verifiable red-team environments.
+</li><li><a href="https://arxiv.org/abs/2611.25123">2611.25123 GrepMem</a> — append-only full-history text plus regex retrieval as index-free long-horizon memory.
+</li><li><a href="https://arxiv.org/abs/2611.25146">2611.25146 EverydayBench</a> — live-web completion evaluation with constraint checks, cited-page verification and deliverable rubrics.
+</li><li><a href="https://arxiv.org/abs/2611.25790">2611.25790</a> — CyberGym task-material consistency and whether a passing exploit addresses the reference target.
+</li><li><a href="https://arxiv.org/abs/2611.26361">2611.26361</a> — deployment lessons on selecting how much self-distilled agent memory to serve.
+</li><li><a href="https://arxiv.org/abs/2611.25534">2611.25534 SkillDiff</a> — feedback-free skill rewriting, outside-prior knowledge loss and SkillDiff.
+</li><li><a href="https://arxiv.org/abs/2611.26427">2611.26427 MemFolder</a> — structure-guided record and context folding for agent memory.
+</li><li><a href="https://arxiv.org/abs/2611.26311">2611.26311 SWE-Recreation</a> — pixels-only exploration and recreation of real applications by coding agents.
+</li><li><a href="https://arxiv.org/abs/2611.25673">2611.25673 CompAct-Bench</a> — stage-boundary working-context compaction in long-horizon agent trajectories.
+</li><li><a href="https://arxiv.org/abs/2611.25380">2611.25380</a> — evolving prompts, tools, skills and planning scaffolding while freezing the policy model.
+</li></ul>
+<h2>Six-week EV</h2>
+<ul><li><strong>Evidence-packet memory ledger (high EV, 2–4 weeks).</strong> Store slot, value, source event, trust, valid interval, deletion/tombstone and raw-turn scrub state. Score evidence and final answers separately for stale, future, contaminated and deleted values; test description-only deletion and explicitly inventory snapshots, caches and logs that deletion does not reach.
+</li><li><strong>Replayable automation-gate record (high EV, 2–4 weeks).</strong> Version the decision key and equality rule; retain anchor/check model, prompt, decoding, raw samples, outcome, confidence and action. Publish risk–coverage, residual errors acted on, gate flips and review-queue latency rather than treating agreement as correctness.
+</li><li><strong>Calibrated input-output lineage shadow (high EV, 4–6 weeks).</strong> Join placeholder/span IDs to output and tool-call records, surrogate/readout versions, calibration cohort, threshold and α. Measure missed true flows, pruned non-flows, transfer across repositories/models and online overhead before using summaries for enforcement.
+</li><li><strong>Eval cost-quality registry (high EV, 1–3 weeks).</strong> For each evaluator record scope, raw/trimmed tokens, code-check settlements, judge/model/effort/cutoff, cascade band, escalation share, sample size, accuracy and cost per 1,000. Compare code-first, trimming and cheaper-judge variants on held-out customer labels before rollout.
+</li><li><strong>Cache-fit and correctness evidence (medium-high EV, 2–4 weeks).</strong> Keep prompt text out of cache-fit traces; store block hashes, token counts, hit-rate scenarios, prompt-length cutover, cache size/price and predicted versus measured L2 share. Pair reuse metrics with output-equivalence checks and tenant-isolation IDs.
+</li><li><strong>Multi-agent governance events (medium-high EV, 3–5 weeks).</strong> Normalize flow/agent/skill/tool IDs, deterministic checks, per-agent contributions, connector write approvals, detect-only versus enforced guardrails and group agent-hour limits. Report completed outcome and denied/held work separately from raw agent hours.
+</li></ul>
+<h2>TL;DRs for BQAA</h2>
+<ul><li><strong>Arize eval-cost study:</strong> put code settlement, input trimming, judge choice and escalation rate beside accuracy and cost in every evaluator report; validate the trade-off on customer labels.
+</li><li><strong>AWS KV-cache skill:</strong> cache-fit analytics should use privacy-preserving workload traces and an output-correctness gate, not hit rate or modeled GPU savings alone.
+</li><li><strong>AWS Quick:</strong> deterministic flow checks, detect-only guardrails, write approvals and agent-hour limits are useful governance events to normalize across agent platforms.
+</li><li><strong>Vercel AI SDK:</strong> continuous voice/agent sessions need lifecycle events and final usage joined to the same session, with experimental-API version pinned.
+</li><li><strong>LEDGER:</strong> answer accuracy can hide polluted or deleted evidence; audit the evidence packet itself and track deletion coverage beyond the primary store.
+</li><li><strong>Anchor and Check:</strong> store enough provenance to replay the gate, but dashboard residual acted-on errors and generation-driven gate flips alongside automation rate.
+</li><li><strong>Sightline:</strong> calibrated lineage is useful only with its calibration population, miss rate, surrogate model and distribution-shift evidence attached.
+</li></ul>
+<h2>Unconfirmed</h2>
+<ul><li><strong>gap: blog lane xAI HTTP 403</strong> on <code>https://x.ai/news</code>; no quiet-surface claim.
+</li><li><strong>gap: blog lane Microsoft Research feed HTTP 403.</strong> The blog index was readable through web extraction, but a complete dated in-window listing was not established; no zero-post claim.
+</li><li><strong>gap: blog lane Azure AI feed HTTP 404; the index returned an empty extraction.</strong> The general Azure feed returned 200 but is not a substitute for a complete Azure AI listing.
+</li><li><strong>gap: blog lane Anthropic RSS HTTP 404.</strong> News/research indexes returned 200. The featured Fable/Mythos primary page is dated Nov 9 and edited Nov 11, so it is pre-window; the Nov 20 IPO item is not agent analytics.
+</li><li><strong>gap: blog lane LlamaIndex RSS 404; CrewAI RSS 404.</strong> Both HTML indexes returned 200, but no complete sub-day in-window listing was established; the LlamaIndex schema-drift guide carries only a Nov 20 date and was not re-carded.
+</li><li><strong>gap: blog lane Snowflake blog HTTP 403.</strong> Documentation release notes returned 200, but no new in-window agent-analytics item was confirmed there.
+</li><li><strong>gap: blog lane Honeycomb changelog HTTP 404; Splunk feed HTTP 404 on the vendor retry and HTTP 403 on the feed-helper retry.</strong> Their blog indexes returned 200; page-modification timestamps are not entry-level publication evidence.
+</li><li><strong>HTML-only changelog coverage:</strong> Braintrust, Weave, Galileo, New Relic, Dynatrace and Opik returned 200, but a complete set of in-window entry timestamps could not be extracted. Braintrust's 2026-11-21T00:04:41Z page-modified time alone does not establish a new changelog entry or support a card.
+</li><li><strong>gap: GitHub microsoft/agent-framework HTTP 404.</strong> Registry fallback succeeded: PyPI latest <code>agent-framework</code> 1.26.0 is from Nov 12 and npm <code>@microsoft/agent-framework</code> latest remains a 2025 beta; no in-window registry mover was found.
+</li><li><strong>AgentCore month-grouped notes:</strong> entries other than the separately dated Web Search expansion still lack an in-window clock. The expansion is NOTE above, not evidence for the older entries.
+</li><li><strong>Carried vendor leads:</strong> Datadog's monitoring page remains modified Nov 12; Databricks' visible Nov 20 item is interactive reference architectures, not agent analytics; no dated in-window primary for the carried model-vendor office-suite item was found in the OpenAI/AWS feeds checked. Looked at those pages and the Databricks index; no new claim is made.
+</li><li><strong>gap: Reddit search HTTP 403</strong> in the collector proxy. X/Reddit/LinkedIn evidence remained web-proxied; no social-quiet claim.
+</li></ul>
+<h2>Housekeeping</h2>
+<ul><li><strong>Fresh path and packs:</strong> used <code>_runs/fb-2026-11-21-0034/fresh-items.md</code> and <code>.json</code> as the complete collector candidate list: <code>FB_MERGE slot=2026-11-21-0034 packs=11 raw=26 unique=23 drop_catalog=0 drop_seen=0 drop_both=0 fresh=23 (cand=23 low=0) tokens_old~80858 tokens_new~17090</code>. Inputs were Agy 1232/1532/2132, Muse 1332/1632/2232 + extra 0007, and DSH 1432/2032/2332 + extra 0009. No pack was read wholesale; fresh-list summaries were leads, not primary evidence.
+</li><li><strong>Collector gaps:</strong> DSH 1732, Agy 1832 and Muse 1932 were skipped while the Mac was offline (~17:30–20:30 PT Fri). DSH 2032 is the payback pack covering 00:40:06Z–04:42:31Z; the writer's own feed/web/registry sweep gave that span extra attention. Nothing after ~08:24Z is pack-covered; the writer's sweep covers it through 08:57Z. HN is dropped, Medium is lead-only, and X/Reddit/LinkedIn remained web-proxied.
+</li><li><strong>Registry/release sweep:</strong> the supplied PyPI/npm/GitHub helpers ran with window start 2026-11-20T20:45Z. Stable in-window movers were LiteLLM 1.108.14, <code>ai</code> 7.0.179, <code>letta-code</code> 0.34.68 and Pyroscope 2.4.4/2.3.6; prereleases stayed NOTE. The Vercel monorepo train is treated as one Progress item.
+</li><li><strong>blog lane: 7 posts checked, 3 carded</strong>
+</li><li>The seven in-window posts individually opened and judged were Arize eval cost, AWS KV-cache agent skill, AWS Quick, HyperPod Global Inference Gateway, HyperPod Slurm extensions, Google Duplex and LangChain Series C. Dated announcements, documentation release notes and registry releases are not counted as blog-lane posts.
+</li><li><strong>Writer-sourced date rejects:</strong> OpenAI Wallet is Nov 13, Performance Factory Nov 19, dots' wider access Nov 18, and the Fable/Mythos model primary is Nov 9 with a Nov 11 edit. Replit's Nov 20 Missions changelog has <code>dateModified</code> 2026-11-20T20:08:06Z, before the 20:45Z window start. None is ranked.
+</li><li><strong>arXiv verification:</strong> HTTP 200 from cs.AI <code>/new</code>; Friday 20 Nov listing, 400 unique IDs read to the end, maximum 2611.26624, zero IDs above ceiling 2611.26627. No new batch appeared and no above-ceiling IDs required abstract screening. Exactly three reserves received complete 11/20/28-page PDF reads; 19 unread reserves carry to 1234 Sat.
+</li><li><strong>Verification method:</strong> official vendor posts and dated release notes, official RSS/Atom entries, GitHub release pages, PyPI/npm JSON, independent web searches and live-catalog greps for every ranked ID/name/URL/arXiv ID. All Industry ranked claims trace to primary pages; Academy papers were read in full with section/table citations. All new catalog slugs were checked against the live catalog before ranking.
+</li><li><strong>Catalog baseline confirmed live:</strong> HTTP 200, 754 items / 228 briefs / 230 runs; maximum brief <code>2026-11-20T1234</code> (Kimi); priority pin <code>arxiv-2609-02702-trace-as-state</code> intact and not re-carded. No HTML or catalog edits, commits or pushes were made.
+</li></ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>arize-eval-cost-code-trimming-decision-cascade-measurements</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Arize measures code checks, trace trimming and judge cascades for lower-cost evaluation
+</li><li><strong>url:</strong> <a href="https://arize.com/blog/reduce-the-cost-of-evals/">https://arize.com/blog/reduce-the-cost-of-evals/</a> (2026-11-21T01:22:44Z, stable)
+</li><li><strong>card text:</strong> Arize reports that a schema check settled 38% of 890 tool calls for free and cut judge cost from $2.17 to $1.34 per 1,000 with accuracy moving from 96.4% to 96.5%; code trimming cut cost 20x–24x across four AgentRewardBench judges while improving each one's balanced accuracy. A decision-model-first cascade escalated 8% of RAGTruth cases and scored 86.8% at $1.40 versus 84.9% at $14.53 for the large judge alone. These are vendor-run, task-specific results that need validation on customer labels.
+</li></ul>
+</li><li><strong>id:</strong> <code>aws-agent-toolkit-distributed-kv-cache-skill-kvtrace</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> AWS Agent Toolkit skill evaluates and configures distributed KV caching from workload traces
+</li><li><strong>url:</strong> <a href="https://aws.amazon.com/blogs/machine-learning/cut-self-hosted-llm-cost-and-latency-with-the-distributed-kv-caching-agent-skill/">https://aws.amazon.com/blogs/machine-learning/cut-self-hosted-llm-cost-and-latency-with-the-distributed-kv-caching-agent-skill/</a> (2026-11-21T00:14:26Z, stable)
+</li><li><strong>card text:</strong> The coding-agent skill uses KVTrace block-hash/token-count traces to estimate cache fit and price before infrastructure spend, then guides LMCache setup and troubleshooting with explicit approval and two-run output-equivalence checks. The underlying cache's quoted cost/TTFT improvements are not measured outcomes of the skill itself.
+</li></ul>
+</li><li><strong>id:</strong> <code>aws-quick-multi-agent-flows-guardrails-agent-hour-limits</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> AWS Quick adds multi-agent flows, prompt guardrails and group agent-hour limits
+</li><li><strong>url:</strong> <a href="https://aws.amazon.com/blogs/machine-learning/new-in-aws-quick-more-capable-flows-an-updated-web-experience-and-agents-that-work-together/">https://aws.amazon.com/blogs/machine-learning/new-in-aws-quick-more-capable-flows-an-updated-web-experience-and-agents-that-work-together/</a> (2026-11-21T01:06:42Z, stable)
+</li><li><strong>card text:</strong> Quick now builds deterministic multi-agent flows in conversation, keeps work running after the tab closes and combines specialized-agent contributions. Preview prompt guardrails support detect-only testing before enforcement, while group controls add permissions and agent-hour limits and connector writes require permission; no controlled quality result is supplied.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-20927-ledger-auditable-agent-memory</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> LEDGER audits the evidence sent to the model under updates, source conflicts and deletion
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.20927">https://arxiv.org/abs/2611.20927</a>
+</li><li><strong>card text:</strong> Full PDF read. LEDGER+EP fallback answers 91.1% on held-out synthetic coding seeds versus 83.3% for full replay; on development probes it sends forbidden evidence in 16 of 512 cases versus 249, with no deleted value in its evaluated description-only deletion probes (Tables V–VI). LongMemEval's equal observed 74.8% with about 1% of full replay's context is not equivalence because the paired interval spans −6.2 to +6.2 points; the coding workload is synthetic and downstream task success is unmeasured.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-25818-anchor-check-replayable-reconciliation-gate</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Anchor and Check makes an LLM decision gate replayable from stored samples
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.25818">https://arxiv.org/abs/2611.25818</a>
+</li><li><strong>card text:</strong> Full PDF read. The three-call contract reaches 0.852 AUROC over 48,000 evaluations, but differences from equal-budget pooled entropy over three/five samples have intervals containing zero. Its strict gate automates 70.1% at 5.4% error among automated items and still acts on 16% of all errors; replay is exact only for recorded samples, while hosted repeat gates flip 5.2% (Tables 2–3, 5, 8).
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-26221-sightline-calibrated-data-flow-summaries</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Sightline calibrates which prompt placeholders flow into an LLM output
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.26221">https://arxiv.org/abs/2611.26221</a>
+</li><li><strong>card text:</strong> Full PDF read. On 2,103 unseen repository families and four models, Sightline prunes 43.9–65.6% of spurious flows at a calibrated 1% true-flow miss level and retains 43.8–60.1% pruning under cross-collection calibration (Tables 3–5). Open-surrogate transfer and an AgentDojo client are promising, but reconstructed runtime values, author-implemented baselines and the exchangeability assumption limit production claims.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>vercel-ai-sdk-7-0-113-tool-approval-replay-gemini-3-8-tts</code>
+<ul><li><strong>text:</strong> AI SDK 7.0.179 (GitHub 2026-11-20T23:17:40Z / npm 23:21:52Z) adds an experimental continuous Live/WebSocket path with normalized session lifecycle events, final usage, Live-bound client secrets and supported direct provider connections without an application relay. <a href="https://github.com/vercel/ai/releases/tag/ai%407.0.179">https://github.com/vercel/ai/releases/tag/ai%407.0.179</a>
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>Arize's vendor-run experiments show code checks, trace trimming and cascades cutting evaluation cost 20x or more in several tasks while preserving or improving task-specific accuracy: <a href="https://arize.com/blog/reduce-the-cost-of-evals/">https://arize.com/blog/reduce-the-cost-of-evals/</a> (2026-11-21T01:22:44Z).
+</li><li>AWS's Agent Toolkit skill uses privacy-conscious KVTrace records to evaluate cache fit before spend and adds explicit approval and output-equivalence checks to setup: <a href="https://aws.amazon.com/blogs/machine-learning/cut-self-hosted-llm-cost-and-latency-with-the-distributed-kv-caching-agent-skill/">https://aws.amazon.com/blogs/machine-learning/cut-self-hosted-llm-cost-and-latency-with-the-distributed-kv-caching-agent-skill/</a> (2026-11-21T00:14:26Z).
+</li><li>AWS Quick combines deterministic multi-agent flows with detect-only prompt guardrails, connector write approvals and group agent-hour limits: <a href="https://aws.amazon.com/blogs/machine-learning/new-in-aws-quick-more-capable-flows-an-updated-web-experience-and-agents-that-work-together/">https://aws.amazon.com/blogs/machine-learning/new-in-aws-quick-more-capable-flows-an-updated-web-experience-and-agents-that-work-together/</a> (2026-11-21T01:06:42Z).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Sat Nov 21, 2026 · 12:34 AM PT · Kimi</span>
+    </div>
+  </footer>
+</body>
+</html>
