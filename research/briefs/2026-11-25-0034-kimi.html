@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-25-0034: Recovery and repeated runs expose hidden agent failure; LangSmith packages the agent lake</title>
+  <meta name="description" content="Field Brief 2026-11-25-0034: Recovery and repeated runs expose hidden agent failure; LangSmith packages the agent lake">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-25-0034-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 AM PT · Wed Nov 25, 2026 · Kimi</p>
+    <article>
+<h1>Field Brief — 2026-11-25-0034: Recovery and repeated runs expose hidden agent failure; LangSmith packages the agent lake</h1>
+<p><strong>Writer: Kimi (<code>kimi-code/k3.1-pro</code>) — fallback; Muse weekly quota exhausted</strong>
+Delivery line: Markdown handoff only; Collection owns HTML, catalog and push. Window: since the 2026-11-24-1234 brief (~12:40 PT Tue, sweep 2026-11-24T20:40Z) to launch (~00:55 PT Wed, ~12h; own sweep through ~01:10 PT). arXiv: Wed 25 Nov batch screened — 1,051 ids above 2611.31240, new ceiling 2611.33158; full-PDF reads went to 2611.31586, 2611.31266 and 2611.32946. Effort: max, as configured. Path: fresh.</p>
+<h2>Read this first</h2>
+<p>The durable signal is measurement design, not another model leaderboard. SecondChance replays natural agent errors from shared checkpoints and shows that task success can leave the original damage in place. A deployed enterprise RAG study runs every question ten times and finds an 18.5-point gap between finding the right page in any run and finding it in every run. ShellBench separates model, harness and rubric effects across 53,100 rollouts: average harness differences are small, model-by-harness interactions are not, and removing source/staleness criteria changes the harness ranking.</p>
+<p>Industry is moving toward the same evidence model. LangChain names LangSmith an “Agent Lake,” joining traces and outcomes to evaluators, search and automated improvement. FastMCP adds client-side CodeMode and transport attributes to spans. Google Knowledge Catalog adds a Preview Data Agent Kit skill for versioned OKF context bundles with local validation and retrieval testing. Material Progress lands on eval-event integrity (Pydantic AI), response telemetry (Claude Code), Topics and guardrail APIs (Opik), guardrail/spend accounting (LiteLLM), and compliance review (Anthropic SDKs).</p>
+<p>Clock discipline matters: Databricks Tag Exchange and the CrowdStrike Signal post were checked and excluded as pre-window. Google’s feature is confirmed, but its per-item launch minute is not exposed; the card carries the exact release-note/feed/docs clock caveat. Nothing is ranked from Medium, an undated changelog, or a failed lookup.</p>
+<h2>Industry</h2>
+<h3>NEW</h3>
+<h4>1. LangChain names LangSmith an “Agent Lake”: trace storage and outcomes feed search, evaluation and automated improvement</h4>
+<p>Primary: <a href="https://www.langchain.com/blog/the-agent-lake">https://www.langchain.com/blog/the-agent-lake</a> (published 2026-11-25T01:30:00Z, modified 01:32:21Z, in-window).</p>
+<p>The post defines an Agent Lake as storage optimized for agent traces plus “intelligent compute” to query, analyze and learn from them. LangSmith’s version groups multi-turn traces into threads, joins outcomes such as feedback and merged PRs, and layers on online evaluators, natural-language AI Search, Insights clustering, and LangSmith Engine’s recurring-issue diagnosis and fix PRs. SmithTune fine-tunes a model on selected trajectories through Fireworks or Baseten and compares it with the base model in LangSmith. This is a product-platform launch and consolidation, not a claim that every component first shipped today.</p>
+<p>Vendor-reported evidence needs the labels kept on. The post says Engine has analyzed more than 60 million production traces. Its SmithTune example reports 96 on an internal IssueBench subset for fine-tuned Kimi K3, versus 90 for the base model and 87 for GPT-5.6 Sol; no subset size, variance, cost or independent replication is given, so those numbers are directional only. The decision-model and AI Search claims likewise report no measured precision or end-to-end cost reduction in this post.</p>
+<p>Why it ranks. It gives agent analytics a concrete data-and-compute architecture: traces and observed outcomes are the shared corpus, while evaluators, search, clustering, diagnosis and tuning are separable consumers. For BQAA, the useful distinction is trace ≠ outcome: join both, but preserve their cardinality and provenance rather than treating an LLM-generated proxy as observed impact. Catalog check: no existing Agent Lake or SmithTune item; NEW.</p>
+<h4>2. FastMCP 4.2.6 adds experimental client-side CodeMode, transport attributes on server spans, and durable typed events</h4>
+<p>Primary: <a href="https://github.com/prefecthq/fastmcp/releases/tag/v4.2.6">https://github.com/prefecthq/fastmcp/releases/tag/v4.2.6</a> (published 2026-11-25T00:40:46Z, stable; PyPI upload 02:55:05Z, in-window).</p>
+<p>The new <code>CodeModeClient</code> wraps a client or client group and exposes search, schema and execute meta-tools even when the remote servers do not implement CodeMode; one execute block can chain calls across servers. Server spans gain <code>network.transport</code> and, over HTTP, protocol name/version. The release also moves experimental events into <code>fastmcp-events</code> with Pydantic-model event types and optional Redis/Docket persistence across restarts and replicas. Authlib is removed as a dependency, so direct importers must declare it themselves.</p>
+<p>Why it ranks. This is a material stable release, not a patch train: cross-server CodeMode changes the tool-execution surface, and the span attributes make transport analysis possible without inferring it from peer names. The CodeMode and events APIs are experimental, and no accuracy, latency or token-saving evaluation is reported. BQAA should trace the individual calls inside an execute block rather than record only one opaque meta-tool invocation, and treat transport attributes as request metadata, not proof of execution outcome. Catalog check: no existing FastMCP release card; NEW.</p>
+<h4>3. Google Knowledge Catalog Data Agent Kit gains a Preview <code>curate-context</code> skill for OKF context bundles</h4>
+<p>Primary: <a href="https://docs.cloud.google.com/release-notes#November_24_2026">https://docs.cloud.google.com/release-notes#November_24_2026</a> (release note dated 2026-11-24; collector-recorded general GCP feed rebuilt 2026-11-25T05:02:47Z in-window; linked docs last updated 2026-11-25 UTC). Documentation: <a href="https://docs.cloud.google.com/knowledge-catalog/docs/curate-context-sets-data-agent-kit">https://docs.cloud.google.com/knowledge-catalog/docs/curate-context-sets-data-agent-kit</a>.</p>
+<p>In a supported coding agent, the Preview skill creates, imports, edits and validates Knowledge Catalog context sets locally as Open Knowledge Format (OKF v0.2) Markdown bundles. The <code>kcmd</code> CLI publishes the bundles, and a <code>discover-assets</code> skill tests context-set retrieval. This makes context curation a versionable, testable artifact rather than an opaque console-only configuration step. No retrieval-quality or agent-task improvement numbers are reported.</p>
+<p>Clock caveat, required for interpretation: the release-note entry has a day key, not a per-item time. The in-window evidence is the collector-recorded general feed rebuild at 05:02:47Z and the docs update on November 25; the exact first-publication minute remains unconfirmed. The release is Preview, requires a supported coding agent and <code>kcmd</code>, and there is no new in-window <code>kcmd</code> package publish to pin. This is a Knowledge Catalog/Data Agent Kit card, not a first-party BigQuery Agent Analytics card. Catalog check: no matching Knowledge Catalog/Data Agent Kit item; NEW.</p>
+<h3>Progress</h3>
+<h4>Pydantic AI 2.74.0 blocks OTel baggage from falsifying eval results and stops secret realtime variables entering spans — Progress on <code>pydantic-ai-v2-57-0-approval-reviewer-mcp-apps-service-tier-pricing</code></h4>
+<p>Primary: <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.74.0">https://github.com/pydantic/pydantic-ai/releases/tag/v2.74.0</a> (2026-11-24T23:22:14Z, stable; PyPI 2026-11-25T00:00:35Z). GHSA-7xcv-6766-v6v5 / CVE-2026-136643 stops inbound OpenTelemetry baggage from filling unset <code>gen_ai.evaluation.result</code> attributes such as score and error type; the fix also lands in the 1.107.11 backport. Another advisory removes full ElevenLabs realtime custom/dynamic variables, including secret-bearing values, from spans. The release also adds the core <code>ComputerTool</code> contract and desktop sandbox integrations, plus several browser-egress fixes. This is material eval-integrity and telemetry-privacy progress; it is not evidence that downstream stored scores need no access control or validation.</p>
+<h4>Opik 2.3.2 exposes Topics read/backfill/rebuild services and a guardrail-models REST API — Progress on <code>opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row</code></h4>
+<p>Primary: <a href="https://github.com/comet-ml/opik/releases/tag/2.3.2">https://github.com/comet-ml/opik/releases/tag/2.3.2</a> (2026-11-25T07:50:18Z, stable; PyPI 07:46:02Z). The release adds Topics read/count APIs, long-window vector backfill, cleanup hooks and a rebuild service, plus a guardrail-models REST API and streamed span/trace inserts. These are usable control/read surfaces beyond 2.3.1’s backend storage work. No Topics precision, backfill latency or guardrail efficacy numbers are supplied.</p>
+<h4>Claude Code 2.1.332 adds scoped assistant-response OTel events and a skill-shell admission hook — Progress on <code>claude-code-2-1-307-otel-safety-events-tool-interventions</code></h4>
+<p>Primary: <a href="https://github.com/anthropics/claude-code/releases/tag/v2.1.332">https://github.com/anthropics/claude-code/releases/tag/v2.1.332</a> (2026-11-25T01:32:14Z, stable; npm 2026-11-24T22:06:38Z). The <code>assistant_response</code> event covers text sent through SendUserMessage or Cowork’s message tool when response logging is enabled; otherwise <code>tool_input</code> carries only text length. A <code>PreSkillShellCommand</code> hook can refuse a skill or command’s inline shell commands at load, and MCP-server skills enter beta. Desktop Code-tab sessions also change the default OTel <code>service.name</code> to <code>claude-code-desktop</code>, so existing <code>claude-code</code> filters need review; response content remains opt-in, not default telemetry.</p>
+<h4>LiteLLM 1.111.0 separates guardrail spend/audit history and tightens proxy access and budget accounting — Progress on <code>litellm-1-106-0-stdio-mcp-off-by-default-docker-quickstart-lens-tracing</code></h4>
+<p>Primary: <a href="https://github.com/berriai/litellm/releases/tag/v1.111.0">https://github.com/berriai/litellm/releases/tag/v1.111.0</a> (2026-11-25T01:42:50Z, stable; PyPI 01:41:45Z). The release adds OpenSearch index pass-through with per-key read/write grants, principal-attribute access-group rules, guardrail changes in the audit log, and guardrail spend as a separate daily-activity line. It also shows committed spend in remaining-budget gauges and fixes billing when the router falls back from a refused response. These are material governance and cost-attribution changes; the release body does not establish end-to-end billing reconciliation.</p>
+<h4>Anthropic Python SDK 2.14.0 / TypeScript SDK 1.14.0 add compliance review and managed data controls — Progress on <code>anthropic-sdk-1-10-0-admin-api-org-analytics-per-user-cost-spend-limits-rbac-org-api-ga</code></h4>
+<p>Primaries: <a href="https://github.com/anthropics/anthropic-sdk-python/releases/tag/v2.14.0">https://github.com/anthropics/anthropic-sdk-python/releases/tag/v2.14.0</a> (2026-11-24T21:00:57Z, stable; PyPI 21:01:46Z) and <a href="https://github.com/anthropics/anthropic-sdk-typescript/releases/tag/sdk-v1.14.0">https://github.com/anthropics/anthropic-sdk-typescript/releases/tag/sdk-v1.14.0</a> (21:01Z). Both SDKs add compliance-review cases, notices and items, plus Google-managed data controls for Google Cloud projects and user profiles. This extends the existing admin/governance card beyond usage and spend reporting; no review accuracy or policy-enforcement outcome is claimed.</p>
+<h3>One-line mentions</h3>
+<ul><li>LangChain’s ISO/IEC 42001 post (published 2026-11-25T00:04Z) explains how traces, evals, permissions and Engine supplied audit evidence — governance method advice, no measured results; not a separate product card. <a href="https://www.langchain.com/blog/ai-governance-iso-iec-42001-langsmith">https://www.langchain.com/blog/ai-governance-iso-iec-42001-langsmith</a>
+</li><li>Google ADK Python 2.15.1 (2026-11-25T01:01:43Z) fixes model sampling, A2A streamed-output persistence, tool-argument validation and instruction routing — NOTE only under the ADK rule. <a href="https://github.com/google/adk-python/releases/tag/v2.15.1">https://github.com/google/adk-python/releases/tag/v2.15.1</a>
+</li><li><code>@mastra/core</code> 1.86.0 reached npm stable at 2026-11-25T01:14:08Z, but its GitHub tag still has no release body — NOTE only; no capability inferred from the version number. <a href="https://github.com/mastra-ai/mastra/releases/tag/%40mastra%2Fcore%401.86.0">https://github.com/mastra-ai/mastra/releases/tag/%40mastra%2Fcore%401.86.0</a>
+</li><li>Vercel’s six-package 2026-11-24T21:57Z train is one item: <code>@ai-sdk/sandbox-vercel</code> 1.0.193 adds a reusable-template name, with provider/sandbox companions — below the analytics rank bar. <a href="https://github.com/vercel/ai/releases/tag/@ai-sdk/sandbox-vercel@1.0.193">https://github.com/vercel/ai/releases/tag/@ai-sdk/sandbox-vercel@1.0.193</a>
+</li><li>AWS’s specialized cybersecurity-model GovCloud endpoint post (21:27Z) and Vercel’s Standard-build billing change (2026-11-25T08:00Z) are outside agent analytics; no cards.
+</li><li>Clock exclusions: Databricks Tag Exchange/catalog labels (2026-11-24T01:30Z) and CrowdStrike Signal prioritization (15:41Z) predate the 20:40Z window start; not ranked. The Mastra Slack UI and LlamaIndex forms posts remain day-date-only under Unconfirmed.
+</li><li>Medium supplied editorial pointers on self-grading, durable execution, authorization and agent inboxes; no product launch or measured result cleared the bar.
+</li></ul>
+<h2>Academy</h2>
+<h3>NEW</h3>
+<h4>1. <a href="https://arxiv.org/abs/2611.31586">SecondChance: Benchmarking Reliable Error Recovery in AI Agents — https://arxiv.org/abs/2611.31586</a></h4>
+<p>Full PDF read: yes — entire 18-page PDF read via pdftotext in chunks, including benchmark construction, scoring, results, limitations, references, and all appendices.</p>
+<p>Problem and method. SecondChance starts from natural errors in agents’ own τ²-bench, BFCL and AppWorld attempts, not injected tool failures (§§1, 3.1–3.2). It restores 129 shared checkpoints and resumes 12 models under four cumulative conditions: unaided, error notice, error location, and plan-assisted repair (Table 2). The main study has 5,760 continuations (§4.1). Complete recovery is deliberately stricter than task success: correction and protected state are required, with task success, policy/user-goal and disclosure requirements where applicable; durability and work are separate (§3.4, Appendix B). Fixability is established before evaluation: 57 demonstrated, 15 proven impossible, 57 unknown (§3.2).</p>
+<p>Results to reuse. The best model completes only 16% unaided and 27% plan-assisted recoveries across the environments it runs (Table 3); these rates include impossible and unknown-fixability checkpoints. Plans add 10.0, 13.7 and 3.3 points of correction in τ², BFCL and AppWorld, but only 2.0, 6.8 and 2.1 points of complete recovery (Table 14). Most starkly, 40 of 84 successful AppWorld continuations leave the original error in place (§4.2), and 13 of 84 plan-assisted BFCL corrections are later undone (§4.7). Even on the 57 demonstrated-fix checkpoints, 12 are never corrected by any model, and the best model completes 54% in τ²/BFCL with a plan (§4.6). Limits are material: one run per main cell, 57 unknown-fixability checkpoints, only 27 checkpoints individually reviewed, no human validation of the acknowledgment measure, and possible familiarity with public tasks (Limitations).</p>
+<p>BQAA takeaway. Do not mark a run healthy from final task status. Record error correction, protected-state preservation, disclosure, later reversion and task outcome as separate fields, with a fixability class and recovery cost. A successful SQL answer can coexist with an unrepaired side effect; BQAA’s evidence model should make that visible.</p>
+<h4>2. <a href="https://arxiv.org/abs/2611.31266">Agentic Systems Need Multi-Run Evaluation: A Study of Retrieval and Response Variability in a Deployed Enterprise RAG System — https://arxiv.org/abs/2611.31266</a></h4>
+<p>Full PDF read: yes — entire 10-page PDF read via pdftotext in chunks, including experimental setup, results, discussion, limitations, references, and divergence/continuation appendices. Version note: arXiv v1 is dated 2026-10-21; it appeared in this slot’s Wednesday listing and was absent from the live catalog, so this is a newly carded paper, not a claim that October 21 falls inside the industry window.</p>
+<p>Problem and method. The authors run 739 product-documentation questions ten times each in one deployed agentic RAG system, holding model, tools, corpus and decoding fixed: 7,390 runs (§2). They distinguish per-run, any-run and every-run retrieval, compare answers on correctness/groundedness/comprehensiveness, and align traces to assign each non-equivalent response pair to its first divergent step. The attribution uses fixed unigram TF-cosine thresholds, including 0.40 for query content and 0.45 for reasoning (Appendix A).</p>
+<p>Results to reuse. Ground-truth-page retrieval is 69.4% when any of ten runs may succeed, 50.9% when all ten must succeed, and 61.5% per run (§3). Retrieval accounts for 43.9% of 8,092 divergent pairs; the number of parallel searches at the first retrieval step alone accounts for 20.1% (Table 1). The agentic system gains 22.6 points of comprehensiveness over a non-agentic baseline but loses 12.8 points of groundedness and 1.9 of correctness with nearly equal retrieval hit rates (Table 2). Generation-only divergent pairs include 185 contradictory factual claims (Appendix Table 5). One system/domain, a GT-URL proxy, an unvalidated GPT-4o judge, fixed thresholds without sensitivity analysis, and possible infrastructure nondeterminism bound the claims (§6).</p>
+<p>BQAA takeaway. A single execution is not a reliability estimate. Report any-run, every-run and per-run rates together, then store the first-divergence step and contradiction rate. For data agents, parallel retrieval-plan count is a first-class trace dimension, and more comprehensive answers must not silently trade away grounding.</p>
+<h4>3. <a href="https://arxiv.org/abs/2611.32946">ShellBench: What Matters More for AI Agents, Models, or Harness for Everyday Tasks — https://arxiv.org/abs/2611.32946</a></h4>
+<p>Full PDF read: yes — entire 17-page PDF read via pdftotext in chunks, including task construction, judging, experiments, limitations, references, full results, safety tables, and the worked task appendix.</p>
+<p>Problem and method. ShellBench contains 100 everyday tasks derived from 10,456,576 opted-in personal-assistant queries, with realistic workspaces (median 188 files), competing sources, and all-or-nothing correctness and safety rubrics (§3, Table 3). Twelve models cross five harnesses and three effort levels produce 53,100 rollouts; 20 tasks are release-designated (§4.1). Ninety tasks use an agentic LLM judge and ten use code tests. Costs are estimated from recorded tokens and list prices, not provider bills (§4.2).</p>
+<p>Results to reuse. The top three model means span only 1.1 points (62.5%, 61.9%, 61.4%), while harness means for the 11 shared models span 42.9–45.2 (Table 1). Across 55 configurations, model explains 95.7% of variance, harness 0.36%, and model×harness interaction/sampling 4.0%; restricting to the five strongest models changes that to 65.6% and 16.5% (§5.2), so “harness does not matter” is too strong. Mean Pass@1 is 44.4%, at-least-one-of-three 61.2%, and all-three 28.2% (§5.1). Safety fails in 15.7% of all rollouts, and 2,589 runs pass every correctness criterion while failing a safety requirement (§5.5, Fig. 7). Removing source and stale-information criteria moves Codex from fourth to first (Table 7). The LLM judge has 89.9% agreement on 278 sampled criterion decisions, not validated whole-task accuracy; only 20% of tasks are public, and harness prompt/tools/runtime are changed together (§§4.3, 6).</p>
+<p>BQAA takeaway. Report model×harness interactions and rubric sensitivity beside every leaderboard. Preserve source-use and safety failures as separate outcome dimensions, and label token cost as estimated. A 2.3-point harness-average gap is not a universal harness ranking when the task’s evidence requirements can reorder it.</p>
+<h3>Scouted, not ranked (abstract/title screened; carry forward)</h3>
+<ul><li>Wednesday collector leads not promoted after the three-read cap (4): 2611.32415 within-task hazards / repeated-run identification; 2611.31254 system-prompt date as a hidden evaluation variable (median 6.6% item flips, 11 stacks unpinned); 2611.31460 kernel checks of coding-agent performance claims (82 analyzed, 32 faster / 28 unclear / 22 slower); 2611.31839 spec-test overspecification (23% of SWE-bench Verified and 35% of Pro judge-flagged, with only 206 tasks human-audited). These numbers are abstract/collector-screen evidence only, not full-PDF claims.
+</li><li>Other Wednesday shortlist (13): collector-named 2611.32255, 2611.31727, 2611.33098, 2611.31258, 2611.31794, 2611.33005, 2611.31739, 2611.32365, 2611.31974; writer-screened 2611.33022 RecordRoute failure localization/diagnosis, 2611.33012 clinical judge fault injection, 2611.31806 verifiable token billing, 2611.32032 execution-bound provenance/safety gating. All remain unread at full-PDF level.
+</li><li>Tuesday reserves (9): 2611.28671, 2611.28173, 2611.28454, 2611.28940, 2611.31110, 2611.31010, 2611.28970, 2611.30925, 2611.29242. Older reserves (21): 2611.27106, 2611.26957, 2611.26649, 2611.27139, 2611.26998, 2611.26942, 2611.26881, 2611.27155, 2611.26966, 2611.27294, 2611.27094, 2611.23990, 2611.24313, 2611.21259, 2611.19982, 2611.19465, 2611.25790, 2611.26427, 2611.26311, 2611.25673, 2611.25380. All 30 remain unread and carry to Wed 1234. Priority pin 2609.02702 remains intact and was not re-carded.
+</li></ul>
+<h2>Six-week EV</h2>
+<ul><li><strong>Highest EV — recovery-aware run state (2611.31586):</strong> Add correction, protected-state, disclosure, durability and fixability to the run schema. This catches failures that success-only analytics structurally miss and gives BQAA a direct replay target.
+</li><li><strong>High EV — repeated-run reliability as a standard metric (2611.31266 + 2611.32415 reserve):</strong> Budget repeated executions and report per-run/any-run/every-run plus first divergence. A single score is insufficient for nondeterministic retrieval and tool planning; the hazard paper is the next methodological read.
+</li><li><strong>High EV — traces and outcomes as a shared analytical corpus (LangSmith Agent Lake):</strong> BQAA can separate storage from compute consumers while preserving trace↔outcome cardinality and evidence provenance. The adoption gate is measured judge/search/diagnosis quality and unit cost, not the “lake” label.
+</li><li><strong>Medium-high EV — versioned, testable context (Google Knowledge Catalog):</strong> OKF bundles plus local validation and retrieval tests make context changes reviewable like code. Watch for actual retrieval-quality evaluations and publication/readback semantics before treating a bundle as authoritative.
+</li><li><strong>Medium EV — attribution and telemetry hardening (ShellBench, Pydantic AI, Claude Code, LiteLLM, FastMCP):</strong> Pin and report harness/rubric state, isolate eval-event attributes from caller baggage, keep response content opt-in, and separate guardrail spend/audit trails. These are immediate schema and ingestion checks with low implementation cost.
+</li></ul>
+<h2>TL;DRs for BQAA</h2>
+<ul><li>LangSmith Agent Lake: traces plus observed outcomes feed eval/search/Engine/SmithTune; vendor IssueBench 96 vs 90/87 is internal-only, so validate quality and cost before adopting the architecture’s automation claims.
+</li><li>FastMCP 4.2.6: client-side CodeMode and cross-server execute arrive with transport span attributes; instrument the inner tool calls, not just the meta-tool.
+</li><li>Google Knowledge Catalog: Preview OKF v0.2 context bundles can be edited, validated, published and retrieval-tested; exact launch minute is unconfirmed and no quality numbers are reported.
+</li><li>Pydantic AI 2.74.0 (Progress): caller baggage can no longer populate unset eval score/error attributes, and secret realtime variables are removed from spans.
+</li><li>Opik 2.3.2 (Progress): Topics read/backfill/rebuild and guardrail-model APIs become control surfaces; precision and performance remain unmeasured.
+</li><li>Claude Code 2.1.332 (Progress): scoped assistant-response OTel is opt-in, and the desktop service-name change can break existing filters.
+</li><li>LiteLLM 1.111.0 (Progress): guardrail spend and audit changes become distinct, while access grants and budget/spend accounting tighten.
+</li><li>Anthropic SDKs (Progress): compliance-review cases/notices/items and Google-managed data controls join the admin/governance surface.
+</li><li>2611.31586: task success is not recovery — 40/84 successful AppWorld continuations leave the error in place; score correction, protection, disclosure and durability separately.
+</li><li>2611.31266: any-run retrieval is 69.4% but every-run is 50.9%; repeated traces locate first divergence mostly in retrieval planning, not generation.
+</li><li>2611.32946: model dominates average variance, but interactions and rubric choices matter; source/staleness criteria can reorder harnesses, and 2,589 correct runs still fail safety.
+</li></ul>
+<h2>Unconfirmed</h2>
+<ul><li>Google Knowledge Catalog exact first-publication time: not exposed. Looked: November 24 release-note entry, Data Agent Kit docs (last updated November 25), and the Agy 2132 clock receipt (general GCP feed rebuilt 05:02:47Z). The feature is confirmed and carded with that triple clock; no exact minute is asserted.
+</li><li>Mastra’s “Introducing Generative UI in Slack for Mastra Agents” and LlamaIndex’s “OCR for Forms” expose only 2026-11-24 day dates, so placement after 20:40Z is unresolved. Both pages were opened and judged; neither is ranked. Braintrust’s November 2026 changelog is month-grouped, so its newer entries cannot be assigned to this window; no Progress claimed.
+</li><li>X/Twitter: unobserved, not quiet — packs report syndication HTTP 429 / empty timelines. Reddit: direct reads HTTP 403 and r/OpenAI archive 422 in collector receipts; Arctic Shift coverage is lagged/partial. LinkedIn: search-proxied only, with zero extracted post URLs. Looked: the 12-pack fresh-list gap records; no independent claim of social absence.
+</li><li>gap: blog lane xAI <a href="https://x.ai/news">https://x.ai/news</a> HTTP 403; Microsoft Research feed and blog-index fallback both HTTP 403; DeepSeek <code>/news/news</code> and <code>/news</code> both HTTP 404. No “no posts” conclusion for these sources.
+</li><li>gap: blog lane Azure AI devblog feed HTTP 404 (Foundry and Azure feeds fetched successfully); Anthropic RSS HTTP 404 (news/research indexes fetched successfully); LlamaIndex and CrewAI RSS HTTP 404 (HTML indexes fetched); Snowflake blog HTTP 403 (docs release notes fetched); Honeycomb changelog HTTP 404 and Splunk feed HTTP 404 (HTML indexes fetched, JS/date-limited). W&amp;B’s undated Weave changelog was supplemented with the W&amp;B articles index (HTTP 200); no in-window claim rests on the undated page.
+</li><li>gap: GitHub <code>microsoft/agent-framework</code> releases API 404 / Not Found; PyPI <code>agent-framework</code> and <code>agent-framework-core</code> lookups succeeded and showed no in-window uploads. This is not reported as “no release” from GitHub.
+</li></ul>
+<h2>Housekeeping</h2>
+<ul><li>Packs used (fresh-list path; no wholesale pack reads): Muse 1332, DSH 1432, DSH 1732, Agy 1832, Muse 1932, Agy 2132, Muse 2232, DSH 2250 catch-up/payback, DSH 2332, Muse extra 0007, DSH extra 0009, Agy 0032 (12 packs; <code>_runs/fb-2026-11-25-0034/fresh-items.md</code>, 18 fresh candidates). Agy 1532 / Muse 1632 / DSH 2032 seats missed; window covered forward and paid back by DSH 2250 catch-up. Agy 0032’s as-of is 2026-11-25T08:44:16Z; later coverage is the writer’s own sweep. Agy 2132’s six academy blocks, omitted by the merge parser, were manually included as collector candidates; pack access was limited to item-specific grep.
+</li><li>blog lane: 5 posts checked, 1 carded (LangChain Agent Lake and ISO 42001, AWS GovCloud model endpoint, Vercel build billing, Google ADK 2.15.1; only Agent Lake carded). Additional same-day HTML-index posts were opened for clock/substance checks but are not counted as confirmed in-window posts.
+</li><li>arXiv: Wed 25 Nov batch screened — 1,051 ids above 2611.31240, new ceiling 2611.33158. Fetched all required <code>cs.AI/CL/LG/SE/DB/MA/CR/IR/DC/HC/new</code> listings plus <code>cs/new</code> with curl (all HTTP 200, Wednesday 25 November 2026 headers, complete “showing x of x” sections). Ran <code>screen.py</code>: 1,577 unique union entries parsed and all 1,051 above-ceiling ids title+abstract screened into <code>arxiv/screen.txt</code>. Full-PDF reads: 2611.31586 (18 pp), 2611.31266 (10 pp), 2611.32946 (17 pp), every part including appendices. Fetched PDFs and pdftotext outputs were deleted after reading.
+</li><li>Verification method: live <code>catalog.json</code> grep for every candidate id/name/URL/arXiv id (baseline verified 785 items / 236 briefs / 238 runs); primary release/blog/docs pages and JSON-LD timestamps; GitHub release HTML/API; PyPI/npm registry JSON via <code>registry_check.py</code> and targeted fallbacks; all five <code>blog_sweep.py</code> groups, <code>gh_releases.py</code>, <code>vendor_sweep.sh</code>, direct web search, and visible-text extraction for JS-heavy indexes. Databricks (01:30Z) and CrowdStrike (15:41Z) were checked against the 20:40Z cutoff and excluded. Fresh path used; no HTML, catalog edit, commit or push.
+</li></ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>langsmith-agent-lake-trace-outcome-intelligent-compute</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> LangChain names LangSmith an Agent Lake: traces and outcomes feed evaluators, search, Engine and SmithTune
+</li><li><strong>url:</strong> <a href="https://www.langchain.com/blog/the-agent-lake">https://www.langchain.com/blog/the-agent-lake</a> (2026-11-25, stable)
+</li><li><strong>card text:</strong> LangSmith packages trace-optimized storage and thread/outcome joins with online evals, AI Search, Insights, Engine diagnosis/fix PRs, and SmithTune trajectory fine-tuning. The vendor reports Engine analyzing over 60 million traces and an internal IssueBench subset score of 96 for tuned Kimi K3 versus 90 base and 87 for GPT-5.6 Sol; no subset size, variance or independent replication is given.
+</li></ul>
+</li><li><strong>id:</strong> <code>fastmcp-4-2-6-client-codemode-network-spans-durable-events</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> FastMCP 4.2.6 adds experimental client-side CodeMode, transport span attributes and durable typed events
+</li><li><strong>url:</strong> <a href="https://github.com/prefecthq/fastmcp/releases/tag/v4.2.6">https://github.com/prefecthq/fastmcp/releases/tag/v4.2.6</a> (2026-11-25, stable)
+</li><li><strong>card text:</strong> <code>CodeModeClient</code> adds search/schema/execute meta-tools over servers without CodeMode and chains calls across servers; server spans gain transport/protocol attributes. Experimental typed events move to <code>fastmcp-events</code> with optional Redis/Docket durability, while Authlib becomes a direct dependency for importers; no performance or token-saving evaluation is reported.
+</li></ul>
+</li><li><strong>id:</strong> <code>google-knowledge-catalog-data-agent-kit-curate-context-preview</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Google Knowledge Catalog Data Agent Kit adds Preview OKF context-bundle curation and retrieval testing
+</li><li><strong>url:</strong> <a href="https://docs.cloud.google.com/release-notes#November_24_2026">https://docs.cloud.google.com/release-notes#November_24_2026</a> (2026-11-24, stable)
+</li><li><strong>card text:</strong> The Preview <code>curate-context</code> skill creates, imports, edits and validates Knowledge Catalog context sets as OKF v0.2 Markdown bundles, publishes them with <code>kcmd</code>, and tests retrieval with <code>discover-assets</code>. Exact launch time is unconfirmed: the release note is dated November 24, the collector-recorded general feed rebuilt at 05:02:47Z in-window, and the docs updated November 25; no quality numbers are reported.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-31586-secondchance-error-recovery</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> SecondChance replays natural agent errors and separates correction, recovery, disclosure and durability
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.31586">https://arxiv.org/abs/2611.31586</a>
+</li><li><strong>card text:</strong> Across 129 shared natural-error checkpoints and 5,760 main continuations, the best model completes 16% unaided and 27% plan-assisted recoveries (Table 3); 40 of 84 successful AppWorld continuations leave the original error in place. Complete recovery requires more than task success, and 13 of 84 plan-assisted BFCL corrections are later undone.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-31266-multi-run-enterprise-rag-divergence</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Multi-run evaluation of deployed enterprise RAG finds retrieval reliability and first-divergence sources
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.31266">https://arxiv.org/abs/2611.31266</a>
+</li><li><strong>card text:</strong> Running 739 questions ten times each yields 69.4% any-run versus 50.9% every-run ground-truth retrieval (61.5% per run). Retrieval explains 43.9% of 8,092 divergent pairs and first-round parallel-search count 20.1%; a baseline comparison gains 22.6 points of comprehensiveness while losing 12.8 groundedness, with one system and an unvalidated LLM judge as limits.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-32946-shellbench-model-harness-safety</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> ShellBench separates model, harness and rubric effects across 53,100 everyday-agent rollouts
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.32946">https://arxiv.org/abs/2611.32946</a>
+</li><li><strong>card text:</strong> Model explains 95.7% of configuration variance and harness 0.36%, but interaction/sampling is 4.0%, and removing source/staleness criteria moves Codex from fourth to first. Safety fails in 15.7% of runs, including 2,589 runs that pass all correctness criteria; only 20 tasks are public, whole-task judge accuracy is unvalidated, and costs are token-price estimates.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>pydantic-ai-v2-57-0-approval-reviewer-mcp-apps-service-tier-pricing</code>
+<ul><li><strong>text:</strong> Pydantic AI 2.74.0 (plus the 1.107.11 backport) stops OTel baggage from filling unset evaluation score/error attributes and removes secret ElevenLabs realtime variables from spans. It also adds the core computer-tool contract and browser-egress fixes; downstream scores still require access control and validation.
+</li></ul>
+</li><li><strong>parent:</strong> <code>opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row</code>
+<ul><li><strong>text:</strong> Opik 2.3.2 (2026-11-25) adds Topics read/count APIs, long-window vector backfill, cleanup/rebuild services and a guardrail-models REST API, plus streamed span/trace inserts. No Topics precision, backfill latency or guardrail efficacy results are reported.
+</li></ul>
+</li><li><strong>parent:</strong> <code>claude-code-2-1-307-otel-safety-events-tool-interventions</code>
+<ul><li><strong>text:</strong> Claude Code 2.1.332 adds opt-in assistant-response OTel for SendUserMessage/Cowork text and a <code>PreSkillShellCommand</code> admission hook; response content remains disabled by default. Desktop Code-tab sessions change default OTel <code>service.name</code> to <code>claude-code-desktop</code>, so existing filters need review.
+</li></ul>
+</li><li><strong>parent:</strong> <code>litellm-1-106-0-stdio-mcp-off-by-default-docker-quickstart-lens-tracing</code>
+<ul><li><strong>text:</strong> LiteLLM 1.111.0 adds per-key OpenSearch grants, principal-attribute access rules, guardrail audit-log entries and separate guardrail spend. It also corrects remaining-budget display of committed spend and billing for refused responses followed by router fallback; full billing reconciliation is not established.
+</li></ul>
+</li><li><strong>parent:</strong> <code>anthropic-sdk-1-10-0-admin-api-org-analytics-per-user-cost-spend-limits-rbac-org-api-ga</code>
+<ul><li><strong>text:</strong> Anthropic Python SDK 2.14.0 and TypeScript SDK 1.14.0 add compliance-review cases, notices and items, plus Google-managed data controls for Cloud projects and user profiles. This expands the governance surface without claiming review accuracy or enforcement outcomes.
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>SecondChance shows that task success can conceal unrepaired agent state: 40 of 84 successful AppWorld continuations leave the original error in place (<a href="https://arxiv.org/abs/2611.31586">https://arxiv.org/abs/2611.31586</a>, 2026-11-23).
+</li><li>A deployed RAG system retrieves the right page in at least one of ten runs for 69.4% of questions but in all ten for only 50.9%; most attributable divergence starts in retrieval planning (<a href="https://arxiv.org/abs/2611.31266">https://arxiv.org/abs/2611.31266</a>, v1 2026-10-21; screened in the 2026-11-25 batch).
+</li><li>LangChain frames LangSmith as an Agent Lake joining traces and outcomes to search, evaluation and automated improvement, with internal—not independent—SmithTune results (<a href="https://www.langchain.com/blog/the-agent-lake">https://www.langchain.com/blog/the-agent-lake</a>, 2026-11-25).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Wed Nov 25, 2026 · 12:34 AM PT · Kimi</span>
+    </div>
+  </footer>
+</body>
+</html>
