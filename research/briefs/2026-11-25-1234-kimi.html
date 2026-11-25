@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-25-1234: Agent query economics get measured; dates and repeated runs expose hidden eval variance</title>
+  <meta name="description" content="Field Brief 2026-11-25-1234: Agent query economics get measured; dates and repeated runs expose hidden eval variance">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-25-1234-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 PM PT · Wed Nov 25, 2026 · Kimi</p>
+    <article>
+<h1>Field Brief — 2026-11-25-1234: Agent query economics get measured; dates and repeated runs expose hidden eval variance</h1>
+<p><strong>Writer: Kimi (<code>kimi-code/k3.1-pro</code>) — fallback; Muse subscription quota exhausted</strong>
+Delivery line: Markdown handoff only; Collection owns HTML, catalog and push. Window: since the 2026-11-25-0034 brief (pack chain from 00:44 PT Wed) to launch (~12:50 PT Wed, ~12h; own sweep through ~13:06 PT). arXiv: no new listing since the Wed 25 Nov batch (ceiling 2611.33158); full-PDF reads went to carried candidates 2611.32415, 2611.31254 and 2611.31460. Effort: max, as configured. Path: fresh.</p>
+<h2>Read this first</h2>
+<p>Honeycomb supplies the strongest industry measurement in this slot. Its weekly MCP tool calls grew from tens of thousands in February to more than one million by October, while human-run queries stayed roughly flat. Agents issue dozens of wide, long-range queries in bursts, changing the economics of its retrieval fleet. After a Lambda Managed Instances migration plus months of telemetry-guided performance work, Honeycomb reports cost per hour of customer data queried down about 40% in the US and 56% in Europe from April, while query volume grew about 30%. This is a combined architecture and engineering result, not a claim that flipping the compute service alone produced the savings.</p>
+<p>Cloudflare’s Search for Agents turns website indexing and a discoverable retrieval endpoint into a zone-level toggle. It returns retrieved Markdown rather than a generated answer and supports both GET and the proposed HTTP QUERY method. The launch supplies no measured discovery rate or retrieval-quality evaluation; its <code>agent:*</code> metadata is guidance an agent may consume, not authority or evidence of a correct answer.</p>
+<p>The Academy reads all attack hidden variance in evaluation. A system-prompt date flips a median 6.6% of test items between correct and incorrect across six models and four benchmarks, yet none of 11 audited evaluation stacks pins it. Repeated runs identify within-task hazard only under explicit independence, selection and cross-section assumptions. Kernel traces test whether coding agents’ stated performance mechanisms actually occurred: among 82 analyzed PRs, 32 ran faster, 28 showed no clear change and 22 ran slower, while 42 changed workload output.</p>
+<p>Material Progress lands on Pydantic AI authority gating and usage accounting, Opik’s SQL/guardrail surfaces, LiveKit decision-model fallback and job logs, and Mastra durable experiments. Microsoft’s current Agent Framework security notice is confirmed but NOTE-only under the compromised-release rule. Langfuse budget warnings/resets and Braintrust’s newer month-grouped entries stay unranked because their per-item publication times are unresolved.</p>
+<h2>Industry</h2>
+<h3>NEW</h3>
+<h4>1. Honeycomb measures agent-driven query growth and cuts retrieval cost after telemetry-guided migration</h4>
+<p>Primary: <a href="https://www.honeycomb.io/blog/outgrowing-lambda-functions-not-lambda">https://www.honeycomb.io/blog/outgrowing-lambda-functions-not-lambda</a> (published 2026-11-25T14:39:00Z, in-window).</p>
+<p>Honeycomb says weekly MCP tool calls rose from tens of thousands in February to over one million by October, most of them queries; human-run queries were roughly flat from 2024. An investigating agent asks dozens of questions, often wide and long-range, turning formerly spiky retrieval into a steadier baseline while preserving large bursts. Honeycomb moved the bulk of query compute to AWS Lambda Managed Instances, added concurrency attributes to runtime spans, and used execution-environment network statistics and hardware counters to guide optimization.</p>
+<p>The final comparison uses cost per hour of customer data queried, indexed to April and public AWS prices with an ordinary one-year Compute Savings Plan. It falls about 40% in the US and 56% in Europe while query volume grows about 30%. The post also reports S3 SlowDown errors falling from 1.31% of requests on Lambda Functions to 0.0001% on LMI. Keep the qualifications beside the numbers: these are vendor-reported, region- and workload-specific results from the migration, capacity tuning, compression, query routing and many code changes together. An earlier denominator change had created a misleading 60% improvement reading, which is why the fixed customer-data-hour denominator matters.</p>
+<p>Why it ranks. This is a measured production engineering result directly relevant to agent analytics, not a product-release claim. BQAA should separate interactive human and agent query mixes, record burst width/range and concurrency, and choose cost denominators that the optimization itself cannot move. Do not infer that every LMI deployment saves money or that the 40–56% figures are independent replication. Catalog check: no existing Honeycomb/LMI item; NEW.</p>
+<h4>2. Cloudflare Search for Agents creates a discoverable site-search endpoint from one zone toggle</h4>
+<p>Primary: <a href="https://blog.cloudflare.com/search-for-agents/">https://blog.cloudflare.com/search-for-agents/</a> (published 2026-11-25T14:00:00Z, modified 14:00:16Z, in-window).</p>
+<p>Search for Agents automatically creates an AI Search instance for a zone, crawls and indexes its content, and advertises <code>/.well-known/search?q={query}</code> through HTML <code>agent:*</code> metadata or Markdown front matter. Agents can use GET or HTTP QUERY with text/JSON bodies; results contain retrieved Markdown and scores, not a generated answer. The feature is available to all customers, including Free with limits, and remains subject to the zone’s bot, AI Crawl Control and WAF settings.</p>
+<p>Why it ranks. This is a material data-agent retrieval and discovery surface, not another crawling API. For BQAA, the useful trace unit is endpoint discovery → query → returned documents/scores → downstream answer, with the site’s access policy attached. The launch offers an OpenCode anecdote but no measured agent discovery rate, retrieval quality or task improvement; the advertised instructions must remain untrusted input. Catalog check: no existing Search for Agents item; NEW.</p>
+<h3>Progress</h3>
+<h4>Pydantic AI 2.75.0 lowers workspace instructions by authority, falls back on empty/invalid responses, and corrects Gemini thinking-token accounting — Progress on <code>pydantic-ai-v2-57-0-approval-reviewer-mcp-apps-service-tier-pricing</code></h4>
+<p>Primary: <a href="https://github.com/pydantic/pydantic-ai/releases/tag/v2.75.0">https://github.com/pydantic/pydantic-ai/releases/tag/v2.75.0</a> (2026-11-25T18:21:00Z, stable; PyPI 18:43:50Z). Workspace files below <code>operator</code> authority no longer enter instructions directly: RepoContext points to files or frames them as data, Skills become tool-mediated, and Memory attributes snapshots to <code>MEMORY.md</code>; capability and MCP instructions can likewise be lowered to the user channel. Empty streams and missing/invalid OpenAI responses now trigger the standard fallback models. Gemini thinking tokens through the OpenAI provider count as output/reasoning tokens, increasing reported cost and making usage limits trip sooner. Durable runs gain extra workspace <code>realpath</code> calls, so the release requires worker-versioning/upgrade care; no task-quality improvement is claimed.</p>
+<h4>Opik 2.3.3–2.3.4 adds flagged free-form SQL, tighter trace scoping, fail-closed guardrails and judge-retry controls — Progress on <code>opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row</code></h4>
+<p>Primaries: <a href="https://github.com/comet-ml/opik/releases/tag/2.3.3">https://github.com/comet-ml/opik/releases/tag/2.3.3</a> (2026-11-25T12:13:36Z, stable; PyPI 12:09:11Z) and <a href="https://github.com/comet-ml/opik/releases/tag/2.3.4">https://github.com/comet-ml/opik/releases/tag/2.3.4</a> (15:30:05Z; PyPI 15:26:07Z). Version 2.3.3 makes guardrail checks fail closed when they cannot run, adds Topics labeling/nightly-rule work, and retries dashboard widget 429s for about a minute. Version 2.3.4 adds a separately flagged public free-form SQL run endpoint, rejects system-catalog reads and identity functions in that SQL, scopes trace-by-ID aggregates to the returned trace’s project, and stops judge calls retrying inside provider clients. These are material control and failure-behavior changes; guardrail efficacy and SQL performance remain unmeasured.</p>
+<h4>LiveKit Agents 1.9.0 adds decision-model fallback and per-job hosted log export — Progress on <code>livekit-agents-1-8-8-decisionmodel-typesafe-jev-gpt-live</code></h4>
+<p>Primary: <a href="https://github.com/livekit/agents/releases/tag/livekit-agents%401.9.0">https://github.com/livekit/agents/releases/tag/livekit-agents%401.9.0</a> (2026-11-25T18:33:32Z, stable; PyPI 18:30:30Z). Decision requests can fall back within LiveKit Inference or across providers, while hosted Python jobs can export one log file per job to LiveKit Cloud. The release also turns toolset setup failures into error events, fixes provider attribution in metrics and improves usage/tool-execution handling. Multi-turn answering-machine detection is the larger voice-product feature, but the analytics-relevant move is fallback plus diagnosability; no fallback success rate or added-latency measurement is supplied.</p>
+<h4>Mastra 1.86.0 makes experiments durable and adds a non-final <code>interrupted</code> run state — Progress on <code>mastra-core-1-83-0-resumable-streams-run-observation</code></h4>
+<p>Primary: <a href="https://github.com/mastra-ai/mastra/releases/tag/%40mastra%2Fcore%401.86.0">https://github.com/mastra-ai/mastra/releases/tag/%40mastra%2Fcore%401.86.0</a> (GitHub stable release 2026-11-25T10:00:05Z, in-window; npm stable 01:14:08Z, pre-window). <code>startExperimentAsync({durable: true})</code> runs an experiment as an evented workflow with one step per item, allowing another worker to resume unacked items after a crash or redeploy. Durable agent execution can select <code>default</code> or <code>evented</code> engines, and shutdown now exposes <code>interrupted</code> separately from final <code>failed</code> so recovered output can arrive on the same subscription. The release body resolves the 0034 NOTE’s missing-notes gap; redelivery is not asserted to provide exactly-once side effects or independent durability testing.</p>
+<h3>One-line mentions</h3>
+<ul><li>Microsoft reports unauthorized <code>agent-framework</code> PyPI 1.26.1/1.26.2 credential-stealing packages and keeps the repository unavailable pending safety review; both versions are removed and 1.26.0 is unaffected — confirmed security NOTE, never a rank under the compromised-release rule. <a href="https://devblogs.microsoft.com/agent-framework/microsoft-agent-framework-repository-update/">https://devblogs.microsoft.com/agent-framework/microsoft-agent-framework-repository-update/</a> (2026-11-25T20:14:50Z) and <a href="https://osv.dev/vulnerability/PYSEC-2026-4388">https://osv.dev/vulnerability/PYSEC-2026-4388</a>.
+</li><li>Google Research releases a user-mediated social-reasoning evaluation framework and over 20,000 generated examples, reporting qualitative assistant–observer gaps across 12 models but no effect sizes in the post — research NOTE, not carded. <a href="https://research.google/blog/verifiable-social-reasoning-for-llm-assistants/">https://research.google/blog/verifiable-social-reasoning-for-llm-assistants/</a> (2026-11-25T17:10:27Z).
+</li><li>Hugging Face’s Ai2 post interviews 17 US-based scientists and proposes participatory agent evaluations, explicitly not an empirical agent evaluation; IBM’s CUGA voice-agent post gives a useful silent cross-lingual retrieval failure example but no measured results — both method advice, no cards. <a href="https://huggingface.co/blog/allenai/where-scientists-draw-the-line-on-ai-agents">https://huggingface.co/blog/allenai/where-scientists-draw-the-line-on-ai-agents</a> and <a href="https://huggingface.co/blog/ibm-research/an-indic-voice-agent-with-cuga">https://huggingface.co/blog/ibm-research/an-indic-voice-agent-with-cuga</a>.
+</li><li>Anthropic’s Messages API Rust migration post was created at 2026-11-25T05:15:13Z and has a 00:00 publication timestamp, before the 08:44Z window start; its 16:27 modification does not reset the clock. Its production-verifier results are not ranked this slot. <a href="https://www.anthropic.com/research/migrating-api-to-rust">https://www.anthropic.com/research/migrating-api-to-rust</a>.
+</li><li>OpenAI Wallet now loads successfully but its RSS publication time is 2026-11-13T15:00Z, so the carried access gap is resolved as pre-window, not a launch for this brief. <a href="https://openai.com/index/introducing-chatgpt-wallet/">https://openai.com/index/introducing-chatgpt-wallet/</a>.
+</li><li>LangChain’s Agent Lake RSS entry changed at 16:26Z but the item was carded at 0034; no re-card. CrowdStrike’s November 25 Agentic SOC/Gartner recap names existing Guardian/custom-agent capabilities without a new dated product move; no Progress.
+</li><li>Braintrust’s 4.0.0 RC train is prerelease NOTE only; Cloudflare’s Vite-plugin 1.70.2 is a below-bar package release; the five in-window AWS posts are EC2 region launches outside agent analytics.
+</li><li>Medium supplied method/editorial pointers on permissions, handoffs, MCP tenancy and a Snowflake SQL walkthrough; no Medium item was used as a citation or ranked without a primary product source.
+</li></ul>
+<h2>Academy</h2>
+<h3>NEW</h3>
+<h4>1. <a href="https://arxiv.org/abs/2611.31254">The Date You Didn’t Set: The System-Prompt Date as a Hidden Variable in LLM Evaluation — https://arxiv.org/abs/2611.31254</a></h4>
+<p>Full PDF read: yes — entire 26-page PDF read via pdftotext in chunks, including the setup, all results and limitations, references, and Appendices A–M. Version note: arXiv v1 is dated 2026-10-17; it appeared in the Wednesday listing and was absent from the live catalog, so this is a newly carded paper, not a claim that October 17 falls inside the industry window.</p>
+<p>Problem and method. Six open instruction-tuned models run on four benchmarks with prompts, decoding and configuration fixed except the date rendered into the system preamble (§3). Each cell has disjoint 32 TRAIN / 32 VAL / 96 TEST items. The authors measure per-item correctness churn across plausible 2024–2026 dates, use a grammar-constrained GCG variant to search arbitrary-year dates as a stress test, audit 11 evaluation stacks, and separately test LLM-judge, jailbreak, refusal and activation-monitor outcomes (§§3–8; Tables 1–3).</p>
+<p>Results to reuse. Between two plausible dates, a median 6.6% of TEST items switch correctness and a one-day change flips 4.3%, while aggregate accuracy moves a median 2.3 points because flips largely cancel (§4, Figure 1; Appendix I, Table 9). None of the 11 stacks pins the rendered date by default, and none of 16 audited papers using date-inserting models reports that date (Table 1; Appendices A–B). Arbitrary-year optimized dates cost Llama models up to 36.5 held-out points, mostly through refusals; those dates are outside 2024–2026 and the large significant losses are model-specific, not a generic plausible-date result (§5, Table 3; Limitations). Date changes also alter judge verdicts and stored jailbreak survival; the safety analyses do not establish the absence of harmful compliance (§§6–7).</p>
+<p>BQAA takeaway. Pin and log the complete rendered prompt, including the date, beside seed, decoding and harness versions. Report per-item churn and refusal/no-final-answer rates, not just aggregate score. A pinned result remains date-conditional, so the date belongs in every replay receipt and safety-eval comparison.</p>
+<h4>2. <a href="https://arxiv.org/abs/2611.32415">Within-task hazards of AI agents: unidentified by time-horizon curves, identified by repeated runs — https://arxiv.org/abs/2611.32415</a></h4>
+<p>Full PDF read: yes — entire 16-page PDF read via pdftotext, including mathematical proofs, mechanisms, METR reanalysis, limitations, references, pipeline details and per-model appendices.</p>
+<p>Problem and method. The paper shows that a declining horizon curve does not identify a declining within-task hazard: a log-logistic cross-section with slope β≤1 is a mixture of constant hazards, and the same curve is compatible with every within-task Weibull shape k≥β (Propositions 2–3). Under conditionally independent repeated runs, the probability that two runs both succeed is the single-run curve shifted by 1/k on the log2 human-time axis (Proposition 4). A more general direction result still depends on a log-logistic cross-section and explicit frailty/selection assumptions (Proposition 7; Table 1).</p>
+<p>Results to reuse. In the TH1.0/TH1.1 METR releases, no eligible 95% interval for 1/k lies entirely above one, so the analysis does not detect a declining hazard; this is not evidence against every declining-hazard model (§5, Result 1). For all five TH1.0 frontier models, cross-batch intervals lie below one; for TH1.1, three of five estimable frontier models do, while baseline-timed and estimated-time subsets give zero (Table 2, Appendix Table 3). Under the stated assumptions and prefix interpretation, those intervals reject a non-increasing average hazard; they do not prove that hazard rises everywhere. Independence, rerun selection, task composition, human-time error, low-power correlation tests and missing multiplicity corrections are material limitations (§§5–6).</p>
+<p>BQAA takeaway. Store repeated-run joint outcomes, batch identity and task family, then report pass² as well as pass@1 and cross-batch comparisons. Do not turn a time-horizon curve into a claim about compounding within-task failure without these assumptions; a direct experiment that observes the same task at several lengths is still needed.</p>
+<h4>3. <a href="https://arxiv.org/abs/2611.31460">Below the Stopwatch: Checking the Performance Claims of Coding Agents in the Kernel — https://arxiv.org/abs/2611.31460</a></h4>
+<p>Full PDF read: yes — entire 5-page PDF read via pdftotext, including the claim taxonomy, blind-build harness, measurement protocol, all results, threats to validity and references; there is no separate appendix.</p>
+<p>Problem and method. BELOW maps 28 claimed optimization mechanisms to kernel/hardware signals that must move, hides the PR claim from the build agent, and compares base/head/base-again with timing, counters and LTTng traces (§II, Figure 1). From 1,343 runtime-performance PRs, the authors select 82 measured PRs for mechanism analysis. A speed result requires at least a 5% median wall-time reduction with every head run faster than every base run; a claimed signal must move at least 10% with the same separation.</p>
+<p>Results to reuse. Across the 1,343 PRs, 57.3% offer reasoning only or no evidence and 31.4% state an effect size (§III.A). Among the 82, 32 are faster, 28 show no clear change and 22 are slower; the claimed mechanism holds in 34, including 20 using kernel-trace signals alone (Table II). Kernel-trace signals move about 1.7 times as often for faster PRs’ claimed mechanisms as for unclaimed ones, versus 1.15 for instruction count; 42 PRs change workload output (§III.C). The sample is small and early, workloads are agent-written and may miss the claimed path, labels/workloads use the same model family as one evaluated agent, and each PR is measured on one machine (§IV).</p>
+<p>BQAA takeaway. A latency delta is not mechanism evidence. Attach workload identity, output equality, syscall/I/O/scheduling signals and hidden resource regressions to performance claims. Kernel evidence supports the stated mechanism; it does not prove production generalization or correctness when output changes.</p>
+<h3>Scouted, not ranked (abstract/title screened; carry forward)</h3>
+<ul><li>Remaining Wednesday lead not promoted after the three-read cap: 2611.31839 spec-test overspecification in SWE-bench-style benchmarks (23% of SWE-bench Verified and 35% of Pro judge-flagged, with only 206 tasks human-audited). These numbers are abstract-screen evidence only, not full-PDF claims.
+</li><li>Other Wednesday shortlist (13): collector-named 2611.32255, 2611.31727, 2611.33098, 2611.31258, 2611.31794, 2611.33005, 2611.31739, 2611.32365, 2611.31974; writer-screened 2611.33022 RecordRoute failure localization/diagnosis, 2611.33012 clinical judge fault injection, 2611.31806 verifiable token billing, 2611.32032 execution-bound provenance/safety gating. All remain unread at full-PDF level.
+</li><li>Tuesday reserves (9): 2611.28671, 2611.28173, 2611.28454, 2611.28940, 2611.31110, 2611.31010, 2611.28970, 2611.30925, 2611.29242. Older reserves (21): 2611.27106, 2611.26957, 2611.26649, 2611.27139, 2611.26998, 2611.26942, 2611.26881, 2611.27155, 2611.26966, 2611.27294, 2611.27094, 2611.23990, 2611.24313, 2611.21259, 2611.19982, 2611.19465, 2611.25790, 2611.26427, 2611.26311, 2611.25673, 2611.25380. All 30 remain unread and carry to 0034 Thu. Priority pin 2609.02702 remains intact and was not re-carded.
+</li></ul>
+<h2>Six-week EV</h2>
+<ul><li><strong>Highest EV — replayable prompt identity (2611.31254):</strong> Add rendered-date and full-prompt hashes to every evaluation receipt, then expose per-item churn and refusal/no-answer rates. This is low-cost instrumentation that prevents silent day-to-day comparisons.
+</li><li><strong>High EV — repeated-run reliability statistics (2611.32415):</strong> Preserve joint pass outcomes, batch and task-family identifiers, and cross-batch comparisons. This upgrades BQAA from single-run success to reliability estimates while keeping the identification assumptions visible.
+</li><li><strong>High EV — agent query economics (Honeycomb):</strong> Separate human and agent workloads and track query width, range, concurrency and cost per stable unit of source data. Agent-driven baseline load can change the right capacity architecture; do not attribute savings without a fixed denominator and workload context.
+</li><li><strong>Medium-high EV — mechanism-level performance evidence (2611.31460):</strong> Link performance outcomes to syscall, I/O, scheduling and output-equality evidence. This makes optimization claims auditable beyond wall-clock deltas and can reuse BQAA’s existing trace/evidence model.
+</li><li><strong>Medium EV — durable execution and retrieval discovery (Mastra, LiveKit, Pydantic AI, Cloudflare):</strong> Model interrupted versus terminal states, fallback attempts, authority lowering and retrieval discovery explicitly. These are concrete schema additions, but durability, fallback quality and search quality still need measured acceptance tests.
+</li></ul>
+<h2>TL;DRs for BQAA</h2>
+<ul><li>Honeycomb: MCP queries exceeded one million weekly while human queries stayed flat; a telemetry-guided migration and tuning program cut vendor-reported cost per customer-data hour about 40% US / 56% Europe as volume grew 30%.
+</li><li>Cloudflare Search for Agents: one toggle creates a site index and discoverable Markdown retrieval endpoint; trace discovery and evidence use, not just the final answer, and keep <code>agent:*</code> instructions untrusted.
+</li><li>Pydantic AI 2.75.0 (Progress): low-authority workspace/MCP instructions leave the system channel, empty/invalid responses can fall back, and Gemini thinking tokens now count as output.
+</li><li>Opik 2.3.3–2.3.4 (Progress): flagged free-form SQL gains catalog restrictions, trace aggregates are project-scoped, guardrails fail closed and provider-level judge retries stop.
+</li><li>LiveKit Agents 1.9.0 (Progress): decision requests gain cross-provider fallback and hosted jobs gain per-job log export; fallback quality remains unmeasured.
+</li><li>Mastra 1.86.0 (Progress): durable experiments resume unacked items and <code>interrupted</code> is distinct from terminal <code>failed</code>; do not infer exactly-once side effects.
+</li><li>2611.31254: plausible system-prompt dates flip a median 6.6% of items while 11/11 stacks leave the date unpinned; log and report it with every replay.
+</li><li>2611.32415: horizon curves cannot establish declining within-task hazard; repeated runs add information only under explicit independence, selection and cross-section assumptions.
+</li><li>2611.31460: 32/82 performance PRs are faster but 22 are slower and 42 change output; kernel traces test the claimed mechanism better than instruction count alone.
+</li></ul>
+<h2>Unconfirmed</h2>
+<ul><li>Langfuse’s “Reset AI Gateway budget spend and set warnings” page exposes only 2026-11-25, not a time of day. Looked: primary HTML/changelog and item-specific collector lines. A collector-observed CDN cache fill around 12:16Z proves availability then, not first publication; no Progress is claimed for the 85%/95% warnings or spend reset.
+</li><li>Braintrust’s November 2026 changelog is month-grouped. The page modified timestamp (2026-11-25T17:33:14Z) does not date individual entries such as trace translation, Pattern rules, scheduled digests or Decisions API judges, so their placement after 08:44Z remains unresolved; no Progress claimed.
+</li><li>Microsoft Agent Framework repository restoration timing is unknown. Looked: the November 25 Microsoft security post, OSV/PySEC advisory, PyPI JSON via curl, and GitHub releases API. Package removal and affected versions are confirmed; the post gives no safe-re-enable timeline.
+</li><li>Social coverage is incomplete, not quiet: packs use web-proxied X with partial/empty timelines, lagged Arctic Shift Reddit archives and search-proxied LinkedIn with zero extracted post URLs. Looked: the 12-pack fresh-list records and independent web searches; no social-absence claim is made.
+</li><li>gap: blog lane xAI <a href="https://x.ai/news">https://x.ai/news</a> HTTP 403; Microsoft Research feed HTTP 403 and blog-index fallback HTTP 504; DeepSeek <code>/news/news</code> and <code>/news</code> both HTTP 404. No “no posts” conclusion for these sources.
+</li><li>gap: blog lane Azure AI devblog feed HTTP 404 (Foundry and Azure feeds succeeded); Anthropic RSS HTTP 404 (news/research indexes succeeded); LlamaIndex and CrewAI RSS HTTP 404 (HTML indexes succeeded); Snowflake blog HTTP 403 (docs release notes succeeded); Honeycomb changelog HTTP 404 and Splunk feed HTTP 404 (HTML indexes fetched, date/JS-limited). Weave’s changelog exposed no parseable dates, so the W&amp;B articles index (HTTP 200) was used as the fallback; no in-window claim rests on the undated changelog.
+</li><li>gap: GitHub <code>microsoft/agent-framework</code> releases API 404 / Not Found; PyPI <code>agent-framework</code> and <code>agent-framework-core</code> via curl plus Microsoft/OSV advisories succeeded. This is not reported as “no release” from GitHub.
+</li></ul>
+<h2>Housekeeping</h2>
+<ul><li>Packs used (fresh-list path; no wholesale pack reads): Muse 0132, DSH 0232, Agy 0332, Muse 0432, DSH 0532, Agy 0632, Muse 0732, Muse 1032, DSH 1132, Muse extra 1207, DSH extra 1209, Agy 1232 (12 packs; <code>_runs/fb-2026-11-25-1234/fresh-items.md</code>, 20 fresh candidates). DSH 0832 / Agy 0932 seats missed; window covered forward by Muse 1032. Agy 1232’s as-of is 2026-11-25T20:43:21Z; later coverage is the writer’s own sweep through ~13:06 PT. Pack access was limited to item-specific grep for the Langfuse clock.
+</li><li>blog lane: 12 posts checked, 2 carded
+</li><li>Blog-lane accounting: Cloudflare Search and Honeycomb LMI carded; Google Research, Microsoft’s security notice, two Hugging Face posts, five AWS EC2 region posts, and the already-carded LangChain Agent Lake were opened and judged but not newly carded. Additional day-date-only Langfuse/CrowdStrike pages were checked without being counted as confirmed in-window posts; Anthropic Rust and OpenAI Wallet were excluded on primary pre-window clocks.
+</li><li>arXiv: no new listing since Wed 25 Nov batch (ceiling 2611.33158). Fetched all required <code>cs.AI/CL/LG/SE/DB/MA/CR/IR/DC/HC/new</code> listings plus <code>cs/new</code> with curl (all HTTP 200, Wednesday 25 November 2026 headers, complete “showing x of x” sections). Ran <code>screen.py</code>: 1,577 unique union entries parsed, 0 ids above 2611.33158, so no new batch ids required title/abstract screening. Full-PDF reads: 2611.32415 (16 pp), 2611.31254 (26 pp), 2611.31460 (5 pp), every part including appendices where present.
+</li><li>Verification method: live <code>catalog.json</code> grep for every ranked candidate and carried arXiv id (baseline verified 791 items / 237 briefs / 239 runs; max brief/run <code>2026-11-25T0034</code>; priority pin <code>2609.02702</code> intact); primary release/blog/docs pages and JSON-LD/RSS timestamps; GitHub release HTML/API; PyPI/npm registry JSON via <code>registry_check.py</code> and targeted curl fallbacks; all five <code>blog_sweep.py</code> groups, <code>gh_releases.py</code>, <code>vendor_sweep.sh</code>, HTML-index text extraction and independent web searches. Fresh path used; no HTML, catalog edit, commit or push.
+</li></ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>honeycomb-lambda-managed-instances-agent-query-cost-telemetry</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Honeycomb measures agent-driven query growth and telemetry-guided retrieval cost reduction
+</li><li><strong>url:</strong> <a href="https://www.honeycomb.io/blog/outgrowing-lambda-functions-not-lambda">https://www.honeycomb.io/blog/outgrowing-lambda-functions-not-lambda</a> (2026-11-25, stable)
+</li><li><strong>card text:</strong> Weekly MCP calls grew from tens of thousands in February to over one million by October while human-run queries stayed roughly flat. After moving query compute to Lambda Managed Instances and months of telemetry-guided tuning, Honeycomb reports cost per hour of customer data queried down about 40% in the US and 56% in Europe from April while volume grew about 30%; the result is workload-specific and comes from the migration plus many optimizations, not the switch alone.
+</li></ul>
+</li><li><strong>id:</strong> <code>cloudflare-search-for-agents-well-known-query-discovery</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Cloudflare Search for Agents creates an index and discoverable <code>/.well-known/search</code> endpoint from one toggle
+</li><li><strong>url:</strong> <a href="https://blog.cloudflare.com/search-for-agents/">https://blog.cloudflare.com/search-for-agents/</a> (2026-11-25, stable)
+</li><li><strong>card text:</strong> Search for Agents automatically indexes a zone and advertises a search endpoint through HTML metadata or Markdown front matter, with GET and HTTP QUERY support and retrieved Markdown rather than generated answers. It is available to all customers with plan limits and existing bot/WAF controls; no discovery-rate or retrieval-quality evaluation is reported.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-31254-system-prompt-date-hidden-eval-variable</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> System-prompt dates are an unpinned evaluation variable that flips answers, judgments and safety outcomes
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.31254">https://arxiv.org/abs/2611.31254</a>
+</li><li><strong>card text:</strong> Across six models and four benchmarks, two plausible dates switch a median 6.6% of TEST items between correct and incorrect while aggregate accuracy moves only 2.3 points; none of 11 audited stacks pins the date. Arbitrary-year optimized dates cost Llama models up to 36.5 points, largely through refusals, but those large significant losses are outside 2024–2026 and model-specific.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-32415-within-task-hazards-repeated-runs</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Repeated runs identify within-task hazard that single-run time-horizon curves cannot
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.32415">https://arxiv.org/abs/2611.32415</a>
+</li><li><strong>card text:</strong> The paper proves that horizon curves do not identify within-task hazard and uses repeated-run joint success to identify it under explicit assumptions. No eligible 95% interval detects a declining hazard; all five TH1.0 frontier cross-batch intervals lie below one, while TH1.1 depends on human-time construction, with independence, selection and multiplicity limitations.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-31460-below-stopwatch-kernel-performance-claims</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> BELOW checks coding-agent performance mechanisms with hardware counters and kernel traces
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.31460">https://arxiv.org/abs/2611.31460</a>
+</li><li><strong>card text:</strong> Among 82 analyzed PRs, 32 run faster, 28 show no clear change and 22 run slower; the claimed mechanism holds in 34 and 42 change workload output. Kernel-trace signals distinguish claimed from unclaimed mechanisms about 1.7 times as often versus 1.15 for instruction count, with a small early sample and agent-written workloads as limits.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>pydantic-ai-v2-57-0-approval-reviewer-mcp-apps-service-tier-pricing</code>
+<ul><li><strong>text:</strong> Pydantic AI 2.75.0 keeps sub-operator workspace and MCP instructions out of the system channel, enables standard fallback on empty/invalid model responses, and counts Gemini thinking tokens as output/reasoning tokens. Durable runs add workspace <code>realpath</code> calls, so in-flight upgrades need worker-versioning care.
+</li></ul>
+</li><li><strong>parent:</strong> <code>opik-2-2-99-triggered-alerts-aws-eventbridge-mcp-instructions-deferred-tools-server-breakdown-row</code>
+<ul><li><strong>text:</strong> Opik 2.3.3–2.3.4 adds a separately flagged free-form SQL endpoint with system-catalog/identity-function restrictions, project-scoped trace aggregates, fail-closed guardrails and an end to provider-internal judge retries. Topics labeling/nightly rules also advance; efficacy and SQL performance remain unmeasured.
+</li></ul>
+</li><li><strong>parent:</strong> <code>livekit-agents-1-8-8-decisionmodel-typesafe-jev-gpt-live</code>
+<ul><li><strong>text:</strong> LiveKit Agents 1.9.0 adds decision-model fallback within LiveKit Inference or across providers and per-job hosted Python log export. Toolset setup failures become error events and provider metrics/usage handling improves; fallback success and latency are not evaluated in the release.
+</li></ul>
+</li><li><strong>parent:</strong> <code>mastra-core-1-83-0-resumable-streams-run-observation</code>
+<ul><li><strong>text:</strong> Mastra 1.86.0 adds durable evented experiments, selectable durable agent engines and a non-final <code>interrupted</code> run state for shutdown/recovery. The GitHub release supplies the previously missing notes; no exactly-once side-effect or independent durability claim is made.
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>Honeycomb reports agent MCP calls exceeding one million weekly and a combined migration/tuning program reducing cost per customer-data hour about 40% in the US and 56% in Europe while query volume grew 30% (<a href="https://www.honeycomb.io/blog/outgrowing-lambda-functions-not-lambda">https://www.honeycomb.io/blog/outgrowing-lambda-functions-not-lambda</a>, 2026-11-25).
+</li><li>Changing only a plausible system-prompt date flips a median 6.6% of test items between correct and incorrect, and none of 11 audited evaluation stacks pins that date (<a href="https://arxiv.org/abs/2611.31254">https://arxiv.org/abs/2611.31254</a>, v1 2026-10-17; screened in the 2026-11-25 batch).
+</li><li>Repeated runs reject a non-increasing average hazard for all five TH1.0 frontier models under the paper’s stated assumptions, while no eligible interval detects a declining hazard across the evaluated specifications (<a href="https://arxiv.org/abs/2611.32415">https://arxiv.org/abs/2611.32415</a>, 2026-11-24).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Wed Nov 25, 2026 · 12:34 PM PT · Kimi</span>
+    </div>
+  </footer>
+</body>
+</html>
