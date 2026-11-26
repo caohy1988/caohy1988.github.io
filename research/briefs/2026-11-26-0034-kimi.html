@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Field Brief — 2026-11-26-0034: Document-agent throughput gets measured; benchmark validity depends on tests, oracles and attack policies</title>
+  <meta name="description" content="Field Brief 2026-11-26-0034: Document-agent throughput gets measured; benchmark validity depends on tests, oracles and attack policies">
+  <link rel="canonical" href="https://caohy1988.github.io/research/briefs/2026-11-26-0034-kimi.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+      --navy: #101828; --paper: #f4efe6; --cream: #fbf7f0; --ink: #161410;
+      --ink-soft: #5c564c; --ink-faint: #8a8378; --line: #d9d0c3;
+      --accent: #e87324; --accent-dark: #b7480d;
+      --serif: "Fraunces", Iowan Old Style, Charter, Georgia, serif;
+      --sans: "IBM Plex Sans", Inter, ui-sans-serif, sans-serif;
+      --mono: "IBM Plex Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.58; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-dark); font-weight: 650; text-decoration: none; box-shadow: inset 0 -1px 0 rgba(183,72,13,.35); }
+    code { font-family: var(--mono); font-size: 0.86em; background: #ebe4d8; padding: 0.08em 0.32em; border-radius: 4px; }
+    .topbar { background: var(--navy); color: #e8edf4; }
+    .shell { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+    .topbar .shell { width: min(1180px, calc(100% - 40px)); min-height: 58px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { text-decoration: none; box-shadow: none; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; color: #e8edf4; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: #b7c2d0; font-size: 0.86rem; font-weight: 600; box-shadow: none; }
+    .nav-links a:hover, .nav-links a[aria-current="page"] { color: #fff; }
+    .kicker { padding: 36px 0 8px; font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-dark); }
+    h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 12px; }
+    .meta { color: var(--ink-soft); margin: 0 0 36px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+    article { padding-bottom: 72px; }
+    article h2 { font-family: var(--serif); font-size: 1.7rem; margin: 40px 0 14px; letter-spacing: -0.02em; }
+    article h3 { font-family: var(--serif); font-size: 1.25rem; margin: 28px 0 10px; }
+    article p { margin: 0 0 14px; color: var(--ink); }
+    article p, article li { color: var(--ink-soft); }
+    article strong { color: var(--ink); }
+    article hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    article ol, article ul { margin: 0 0 16px; padding-left: 1.3em; color: var(--ink-soft); }
+    article li { margin: 0 0 8px; }
+    footer { border-top: 3px solid var(--ink); padding: 22px 0 36px; color: var(--ink-soft); font-size: 0.9rem; background: var(--cream); }
+    footer .shell { width: min(1180px, calc(100% - 40px)); display: flex; justify-content: space-between; gap: 16px; }
+    .mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.1em; }
+
+    article table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 0.9rem; }
+    article .tbl { overflow-x: auto; margin: 0 0 18px; }
+    article th, article td {
+      border-bottom: 1px solid var(--line); padding: 8px 10px 8px 0;
+      text-align: left; vertical-align: top; color: var(--ink-soft);
+    }
+    article th {
+      font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink); font-weight: 600;
+    }
+    article td strong { color: var(--ink); }
+
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <a class="brand" href="/research/"><span>HC</span> / FIELD BRIEF</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="/research/" aria-current="page">Research</a>
+        <a href="/rfc/">RFC</a>
+      </nav>
+    </div>
+  </div>
+  <main class="shell">
+    <p class="kicker">Field Brief · 12:34 AM PT · Thu Nov 26, 2026 · Kimi</p>
+    <article>
+<h1>Field Brief — 2026-11-26-0034: Document-agent throughput gets measured; benchmark validity depends on tests, oracles and attack policies</h1>
+<p><strong>Writer: Kimi (<code>kimi-code/k3.1-pro</code>) — fallback; Muse subscription quota exhausted</strong>
+Delivery line: Markdown handoff only; Collection owns HTML, catalog and push. Window: since the 2026-11-25-0034 brief lineage (pack chain from 00:44 PT Wed), narrowed to the previous 2026-11-25-1234 brief's Agy 1232 chain end at 2026-11-25T20:43Z, through launch (~00:50 PT Thu; own sweep through 00:59 PT). arXiv: Thursday 26 November listing checked; 535 ids above 2611.33158 screened, new ceiling 2611.34945. Full-PDF reads went to carried 2611.31839 and new 2611.34875 / 2611.34934. Effort: max, as configured. Path: fresh.</p>
+<h2>Read this first</h2>
+<p>NVIDIA supplies the strongest industry measurement. Its Parse 3.5 release opens three document-training datasets—9.98M synthetic charts, 1M synthetic tables and 7.9M multilingual OCR examples—and describes the supervised/verifiable-reward recipe and DFlash2 inference path. On one H200 in BF16 over the same 2,078 pages, DFlash2 raises throughput 7.62× at concurrency 1 and 1.52× at concurrency 512 over Parse 3.5 without speculation. These are workload- and hardware-specific vendor measurements; the reward-training comparison uses development checkpoints, not the final released model.</p>
+<p>OpenAI's paired Python/Node SDK releases add organization/project hard-spend email settings and response-compaction safety and service-tier fields. Strands harness-cli adds isolated development workspaces, experiments/evaluation/optimization and streaming per-model cost estimates. Material Progress lands on LangWatch governance and evaluator CI, Phoenix single-span retrieval and setup diagnostics, and Letta Code subagent lifecycle/trace handling.</p>
+<p>The Academy reads all show that an evaluation number is only as good as its measurement setup. Overspecified SWE-bench tests flag 23% of Verified and 35% of public Pro tasks; relaxing flagged tests flips 61% of 2,186 failed candidate patches, but that is an upper bound, not a corrected leaderboard. Coding-agent patch necessity changes when the oracle is strengthened with behavioral probes, so patch size and a single test suite cannot define over-editing. Monitor false-negative rates move from at most 0.5% on basic prompts to 20.8% after RL and 23.0% with transcript editing on the same IaC setting, yet transfer weakly across environments and remain proxies rather than deployment-risk estimates.</p>
+<p>Pydantic's Pax launch and Together's Hurdle post are substantive but pre-window on their official clocks, so neither is ranked. Langfuse's decision-model evaluator API remains unranked because only a day-level date is available. Social coverage is partial, not quiet.</p>
+<h2>Industry</h2>
+<h3>NEW</h3>
+<h4>1. NVIDIA opens Parse 3.5 training data and measures DFlash2 document-parsing throughput</h4>
+<p>Primary: <a href="https://huggingface.co/blog/nvidia/building-on-nemotron-35-parse-open-data-fine-tunin">https://huggingface.co/blog/nvidia/building-on-nemotron-35-parse-open-data-fine-tunin</a> (Hugging Face RSS published 2026-11-26T05:05:36Z, in-window).</p>
+<p>NVIDIA releases Synthetic Charts V1 (9.98M examples), Synthetic Tables V1 (1M) and OCR Synthetic Multilingual v2 (7.9M), with images, annotations, generation documentation and training format. Parse turns page images into reading-ordered, located and typed records for RAG and agents. The post also explains the two-stage supervised fine-tuning and GRPO verifiable-reward recipe, and releases a DFlash2 speculative-decoding path that proposes up to 32 tokens ahead.</p>
+<p>In the matched development-checkpoint comparison, loop-flagged outputs fall from 126 to 29 pages, outputs reaching the 9,000-token limit fall from 185 to 35, and overall score rises from 66.24 to 71.38 (Figure 3). Those checkpoints are explicitly separate from the final released model. In the native single-pass benchmark on one H200 in BF16, DFlash2 improves throughput 7.62× at concurrency 1 and 1.52× at concurrency 512 over Parse 3.5 with speculation disabled. At concurrency 512, Parse 3.5 reaches 13.48 pages/s without and 20.44 with DFlash2, against 2.98 for Parse 2.0 (Figure 4). Parse 3.5 uses three-trial medians; Parse 2.0 uses one trial per point.</p>
+<p>Why it ranks. This is a material training-data, recipe and inference release for document agents, with measured extraction and serving results rather than a model-name bump. BQAA should trace parse model/version, page count, pass count, structured-output validity, loops/token-limit failures, latency and cost per successfully parsed page. Multi-pass refinement can improve difficult regions while changing the cost denominator; no cross-hardware or independent quality replication is supplied. Catalog check: no existing Parse 3.5 item; NEW.</p>
+<h4>2. OpenAI Python 3.60.0 and Node 7.65.0 add spend-alert settings and response-compaction fields</h4>
+<p>Primaries: <a href="https://github.com/openai/openai-python/releases/tag/v3.60.0">https://github.com/openai/openai-python/releases/tag/v3.60.0</a> (stable, 2026-11-26T07:09:55Z; PyPI wheel 07:10:35Z) and <a href="https://github.com/openai/openai-node/releases/tag/v7.65.0">https://github.com/openai/openai-node/releases/tag/v7.65.0</a> (stable, 07:09:43Z; npm 07:24:26Z), with the paired change described at <a href="https://github.com/openai/openai-python/pull/4335">https://github.com/openai/openai-python/pull/4335</a>.</p>
+<p>Both SDKs expose email notification settings for organization and project hard spend limits. They can set a safety identifier on conversation creation and response compaction, and read the safety identifier and service tier when a compaction response includes them. Session-vault updates also ship in these versions, although that companion change merged before this slot's cutoff and is not counted as an in-window feature. The public API changelog's newest entry remained November 24, so this card rests on the stable releases, registries and implementation PR, not a changelog assertion.</p>
+<p>Why it ranks. Spend thresholds, compaction and end-user safety identity are first-class analytics dimensions, not a routine generated-type refresh. BQAA should preserve organization/project scope, safety identifier, service tier and compaction identity in usage and budget traces. These fields do not themselves prove that an alert was delivered, a cap was enforced, or compaction preserved task quality. Catalog check: earlier SDK cards cover Live/Realtime and session tracing, not this spend/compaction surface; NEW.</p>
+<h4>3. Strands harness-cli 0.5.0 adds isolated development/evaluation workspaces and per-model cost telemetry</h4>
+<p>Primary: <a href="https://github.com/strands-agents/harness-sdk/releases/tag/harness-cli/v0.5.0">https://github.com/strands-agents/harness-sdk/releases/tag/harness-cli/v0.5.0</a> (stable, 2026-11-25T22:23:42Z).</p>
+<p><code>strands dev</code> gains isolated workspaces, experiments, evaluation and optimization, accepts <code>--max-rollouts</code> and other optimization flags, and narrates the two auto-optimization stages. The release adds <code>HttpDecisionModel</code>, per-model usage with a plugin that streams cost estimates, and model-span-only token usage opt-in. Context management graduates out of experimental with a breaking <code>stash</code> → <code>archive</code> rename; cancellation can stop background tasks and sandbox shell/Python execution.</p>
+<p>Why it ranks. The standalone open-source CLI now connects harness development, repeatable evaluation and cost observation rather than merely patching the SDK. BQAA can compare experiment/workspace identity, rollout caps, per-model usage and streamed cost against task outcome. The release body is auto-drafted from commits and points to canonical website notes; no independent optimization-quality or cost-accuracy result is claimed. The catalog's AWS AgentCore managed-harness card is a different product surface, so this is NEW rather than Progress on that AWS card.</p>
+<h3>Progress</h3>
+<h4>LangWatch 3.29.0 adds organization dashboards, multi-cloud agent discovery and evaluator-failure CI gating — Progress on <code>langwatch-v3-28-0-a2a-proxy-ocsf-ingest</code></h4>
+<p>Primary: <a href="https://github.com/langwatch/langwatch/releases/tag/langwatch@v3.29.0">https://github.com/langwatch/langwatch/releases/tag/langwatch@v3.29.0</a> (stable, 2026-11-25T21:29:17Z). The release adds an organization-wide Dashboards page, per-project dashboard-query failure attribution and browser-crash reporting. Governance discovers agents across AWS, Google Cloud and ARD registries with shadow/dormant posture. Experiments gain an opt-in CI gate on evaluator failures and a shared cell budget, while LangWatchQL and Instant Evals become default-on for self-hosted installs and Postgres views gain per-reader row scoping. This extends the prior A2A/OCSF governance card into inventory and evaluation operations; evaluator effectiveness and discovery completeness are not measured.</p>
+<h4>Phoenix 22.1.0 adds single-span retrieval, project/setup diagnostics and finer evaluation workflows — Progress on <code>arize-phoenix-22-0-0-decision-embedding-cost-tracking</code></h4>
+<p>Primary: <a href="https://github.com/arize-ai/phoenix/releases/tag/arize-phoenix-v22.1.0">https://github.com/arize-ai/phoenix/releases/tag/arize-phoenix-v22.1.0</a> (stable, 2026-11-26T07:57:33Z; PyPI 08:01:41Z). A new <code>GET /spans/{span_identifier}</code> endpoint retrieves one span; <code>px project create</code> and <code>px setup doctor</code> automate project creation and connection diagnosis. The release also adds permanent dataset-example deletion, configurable playground task timeout, model-provider listing, seeded Harbor evaluation workflows and separate evals/experiments/judge-alignment skills. The single-span API is useful evidence retrieval, but the release supplies no latency, completeness or evaluator-quality evaluation.</p>
+<h4>Letta Code 0.34.71 persists subagent lifecycle and enriches cross-harness traces — Progress on <code>letta-code-v0-34-12-13-claude-codex-subagents-connected-computer-live-tool-progress-opencode-backup-wake</code></h4>
+<p>Primary: <a href="https://github.com/letta-ai/letta-code/releases/tag/v0.34.71">https://github.com/letta-ai/letta-code/releases/tag/v0.34.71</a> (stable, 2026-11-26T06:53:25Z; npm 06:48:58Z). Subagents gain persisted lifecycle and <code>ListAgents</code>, task descriptions enter traces and conversations, external tools can yield per-tool foreground results, and Antigravity CLI workers join the supported harnesses. Trace deltas survive cache breakpoints, Codex model/settings survive resume, and launch failures carry clearer status codes. This materially extends the existing connected-computer/subagent card; lifecycle durability and trace completeness across every backend remain untested by the release notes.</p>
+<h3>One-line mentions</h3>
+<ul><li>Pydantic's Pax terminal coding agent and Harness beta has measured SWE81 score/cost tables, but its official <code>datePublished</code> is 2026-11-25T09:00:00Z, before this window; not ranked. <a href="https://pydantic.dev/articles/pax-harness-beta">https://pydantic.dev/articles/pax-harness-beta</a>
+</li><li>Together's Hurdle agent-evaluation library is likewise excluded on its official RSS publication clock, 2026-11-25T00:00:00Z; its 21:43:57Z modification does not reset the clock. <a href="https://www.together.ai/blog/introducing-hurdle-run-agent-evals-on-your-api-skills-and-docs">https://www.together.ai/blog/introducing-hurdle-run-agent-evals-on-your-api-skills-and-docs</a>
+</li><li>LangGraph CLI 0.4.44 adds two deploy conveniences; LangChain Core 1.8.5 reuses provider message IDs on later stream chunks; Vercel <code>ai</code> 7.0.183 only updates provider-utils/gateway dependencies — patch-level NOTEs, no Progress.
+</li><li>LiteLLM 1.108.18 is an old-version registry backfill while latest remains the already-carded 1.111.0; Mastra 1.87.0-alpha.0–2, CrewAI 1.15.45.dev20261126, FastMCP 4.2.7a1 and LangGraph JS RCs remain prerelease/backfill NOTEs only.
+</li><li>Snowflake's November 25 FedRAMP-on-Azure Native Apps entry is outside agent analytics; CrowdStrike's two November 25 Guardian/architecture pages are pre-window by the index's 17:24:25Z modification clock and add no new in-window Progress.
+</li><li>Microsoft's compromised <code>agent-framework</code> 1.26.1/1.26.2 packages remain absent from PyPI with 1.26.0 latest; the GitHub repository is still unavailable. This is the prior security NOTE, never a release rank.
+</li><li>Medium supplied evaluation, observability and permissions pointers only; none was used as a primary citation or ranked without a product source.
+</li></ul>
+<h2>Academy</h2>
+<h3>NEW</h3>
+<h4>1. <a href="https://arxiv.org/abs/2611.31839">Spec-Test Coverage Gap: Detecting Overspecified Tests in SWE-Bench-Style Benchmarks — https://arxiv.org/abs/2611.31839</a></h4>
+<p>Full PDF read: yes — entire 16-page PDF read via pdftotext, including the judge/relaxer protocols, execution controls, limitations, references and Appendices A–J. arXiv v1 is dated 2026-11-24 and was carried from the Wednesday screen; it is absent from the live catalog.</p>
+<p>Problem and method. STCG asks whether every reasonable correct fix would pass the evaluation tests. Two judges see the task specification and test patch, but not the repository or reference fix; a task is flagged only when both score it 3–4 (§3). On a held-out 206-task split, the panel reaches 89% recall on known-overspecified tasks and a 4% false-flag rate on known-fine Verified tasks (§4, Table 4). The panel then runs over all 500 Verified and 731 public Pro tasks.</p>
+<p>Results to reuse. It flags 117/500 Verified (23%) and 258/731 Pro tasks (35%; §5, Table 5). On Verified, the top 30 submissions resolve flagged tasks 31% of the time versus 88% for unflagged tasks (§5.1). For executable confirmation, the authors relax flagged tests and regrade 2,186 failed patches that fail evaluation but not regression tests: 61% flip to passing, versus 29% under a forced unflagged control (§7, Table 7). With the same no-findings prompt, the comparison is 49% versus 0%. Counting every flip would add 33–60 resolved tasks per top-30 submission, but the authors explicitly call those score changes an upper bound, not corrected scores (§7.2, §8).</p>
+<p>Qualifications. Pro has no known-fine validation set or executable confirmation. Validation uses clear cases, flipped patches receive only sampled manual inspection, the relaxer is one of the judges and can over-loosen tests, and repository conventions are hidden from the judge (§8). BQAA should audit spec/test gaps alongside pass rates and preserve relaxation provenance plus positive and negative controls; never convert the 61% flip rate directly into agent credit.</p>
+<h4>2. <a href="https://arxiv.org/abs/2611.34875">How Much Do Coding Agents Over-Edit, and Why? An Empirical Study of Unneeded Edits in Repository-Level Agent Patches — https://arxiv.org/abs/2611.34875</a></h4>
+<p>Full PDF read: yes — entire 30-page PDF read via pdftotext, including methods, all results, limitations, references and Appendices A–I. arXiv v1 is dated 2026-11-25 and is absent from the live catalog.</p>
+<p>Problem and method. Delta Residue Attribution (DRA) replays trajectories, attributes every final-patch unit to its introducing step, reverts each unit and reruns task tests (§3, Algorithm 1). The study covers 7,660 resolved GitHub Copilot CLI trajectories from 18 models: 6,728 on SWE-bench Verified and 932 on DeepSWE (§4.1). Developer patches are graded with the same oracle, test edits are separated from code, and behavioral probes test whether removing test-unneeded code changes behavior.</p>
+<p>Results to reuse. Under the task-test oracle, mean code necessity is 0.887 for agents versus 0.864 for developers on Verified; 11 of 18 models leave less unneeded code, four show no significant difference and three leave more (§5.1, Figure 2). About 11% of agent code units are test-unneeded, and 89% of 3,559 probed units change behavior when reverted (§5.2; Appendix C.1, Table 7). On Verified, 61% of extra edits are tests and 13% documentation; debug steps write only 154 of 3,987 unneeded code units (§5.2–5.3, Figure 3). With the agent's and repository's tests, pruning reaches 67.3% recall at 46.3% precision and 89.1% still-resolving patches on 2,495 eligible patches; self-audit reaches 35.5% recall at 65.7% precision (§5.5, Table 1).</p>
+<p>Qualifications. The oracle matters decisively: strengthening it with developer-equivalent behavioral probes raises developer necessity from 0.864 to 0.970 and agent necessity from 0.887 to 0.925, flipping the agent–developer gap from +2.3 to −4.5 points (Appendix C.1). Results cover resolved patches, primarily one harness, LLM-written probes, single-unit reversions and no completed human validation (§6; Appendices A–B). BQAA should report oracle identity, code/test necessity and behavioral change next to resolve rate, not equate large patches with bad patches or test-passing pruning with safe cleanup.</p>
+<h4>3. <a href="https://arxiv.org/abs/2611.34934">Attack Policy Selection can Mislead Monitor Evaluators — https://arxiv.org/abs/2611.34934</a></h4>
+<p>Full PDF read: yes — entire 24-page PDF read via pdftotext, including the case-study setup, all attack methods, proxy/legitimacy analysis, limitations, references and Appendices A–I. arXiv v1 is dated 2026-11-25 and is absent from the live catalog.</p>
+<p>Problem and method. The paper varies attack generation while holding the deployment scenario, monitor and control tasks fixed. Attacks are developed only against proxy monitors; the reported false-negative rates (FNRs) measure transfer to a held-out GPT-5.4 monitor (§§1–2). The four methods are basic prompting, optimized prompting, reinforcement learning and transcript editing, with primary FNR conditioned on side-task success.</p>
+<p>Results to reuse. On IaC, basic and async-control prompting produce 0.2% and 0.5% FNR. Optimized prompting reaches 6.4%, RL rises from 0.5% to 20.8%, and transcript editing rises from 0.3% to 23.0% (§2, Figures 2–5; Appendix B, Table 1). A narrow evaluation using only basic methods therefore makes the monitor look much stronger than the broad one (Figure 1). Transfer is environment-dependent: on LinuxArena, optimized prompting and the best RL results fall to 0.2% and 0.7%, while directly optimized transcript editing reaches 16.2% (Appendix F, Figure 6). Counting flagged failed side tasks under a stricter metric lowers optimized prompting to 5.4% and final RL to 17.5% (Appendix G, Table 4).</p>
+<p>Qualifications. Attack transcripts are off-policy proxies, edited tool calls are not re-executed, the target agent is less capable than the monitor, and direct optimization against the held-out monitor is untested (§§3–4). The paper's central requirement is a legitimacy argument for why a proxy distribution is informative or conservative; no FNR here is a deployment-risk estimate. BQAA should record attack method, optimization budget, proxy/target monitor, environment, success conditioning and transfer results with every monitor evaluation.</p>
+<h3>Scouted, not ranked (abstract/title screened; carry forward)</h3>
+<ul><li>Wednesday shortlist (13): 2611.33022 RecordRoute failure localization/diagnosis, 2611.33012 clinical judge fault injection, 2611.31806 verifiable token billing, 2611.32032 execution-bound provenance/safety gating, plus collector-named 2611.32255, 2611.31727, 2611.33098, 2611.31258, 2611.31794, 2611.33005, 2611.31739, 2611.32365 and 2611.31974. All remain unread at full-PDF level.
+</li><li>Tuesday reserves (9): 2611.28671, 2611.28173, 2611.28454, 2611.28940, 2611.31110, 2611.31010, 2611.28970, 2611.30925 and 2611.29242. Older reserves (21): 2611.27106, 2611.26957, 2611.26649, 2611.27139, 2611.26998, 2611.26942, 2611.26881, 2611.27155, 2611.26966, 2611.27294, 2611.27094, 2611.23990, 2611.24313, 2611.21259, 2611.19982, 2611.19465, 2611.25790, 2611.26427, 2611.26311, 2611.25673 and 2611.25380. All remain unread.
+</li><li>Thursday collector candidates not promoted after the three-read cap: 2611.33893 parallel-subagent effectiveness/cost, 2611.34327 MeterRouter budget-aware routing, 2611.33605 recovery-induced workflow security downgrade, 2611.33174 MGMem provenance-preserving memory, 2611.34400 EvoLink-Bench, 2611.34624 HoMe harness optimization, 2611.34466 EgoUseBench, 2611.34254 Crucible executable chemistry, 2611.33757 TransHarness, 2611.33739, 2611.34942, 2611.34938, 2611.34754, 2611.34945 and 2611.34576. Collector-named 2611.33242 CypherMAS routing reliability also remains unread.
+</li><li>Additional writer-screened Thursday candidates: 2611.34363 counterfactual execution for trustworthy text-to-SQL rewards, 2611.34341 claim-level rewards from unreliable operator references, 2611.34132 Agent-as-a-Verifier evidence, 2611.34380 AgentLens graph-guided security auditing, 2611.34377 SmartLens review/risk signals, 2611.33943 SkillsBench source-code audit, 2611.33639 reviewer effort on plausible-but-wrong patches, and 2611.33480 Agent Experience context health. These are abstract-screen candidates only, not full-PDF claims. Priority pin 2609.02702 remains intact and was not re-carded.
+</li></ul>
+<h2>Six-week EV</h2>
+<ul><li><strong>Highest EV — test/specification validity (2611.31839):</strong> Add an STCG-style audit to coding-agent benchmarks, retain judge evidence, and validate any relaxed tests with unfixed/reference/oracle controls. This can prevent false failure attribution and leaderboard overreaction within one evaluation cycle.
+</li><li><strong>High EV — monitor evaluation receipts (2611.34934):</strong> Require attack method, optimization level, proxy/target monitor, environment and success conditioning in safety-eval receipts, then test transfer. This is a schema and reporting change that directly reduces false robustness claims.
+</li><li><strong>High EV — patch necessity and behavioral evidence (2611.34875):</strong> Separate code, tests and docs; record unit provenance, necessity under a named oracle and behavior on reversion. This gives BQAA a useful quality axis beyond resolve rate, provided strengthened-oracle results are shown beside task-test results.
+</li><li><strong>Medium-high EV — document-agent cost and validity telemetry (NVIDIA):</strong> Track parse version, page/pass counts, structured-output validity, loops/token-limit failures and cost per valid page. DFlash2 and multi-pass parsing make latency/quality trade-offs measurable rather than implicit.
+</li><li><strong>Medium EV — budget, compaction and subagent observability (OpenAI, Strands, LangWatch, Phoenix, Letta):</strong> Add spend-alert scope, compaction safety/service-tier fields, experiment/workspace identity, single-span lookup and subagent lifecycle states to the trace model. These are concrete integrations, but each still needs acceptance tests for delivery, durability and metric accuracy.
+</li></ul>
+<h2>TL;DRs for BQAA</h2>
+<ul><li>NVIDIA Parse 3.5: three open document-training datasets plus DFlash2 deliver measured extraction and throughput improvements; benchmark cost per valid page and pass count, not just pages/s.
+</li><li>OpenAI Python 3.60.0 / Node 7.65.0: spend-alert settings and compaction safety/service-tier fields join the SDKs; record them, but do not infer alert delivery, cap enforcement or compaction quality.
+</li><li>Strands harness-cli 0.5.0: isolated dev/eval workspaces and streamed per-model cost make experiment cost/outcome joins easier; optimization quality remains unmeasured.
+</li><li>LangWatch 3.29.0 (Progress): organization dashboards, shadow/dormant agent discovery and evaluator-failure CI extend governance into day-to-day agent operations.
+</li><li>Phoenix 22.1.0 (Progress): single-span GET and setup diagnostics simplify evidence retrieval and deployment checks; evaluator quality is unchanged and unmeasured.
+</li><li>Letta Code 0.34.71 (Progress): persisted subagent lifecycle, <code>ListAgents</code>, task descriptions and cache-breakpoint-safe deltas improve cross-harness trace continuity.
+</li><li>2611.31839: overspecified tests are common and can move coding leaderboards, but relaxed-test flips are upper bounds requiring controls, not free resolve-rate points.
+</li><li>2611.34875: most extra Verified edits are tests/docs and most agent code is test-necessary, yet the agent–developer comparison flips under a stronger behavioral oracle; always report the oracle.
+</li><li>2611.34934: monitor FNR ranges from 0.5% to 23.0% with attack policy and optimization; report proxy legitimacy and environment transfer before claiming robustness.
+</li></ul>
+<h2>Unconfirmed</h2>
+<ul><li>Langfuse's “Manage decision-model evaluators via the API” and the previously carried “Reset AI Gateway budget spend and set warnings” expose only 2026-11-25, with no time of day. Looked: both the changelog index and evaluator-specific primary page, plus item-specific collector lines. Their placement after 2026-11-25T20:43Z is unresolved; no Progress is claimed for the stable evaluator API, warnings or spend reset.
+</li><li>Braintrust's month-grouped changelog exposes many product entries without per-entry publication times. Looked: primary changelog HTML and the Python/npm registries, which showed no new stable SDK in-window. Entries that cannot be placed after the cutoff are not ranked.
+</li><li>gap: blog lane xAI <a href="https://x.ai/news">https://x.ai/news</a> returned HTTP 403 via curl; the FetchURL fallback returned an undated old Series C page rather than a current dateable index. No “no posts” conclusion.
+</li><li>gap: blog lane DeepSeek <code>/news/news</code> and <code>/news</code> both returned HTTP 404; the known <code>news261113</code> article loads, but it is not an index that establishes the absence of later posts. No “no posts” conclusion.
+</li><li>gap: blog lane Microsoft Research feed HTTP 403 (blog index HTTP 200; latest relevant posts checked were pre-window), Azure AI devblog feed HTTP 404 (Foundry and Azure feeds succeeded), Anthropic RSS HTTP 404 (news/research indexes succeeded), LlamaIndex and CrewAI RSS HTTP 404 (HTML indexes succeeded), Snowflake blog HTTP 403 (docs release notes succeeded), Honeycomb changelog HTTP 404 (blog index succeeded), and Splunk feed HTTP 403/404 across the two fetch paths (HTML index succeeded).
+</li><li>gap: Weave's changelog exposed no parseable dates; the W&amp;B articles fallback loaded but its fetched article list also supplied no dates. No in-window Weave claim rests on these undated pages.
+</li><li>gap: GitHub <code>microsoft/agent-framework</code> releases API 404 / Not Found. PyPI JSON succeeded and confirms 1.26.0 latest with zero files for 1.26.1/1.26.2; the GitHub failure is not reported as “no release.”
+</li><li>Social coverage is incomplete, not quiet: packs used web-proxied X with partial/empty or 429 timelines, lagged Arctic Shift Reddit archives and search-proxied LinkedIn with anti-bot/undated results. There is no social MCP in collector runners. Looked: all 11 fresh-list pack records and independent web searches; no social-absence claim is made.
+</li></ul>
+<h2>Housekeeping</h2>
+<ul><li>Packs used (fresh-list path; no wholesale pack reads): Muse 1332, DSH 1432, Agy 1532, DSH 1813 catch-up, Muse 1932, DSH 2032, Agy 2132, Muse 2232, DSH 2332, Muse extra 0007 and DSH extra 0009 (11 packs; <code>_runs/fb-2026-11-26-0034/fresh-items.md</code>; <code>FB_MERGE packs=11 raw=44 unique=32 drop_seen=1 fresh=31</code>). Pack access was limited to item-specific grep for LangWatch, Strands, OpenAI, Phoenix, NVIDIA, Hurdle and Langfuse.
+</li><li>Rotation gaps: Muse 1632 (Mac-down) and DSH 1732 (cap) produced no packs; both paybacks were covered by DSH 1813 catch-up and the marker is closed. <strong>Agy 1832 seat: no pack; window covered by the DSH 1813 catch-up, Muse 1932 and Agy 2132</strong>; a Collection catch-up for Agy 1832 is owed after this brief. <strong>Agy 0032 Thu had not landed at launch</strong>; anything after Muse 0007 / DSH 0009 (as-of ~2026-11-26T07:2xZ) is covered by the writer's own sweep, not claimed as pack-covered.
+</li><li>blog lane: 1 posts checked, 1 carded
+</li><li>Blog-lane accounting: the in-window NVIDIA/Hugging Face Parse post was opened, judged and carded. Pydantic Pax (09:00Z), Together Hurdle (RSS 00:00Z), Microsoft Research, CrowdStrike, Anthropic, Google Research and other same-day items were opened or checked but excluded as pre-window; day-only Langfuse entries are excluded as time-unconfirmed and are not counted as confirmed in-window posts.
+</li><li>arXiv: Thu 26 Nov listing screened, 535 ids above 2611.33158, new ceiling 2611.34945. Re-fetched <code>cs.AI/new</code> and <code>cs/new</code> (both HTTP 200 with “Showing new listings for Thursday, 26 November 2026”); all nine category files carried the same header. Re-ran <code>screen.py</code>: 841 unique category ids parsed and 535 above the previous ceiling; read the 2,140-line ranked screen top-down. Full-PDF reads: 2611.31839 (16 pp), 2611.34875 (30 pp), 2611.34934 (24 pp), every part including appendices and references.
+</li><li>Verification method: live <code>catalog.json</code> grep for every ranked candidate, carried arXiv id and new slug (baseline verified 796 items / 238 briefs / 240 runs; max brief/run <code>2026-11-25T1234</code>; priority pin <code>2609.02702</code> intact); primary release/blog/docs pages and JSON-LD/RSS clocks; GitHub release HTML/API and implementation PR; PyPI/npm registry JSON via <code>registry_check.py</code> and targeted curl; all five <code>blog_sweep.py</code> groups, <code>gh_releases.py</code>, <code>vendor_sweep.sh</code>, HTML-index checks and independent web searches. Fresh path used; no HTML, catalog edit, commit or push.
+</li></ul>
+<h2>Catalog handoff</h2>
+<p><strong>NEW</strong></p>
+<ol><li><strong>id:</strong> <code>nvidia-nemotron-35-parse-training-data-dflash2-throughput</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> NVIDIA opens Parse 3.5 document-training datasets and measures DFlash2 inference throughput
+</li><li><strong>url:</strong> <a href="https://huggingface.co/blog/nvidia/building-on-nemotron-35-parse-open-data-fine-tunin">https://huggingface.co/blog/nvidia/building-on-nemotron-35-parse-open-data-fine-tunin</a> (2026-11-26, stable)
+</li><li><strong>card text:</strong> NVIDIA releases 9.98M synthetic charts, 1M synthetic tables and 7.9M multilingual OCR examples, plus the Parse 3.5 training recipe and DFlash2 speculator. On one H200 in BF16 over 2,078 pages, DFlash2 raises throughput 7.62× at concurrency 1 and 1.52× at concurrency 512 over Parse 3.5 without speculation; results are vendor-reported and workload-specific, and the reward-training comparison uses development checkpoints.
+</li></ul>
+</li><li><strong>id:</strong> <code>openai-python-3-60-node-7-65-spend-alerts-response-compaction</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> OpenAI Python 3.60.0 and Node 7.65.0 expose spend-alert settings and response-compaction identity fields
+</li><li><strong>url:</strong> <a href="https://github.com/openai/openai-python/releases/tag/v3.60.0">https://github.com/openai/openai-python/releases/tag/v3.60.0</a> (2026-11-26, stable)
+</li><li><strong>card text:</strong> Both SDKs add organization/project hard-spend email settings, safety identifiers on conversation creation and response compaction, and safety-identifier/service-tier reads on compaction responses. These are new analytics fields, not evidence that alerts fired, caps held or compaction preserved quality; the companion Node release is 7.65.0.
+</li></ul>
+</li><li><strong>id:</strong> <code>strands-harness-cli-0-5-0-isolated-dev-evals-cost-telemetry</code>
+<ul><li><strong>tag:</strong> Industry
+</li><li><strong>title:</strong> Strands harness-cli 0.5.0 adds isolated development/evaluation workspaces and streamed model cost
+</li><li><strong>url:</strong> <a href="https://github.com/strands-agents/harness-sdk/releases/tag/harness-cli/v0.5.0">https://github.com/strands-agents/harness-sdk/releases/tag/harness-cli/v0.5.0</a> (2026-11-25, stable)
+</li><li><strong>card text:</strong> <code>strands dev</code> adds isolated workspaces, experiments, evaluation and optimization, while per-model usage and a streaming cost-estimate plugin make harness runs attributable. Context management graduates with breaking renames and cancellation expands; the auto-drafted release supplies no independent optimization-quality or cost-accuracy measurement.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-31839-spec-test-coverage-gap-overspecified-tests</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> STCG detects overspecified SWE-bench tests and measures their effect on agent scores
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.31839">https://arxiv.org/abs/2611.31839</a>
+</li><li><strong>card text:</strong> A two-judge panel flags 23% of SWE-bench Verified and 35% of public Pro tasks, after reaching 89% recall and a 4% false-flag rate on held-out clear cases. Relaxing flagged tests flips 61% of 2,186 failed candidates versus 29% for forced controls, but Pro validation is weaker and score changes are upper bounds, not corrected leaderboards.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-34875-coding-agent-over-editing-necessity</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> DRA attributes coding-agent patch necessity to trajectory steps and named test oracles
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.34875">https://arxiv.org/abs/2611.34875</a>
+</li><li><strong>card text:</strong> Across 7,660 resolved Copilot CLI trajectories, agent code necessity is 0.887 versus developers' 0.864 under task tests, while 89% of probed test-unneeded code changes behavior. Strengthening the oracle flips the agent–developer gap from +2.3 to −4.5 points, so patch necessity, test edits and behavioral evidence must be reported together rather than inferring over-editing from patch size.
+</li></ul>
+</li><li><strong>id:</strong> <code>arxiv-2611-34934-attack-policy-monitor-evaluators</code>
+<ul><li><strong>tag:</strong> Academy
+</li><li><strong>title:</strong> Attack policy and optimization level can change monitor evaluation false-negative rates by tens of points
+</li><li><strong>arxiv:</strong> <a href="https://arxiv.org/abs/2611.34934">https://arxiv.org/abs/2611.34934</a>
+</li><li><strong>card text:</strong> On the same IaC monitor evaluation, FNR rises from 0.5% on a basic prompt to 20.8% after RL and 23.0% with transcript editing, with attacks developed only against proxy monitors. Environment transfer is weak and proxy transcripts are not deployment evidence; monitor receipts need attack method, budget, success conditioning and a legitimacy argument.
+</li></ul>
+</li></ol>
+<p><strong>Progress</strong></p>
+<ol><li><strong>parent:</strong> <code>langwatch-v3-28-0-a2a-proxy-ocsf-ingest</code>
+<ul><li><strong>text:</strong> LangWatch 3.29.0 adds organization dashboards and failure/crash diagnostics, AWS/Google Cloud/ARD agent discovery with shadow/dormant posture, evaluator-failure CI gating and per-reader LangWatchQL scoping. Governance and evaluation operations expand, but discovery completeness and evaluator efficacy remain unmeasured.
+</li></ul>
+</li><li><strong>parent:</strong> <code>arize-phoenix-22-0-0-decision-embedding-cost-tracking</code>
+<ul><li><strong>text:</strong> Phoenix 22.1.0 adds single-span <code>GET /spans/{span_identifier}</code>, <code>px project create</code>, <code>px setup doctor</code>, permanent dataset-example deletion and configurable playground timeout. It also splits evaluation skills and adds seeded Harbor workflows; no latency or evaluator-quality result is supplied.
+</li></ul>
+</li><li><strong>parent:</strong> <code>letta-code-v0-34-12-13-claude-codex-subagents-connected-computer-live-tool-progress-opencode-backup-wake</code>
+<ul><li><strong>text:</strong> Letta Code 0.34.71 persists subagent lifecycle, adds <code>ListAgents</code> and Antigravity workers, records task descriptions in traces/conversations and preserves trace deltas across cache breakpoints. External tools gain per-tool foreground yield; backend-independent durability and trace completeness are not established.
+</li></ul>
+</li></ol>
+<p><strong>Headline claims</strong></p>
+<ul><li>NVIDIA releases three Parse 3.5 training datasets and reports DFlash2 throughput gains of 7.62× at concurrency 1 and 1.52× at concurrency 512 on one H200 over 2,078 pages (<a href="https://huggingface.co/blog/nvidia/building-on-nemotron-35-parse-open-data-fine-tunin">https://huggingface.co/blog/nvidia/building-on-nemotron-35-parse-open-data-fine-tunin</a>, 2026-11-26).
+</li><li>Relaxing overspecified tests flips 61% of 2,186 failed coding-agent patches, versus 29% under a forced control; the authors label resulting score changes upper bounds rather than corrected leaderboards (<a href="https://arxiv.org/abs/2611.31839">https://arxiv.org/abs/2611.31839</a>, v1 2026-11-24).
+</li><li>A held-out monitor's IaC false-negative rate reaches 20.8% after proxy-trained RL and 23.0% with proxy-guided transcript editing, versus at most 0.5% on basic prompts, with substantial environment-dependence (<a href="https://arxiv.org/abs/2611.34934">https://arxiv.org/abs/2611.34934</a>, v1 2026-11-25).
+</li></ul>
+    </article>
+  </main>
+  <footer>
+    <div class="shell">
+      <span class="mono">THE FIELD BRIEF</span>
+      <span>Thu Nov 26, 2026 · 12:34 AM PT · Kimi</span>
+    </div>
+  </footer>
+</body>
+</html>
